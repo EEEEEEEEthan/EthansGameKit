@@ -3,26 +3,41 @@ using UnityEngine;
 
 namespace EthansGameKit
 {
-	class ApplicationEventListenerBehaviour : MonoBehaviour
+	public static class ApplicationEvents
 	{
-		static ApplicationEventListenerBehaviour instance;
+		public static bool Quitting => ApplicationEventListener.Quitting;
+		public static event Action OnScreenSizeChanged
+		{
+			add => ApplicationEventListener.OnScreenSizeChanged += value;
+			remove => ApplicationEventListener.OnScreenSizeChanged -= value;
+		}
+	}
+
+	class ApplicationEventListener : MonoBehaviour
+	{
+		static ApplicationEventListener instance;
 		static int screenHeight;
 		static int screenWidth;
+		public static bool Quitting { get; private set; }
 		public static event Action OnScreenSizeChanged;
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
 		{
-			var timerManager = new GameObject(nameof(ApplicationEventListenerBehaviour));
+			var timerManager = new GameObject(nameof(ApplicationEventListener));
 			DontDestroyOnLoad(timerManager);
-			instance = timerManager.AddComponent<ApplicationEventListenerBehaviour>();
+			instance = timerManager.AddComponent<ApplicationEventListener>();
 		}
-		public ApplicationEventListenerBehaviour Instance
+		public ApplicationEventListener Instance
 		{
 			get
 			{
-				if (!instance) instance = FindObjectOfType<ApplicationEventListenerBehaviour>();
+				if (!instance) instance = FindObjectOfType<ApplicationEventListener>();
 				return instance;
 			}
+		}
+		void OnApplicationQuit()
+		{
+			Quitting = true;
 		}
 		void Update()
 		{

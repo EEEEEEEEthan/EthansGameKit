@@ -6,7 +6,7 @@ namespace EthansGameKit
 	public class FakeSingleton<T> : MonoBehaviour where T : FakeSingleton<T>
 	{
 		// ReSharper disable once StaticMemberInGenericType
-		static bool iKnowWhereTheInstanceIs = true;
+		static bool iKnowWhereTheInstanceIs;
 		static T instance;
 		public static T Instance
 		{
