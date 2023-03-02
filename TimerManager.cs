@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
+using EthansGameKit.Extensions;
 using UnityEngine;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	public struct TimerId
 	{

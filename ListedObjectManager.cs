@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	public class ListedObjectManager : MonoBehaviour
 	{

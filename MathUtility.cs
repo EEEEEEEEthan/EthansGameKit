@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	public static class MathUtility
 	{

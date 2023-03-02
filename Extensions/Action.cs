@@ -2,17 +2,20 @@
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
-public static partial class Extensions
+namespace EthansGameKit.Extensions
 {
-	public static void TryInvoke(this Action @this)
+	public static partial class Extensions
 	{
-		try
+		public static void TryInvoke(this Action @this)
 		{
-			@this();
-		}
-		catch (Exception e)
-		{
-			Debug.LogException(e);
+			try
+			{
+				@this();
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
 		}
 	}
 }

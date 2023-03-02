@@ -1,7 +1,7 @@
 using UnityEngine;
 using UnityEngine.Assertions;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	public class FakeSingleton<T> : MonoBehaviour where T : FakeSingleton<T>
 	{

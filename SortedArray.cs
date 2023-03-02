@@ -3,7 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	[Serializable]
 	public class SortedArray<T> : ICollection<T>

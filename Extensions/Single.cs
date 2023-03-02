@@ -1,10 +1,13 @@
 ﻿using UnityEngine;
 
 // ReSharper disable once CheckNamespace
-public static partial class Extensions
+namespace EthansGameKit.Extensions
 {
-	public static float Clamp(this float @this, float min, float max)
+	public static partial class Extensions
 	{
-		return Mathf.Clamp(@this, min, max);
+		public static float Clamp(this float @this, float min, float max)
+		{
+			return Mathf.Clamp(@this, min, max);
+		}
 	}
 }

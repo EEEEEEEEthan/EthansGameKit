@@ -1,9 +1,8 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using UnityEngine.Assertions;
-using Utilities.Internal;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	public interface IAwaitable : INotifyCompletion
 	{
@@ -80,9 +79,7 @@ namespace Utilities
 		Completed,
 		Canceled,
 	}
-}
-namespace Utilities.Internal
-{
+
 	class Awaiter<T>
 		: IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
 	{
