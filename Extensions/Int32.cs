@@ -5,11 +5,11 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
-		public static bool Between(this float @this, float min, float max)
+		public static bool Between(this int @this, int min, int max)
 		{
 			return @this >= min && @this <= max;
 		}
-		public static float Clamp(this float @this, float min, float max)
+		public static int Clamp(this int @this, int min, int max)
 		{
 			return Mathf.Clamp(@this, min, max);
 		}

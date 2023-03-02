@@ -23,7 +23,7 @@ namespace EthansGameKit
 		}
 		protected void OnEnable()
 		{
-			Assert.IsFalse(Instance);
+			Assert.IsFalse(instance);
 			iKnowWhereTheInstanceIs = true;
 			instance = (T)this;
 		}

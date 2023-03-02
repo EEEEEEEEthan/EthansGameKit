@@ -17,5 +17,16 @@ namespace EthansGameKit
 				Debug.LogException(e);
 			}
 		}
+		public static void TryInvoke<T>(this Action<T> @this, T arg)
+		{
+			try
+			{
+				@this(arg);
+			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
+		}
 	}
 }
