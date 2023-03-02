@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using EthansGameKit.Extensions;
 using UnityEngine;
 
 namespace EthansGameKit
