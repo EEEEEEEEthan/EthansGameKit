@@ -22,7 +22,7 @@ namespace EthansGameKit
 		}
 	}
 
-	public interface ITimerManager
+	public static class Timer
 	{
 		public static IAwaitable Await(double delay)
 		{
