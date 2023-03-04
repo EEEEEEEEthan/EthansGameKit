@@ -3,33 +3,39 @@ using UnityEngine.Assertions;
 
 namespace EthansGameKit
 {
+	[DefaultExecutionOrder(int.MinValue)]
 	public class FakeSingleton<T> : MonoBehaviour where T : FakeSingleton<T>
 	{
 		// ReSharper disable once StaticMemberInGenericType
 		static bool iKnowWhereTheInstanceIs;
 		static T instance;
 		public static T Instance
+#if UNITY_EDITOR
 		{
 			get
 			{
-#if UNITY_EDITOR
 				if (iKnowWhereTheInstanceIs)
 					return instance ? instance : null;
 				instance = FindObjectOfType<T>();
 				iKnowWhereTheInstanceIs = true;
-#endif
 				return instance;
 			}
+			private set { instance = value; }
 		}
+#else
+		;
+#endif
 		protected void OnEnable()
 		{
-			Assert.IsFalse(instance);
+#if UNITY_EDITOR
+			Assert.IsFalse(instance, $"duplicated instance {instance}");
+#endif
 			iKnowWhereTheInstanceIs = true;
-			instance = (T)this;
+			Instance = (T)this;
 		}
 		protected void OnDisable()
 		{
-			instance = null;
+			Instance = null;
 		}
 	}
 }
