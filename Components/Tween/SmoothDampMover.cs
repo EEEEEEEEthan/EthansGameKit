@@ -32,8 +32,8 @@ namespace EthansGameKit.Components.Tween
 		public const float minSmoothTime = 0.01f;
 		public const float minSpeedLimit = 0.1f;
 		[SerializeField, HideInInspector] Vector3 velocity;
-		[SerializeField, Range(minSpeedLimit, maxSpeedLimit)] float maxSpeed;
-		[SerializeField, Range(minSmoothTime, maxSmoothTime)] float smoothTime;
+		[SerializeField, Range(minSpeedLimit, maxSpeedLimit)] float maxSpeed = 1f;
+		[SerializeField, Range(minSmoothTime, maxSmoothTime)] float smoothTime = 1f;
 		[SerializeField, HideInInspector] Vector3 targetPosition;
 		[SerializeField, HideInInspector] Transform targetTransform;
 		[SerializeField, HideInInspector] bool useTargetTransform;
@@ -84,7 +84,7 @@ namespace EthansGameKit.Components.Tween
 			var targetPosition = this.targetPosition;
 			if (useTargetTransform)
 			{
-				if (transform)
+				if (targetTransform)
 				{
 					if (transform.parent)
 						targetPosition = transform.parent.InverseTransformPoint(targetTransform.position);
