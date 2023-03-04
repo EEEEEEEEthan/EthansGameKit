@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections;
 using UnityEngine;
 
 namespace EthansGameKit
@@ -44,51 +43,26 @@ namespace EthansGameKit
 		{
 			return @this.Value;
 		}
-		[NonSerialized] int changingFlag;
-		[NonSerialized] float changingSpeed;
 		public TrackableSingle()
 		{
 		}
 		public TrackableSingle(float value) : base(value)
 		{
 		}
-		public void SmoothChange(float target, float duration, bool scaledTime = true)
+	}
+
+	[Serializable]
+	public class TrackableVector3 : TrackableValue<Vector3>
+	{
+		public static implicit operator Vector3(TrackableVector3 @this)
 		{
-			RoutineDriver.StartCoroutine(HermiteChange(target, duration, scaledTime));
+			return @this.Value;
 		}
-		protected override void OnSetValue(float value)
+		public TrackableVector3()
 		{
-			base.OnSetValue(value);
-			++changingFlag;
 		}
-		IEnumerator HermiteChange(float target, float duration, bool scaled = true)
+		public TrackableVector3(Vector3 value) : base(value)
 		{
-			var changingFlag = ++this.changingFlag;
-			var start = Value;
-			var startTime = scaled ? Time.time : Time.unscaledTime;
-			var endTime = startTime + duration;
-			yield return null;
-			while (changingFlag == this.changingFlag)
-			{
-				var currentTime = scaled ? Time.time : Time.unscaledTime;
-				if (currentTime >= endTime)
-				{
-					SetValue(target);
-					break;
-				}
-				var progress = (currentTime - startTime) / duration;
-				MathUtility.Hermite(
-					start,
-					changingSpeed,
-					target,
-					0,
-					progress,
-					out var nextValue,
-					out changingSpeed
-				);
-				SetValue(nextValue);
-				yield return null;
-			}
 		}
 	}
 }
