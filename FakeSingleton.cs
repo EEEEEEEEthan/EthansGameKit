@@ -19,16 +19,4 @@ namespace EthansGameKit
 			Instance = null;
 		}
 	}
-	public interface IFakeSingleton<T> where T : MonoBehaviour, IFakeSingleton<T>
-	{
-		static T instance;
-		public static T Instance
-		{
-			get
-			{
-				if (instance) return instance;
-				return instance = Object.FindObjectOfType<T>();
-			}
-		}
-	}
 }
