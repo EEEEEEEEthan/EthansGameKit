@@ -33,14 +33,38 @@ namespace EthansGameKit
 		}
 	}
 
-	public class RoutineUpdater : FakeSingleton<RoutineUpdater>
+	[DefaultExecutionOrder(int.MinValue)]
+	class RoutineUpdater : MonoBehaviour
 	{
+		static bool iKnowWhereTheInstanceIs;
+		static RoutineUpdater instance;
+		internal static RoutineUpdater Instance
+		{
+			get
+			{
+				if (iKnowWhereTheInstanceIs)
+					return instance;
+				instance = FindObjectOfType<RoutineUpdater>();
+				iKnowWhereTheInstanceIs = true;
+				return instance;
+			}
+		}
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
 		{
 			var gameObject = new GameObject(nameof(RoutineUpdater));
 			DontDestroyOnLoad(gameObject);
 			gameObject.AddComponent<RoutineUpdater>();
+		}
+		void OnEnable()
+		{
+			iKnowWhereTheInstanceIs = true;
+			instance = this;
+		}
+		void OnDisable()
+		{
+			iKnowWhereTheInstanceIs = true;
+			instance = null;
 		}
 	}
 }

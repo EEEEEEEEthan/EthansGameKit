@@ -96,7 +96,7 @@ namespace EthansGameKit
 		}
 	}
 
-	class TimerManager : FakeSingleton<TimerManager>
+	class TimerManager : MonoBehaviour
 	{
 		public static readonly TimerInvoker scaledInvoker = new();
 		public static readonly TimerInvoker unscaledInvoker = new();
