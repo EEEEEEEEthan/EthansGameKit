@@ -55,7 +55,7 @@ namespace EthansGameKit
 			return clamp switch
 			{
 				true => value.Clamp(0, 1),
-				_ => value
+				_ => value,
 			};
 		}
 	}
