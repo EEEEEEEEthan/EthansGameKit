@@ -4,18 +4,17 @@ namespace EthansGameKit.CachePools
 {
 	public static class StackPool<T>
 	{
-		static readonly CachePool pool = new(0);
+		static readonly CachePool<Stack<T>> pool = new(0);
 		public static void ClearAndRecycle(ref Stack<T> list)
 		{
-			var obj = (object)list;
 			list.Clear();
-			pool.Recycle(ref obj);
+			pool.Recycle(ref list);
 			list = null;
 		}
 		public static Stack<T> Generate()
 		{
 			if (pool.TryGenerate(out var cache))
-				return (Stack<T>)cache;
+				return cache;
 			return new();
 		}
 	}

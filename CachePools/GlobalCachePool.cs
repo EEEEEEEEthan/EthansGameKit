@@ -5,24 +5,17 @@ namespace EthansGameKit.CachePools
 {
 	public static class GlobalCachePool<T> where T : new()
 	{
+		static readonly CachePool<T> pool = new(0);
 		static readonly Type type = typeof(T);
-		static readonly CachePool pool = new(0);
-		public static void Recycle(ref T obj)
+		public static void Recycle(ref T item)
 		{
-			Assert.IsTrue(obj.GetType() == type);
-			var o = (object)obj;
-			pool.Recycle(ref o);
-			obj = default;
+			Assert.IsTrue(item.GetType() == type);
+			pool.Recycle(ref item);
+			item = default;
 		}
 		public static bool TryGenerate(out T value)
 		{
-			if (pool.TryGenerate(out var v))
-			{
-				value = (T)v;
-				return true;
-			}
-			value = default;
-			return false;
+			return pool.TryGenerate(out value);
 		}
 	}
 }
