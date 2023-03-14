@@ -13,7 +13,6 @@ namespace EthansGameKit.Collections
 		bool TryPeek(out T key, int index = 0);
 		bool TryPeek(out T key, out float value, int index = 0);
 	}
-
 	public interface IHeap<T> : IReadOnlyHeap<T>
 	{
 		void Add(T element, float sortingValue);
@@ -21,7 +20,6 @@ namespace EthansGameKit.Collections
 		T Pop(out float value, int index = 0);
 		void TrimExcess();
 	}
-
 	[Serializable]
 	public class Heap<T> : IHeap<T>
 	{
@@ -69,24 +67,22 @@ namespace EthansGameKit.Collections
 					// ReSharper disable once RedundantJumpStatement
 					goto NEXT;
 				}
-				else if (value < currentValue)
+				if (value < currentValue)
 				{
 					// ReSharper disable once RedundantJumpStatement
 					goto NEXT;
 				}
-				else // if value > currentValue
-				{
-					var leftIndex = (currentIndex << 1) + 1;
-					if (leftIndex >= length) goto NEXT;
-					if (count + 1 >= finder.Length)
-						Array.Resize(ref finder, count);
-					finder[count++] = leftIndex;
-					var rightIndex = leftIndex + 1;
-					if (rightIndex >= length) goto NEXT;
-					if (count + 1 >= finder.Length)
-						Array.Resize(ref finder, count);
-					finder[count++] = rightIndex;
-				}
+				// if value > currentValue
+				var leftIndex = (currentIndex << 1) + 1;
+				if (leftIndex >= length) goto NEXT;
+				if (count + 1 >= finder.Length)
+					Array.Resize(ref finder, count);
+				finder[count++] = leftIndex;
+				var rightIndex = leftIndex + 1;
+				if (rightIndex >= length) goto NEXT;
+				if (count + 1 >= finder.Length)
+					Array.Resize(ref finder, count);
+				finder[count++] = rightIndex;
 			NEXT:
 				--count;
 				++start;
@@ -224,11 +220,15 @@ namespace EthansGameKit.Collections
 			keys = new T[defaultCapability];
 			values = new float[defaultCapability];
 		}
-		public void Clear()
+		public bool Update(T element, float sortingValue)
 		{
-			Array.Clear(keys, 0, keys.Length);
-			Array.Clear(values, 0, values.Length);
-			length = 0;
+			for (var i = 0; i < length; i++)
+				if (keys[i].Equals(element))
+				{
+					HeapUpdate(element, sortingValue, i, keys, values, length);
+					return true;
+				}
+			return false;
 		}
 		/// <summary>
 		///     堆增加一个元素
@@ -248,24 +248,34 @@ namespace EthansGameKit.Collections
 			}
 			HeapAdd(element, sortingValue, keys, values, ref length);
 		}
-		IEnumerator<KeyValuePair<T, float>> IEnumerable<KeyValuePair<T, float>>.GetEnumerator()
+		public void AddOrUpdate(T element, float sortingValue)
 		{
 			for (var i = 0; i < length; i++)
-				yield return new(keys[i], values[i]);
+			{
+				if (keys[i].Equals(element))
+				{
+					HeapUpdate(element, sortingValue, i, keys, values, length);
+					return;
+				}
+			}
+			Add(element, sortingValue);
 		}
-		IEnumerator IEnumerable.GetEnumerator()
+		public void Clear()
+		{
+			Array.Clear(keys, 0, keys.Length);
+			Array.Clear(values, 0, values.Length);
+			length = 0;
+		}
+		public int Find(T element, float sortingValue)
+		{
+			return HeapFind(element, sortingValue, keys, values, length);
+		}
+		public int Find(T element)
 		{
 			for (var i = 0; i < length; i++)
-				yield return new KeyValuePair<T, float>(keys[i], values[i]);
-		}
-		public T Pop(out float value, int index = 0)
-		{
-			value = values[index];
-			return HeapPop(keys, values, ref length, index);
-		}
-		public T Pop(int index = 0)
-		{
-			return HeapPop(keys, values, ref length, index);
+				if (keys[i].Equals(element))
+					return i;
+			return -1;
 		}
 		public T Peek(out float value, int index = 0)
 		{
@@ -275,6 +285,15 @@ namespace EthansGameKit.Collections
 		public T Peek(int index = 0)
 		{
 			return keys[index];
+		}
+		public T Pop(out float value, int index = 0)
+		{
+			value = values[index];
+			return HeapPop(keys, values, ref length, index);
+		}
+		public T Pop(int index = 0)
+		{
+			return HeapPop(keys, values, ref length, index);
 		}
 		public void TrimExcess()
 		{
@@ -306,41 +325,17 @@ namespace EthansGameKit.Collections
 			value = default;
 			return false;
 		}
-		public void AddOrUpdate(T element, float sortingValue)
+		IEnumerator<KeyValuePair<T, float>> IEnumerable<KeyValuePair<T, float>>.GetEnumerator()
 		{
 			for (var i = 0; i < length; i++)
-			{
-				if (keys[i].Equals(element))
-				{
-					HeapUpdate(element, sortingValue, i, keys, values, length);
-					return;
-				}
-			}
-			Add(element, sortingValue);
+				yield return new(keys[i], values[i]);
 		}
-		public int Find(T element, float sortingValue)
-		{
-			return HeapFind(element, sortingValue, keys, values, length);
-		}
-		public int Find(T element)
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			for (var i = 0; i < length; i++)
-				if (keys[i].Equals(element))
-					return i;
-			return -1;
-		}
-		public bool Update(T element, float sortingValue)
-		{
-			for (var i = 0; i < length; i++)
-				if (keys[i].Equals(element))
-				{
-					HeapUpdate(element, sortingValue, i, keys, values, length);
-					return true;
-				}
-			return false;
+				yield return new KeyValuePair<T, float>(keys[i], values[i]);
 		}
 	}
-
 	[Serializable]
 	public class HeapInt32 : Heap<int>
 	{

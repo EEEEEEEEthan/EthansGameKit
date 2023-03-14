@@ -13,6 +13,9 @@ namespace EthansGameKit.Collections
 		[SerializeField, HideInInspector] int start;
 		[SerializeField, HideInInspector] int count;
 		[SerializeField, HideInInspector] int changingFlag;
+		public int Count => count;
+		bool ICollection.IsSynchronized => false;
+		object ICollection.SyncRoot => this;
 		public SerializableQueue()
 		{
 			items = Array.Empty<T>();
@@ -25,18 +28,6 @@ namespace EthansGameKit.Collections
 			collection.CopyTo(items, 0);
 			count = items.Length;
 		}
-		bool ICollection.IsSynchronized => false;
-		object ICollection.SyncRoot => this;
-		void ICollection.CopyTo(Array array, int index) { }
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-		public int Count => count;
 		public void Clear()
 		{
 			++changingFlag;
@@ -168,6 +159,17 @@ namespace EthansGameKit.Collections
 			}
 			result = Peek();
 			return true;
+		}
+		void ICollection.CopyTo(Array array, int index)
+		{
+		}
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
 		}
 	}
 	[Serializable]

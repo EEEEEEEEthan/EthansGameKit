@@ -11,7 +11,6 @@ namespace EthansGameKit
 			this.id = id;
 		}
 	}
-
 	public struct UnscaledTimerId
 	{
 		internal readonly int id;
@@ -20,7 +19,6 @@ namespace EthansGameKit
 			this.id = id;
 		}
 	}
-
 	public static class Timer
 	{
 		public static IAwaitable Await(double delay)

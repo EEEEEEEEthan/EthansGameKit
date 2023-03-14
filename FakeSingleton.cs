@@ -4,8 +4,7 @@ using UnityEngine.Assertions;
 
 namespace EthansGameKit
 {
-	[Obsolete]
-	[DefaultExecutionOrder(int.MinValue)]
+	[Obsolete, DefaultExecutionOrder(int.MinValue)]
 	public class FakeSingleton<T> : MonoBehaviour where T : FakeSingleton<T>
 	{
 		public static T Instance { get; private set; }

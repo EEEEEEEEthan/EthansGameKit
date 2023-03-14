@@ -25,7 +25,6 @@ namespace EthansGameKit
 		{
 			Value = value;
 		}
-		public event Action<T> ValueChanged;
 		protected virtual void OnSetValue(T value)
 		{
 		}
@@ -34,8 +33,8 @@ namespace EthansGameKit
 			this.value = value;
 			ValueChanged?.TryInvoke(value);
 		}
+		public event Action<T> ValueChanged;
 	}
-
 	[Serializable]
 	public class TrackableSingle : TrackableValue<float>
 	{
@@ -50,7 +49,6 @@ namespace EthansGameKit
 		{
 		}
 	}
-
 	[Serializable]
 	public class TrackableVector3 : TrackableValue<Vector3>
 	{

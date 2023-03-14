@@ -21,9 +21,28 @@ namespace EthansGameKit
 			unscaledInvoker.TryTrigger(Time.unscaledTimeAsDouble);
 		}
 	}
-
 	class TimerInvoker
 	{
+		int currentId;
+		readonly SortedSet<Timer> timers = new();
+		public bool CancelInvoke(int id)
+		{
+			return timers.Remove(new(id, 0, null));
+		}
+		public int InvokeAt(double time, Action callback)
+		{
+			timers.Add(new(++currentId, time, callback));
+			return currentId;
+		}
+		public void TryTrigger(double time)
+		{
+			while (timers.Count > 0 && timers.Min.time < time)
+			{
+				var timer = timers.Min;
+				timers.Remove(timer);
+				timer.callback.TryInvoke();
+			}
+		}
 		readonly struct Timer : IComparable<Timer>
 		{
 			public readonly Action callback;
@@ -50,27 +69,6 @@ namespace EthansGameKit
 			public override int GetHashCode()
 			{
 				return id;
-			}
-		}
-
-		int currentId;
-		readonly SortedSet<Timer> timers = new();
-		public bool CancelInvoke(int id)
-		{
-			return timers.Remove(new(id, 0, null));
-		}
-		public int InvokeAt(double time, Action callback)
-		{
-			timers.Add(new(++currentId, time, callback));
-			return currentId;
-		}
-		public void TryTrigger(double time)
-		{
-			while (timers.Count > 0 && timers.Min.time < time)
-			{
-				var timer = timers.Min;
-				timers.Remove(timer);
-				timer.callback.TryInvoke();
 			}
 		}
 	}

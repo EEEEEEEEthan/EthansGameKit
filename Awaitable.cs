@@ -37,41 +37,33 @@ namespace EthansGameKit
 		}
 		new IAwaiter<T> GetAwaiter();
 	}
-
 	public interface IAwaiter : INotifyCompletion
 	{
 		bool IsCompleted { get; }
 		object GetResult();
 	}
-
 	public interface IAwaiter<out T> : IAwaiter
 	{
 		new T GetResult();
 	}
-
 	public interface IAsyncTrigger
 	{
 		void Set();
 	}
-
 	public interface IAsyncTrigger<in T>
 	{
 		void Set(T result);
 	}
-
 	public interface IAsyncStopper
 	{
 		void Cancel();
 	}
-
 	public interface IAsyncHandle : IAsyncTrigger, IAsyncStopper
 	{
 	}
-
 	public interface IAsyncHandle<in T> : IAsyncTrigger<T>, IAsyncStopper
 	{
 	}
-
 	public enum StateCode
 	{
 		Inactive,
@@ -79,7 +71,6 @@ namespace EthansGameKit
 		Completed,
 		Canceled,
 	}
-
 	class Awaiter<T>
 		: IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
 	{
@@ -110,6 +101,13 @@ namespace EthansGameKit
 			continuation?.Invoke();
 			continuation = null;
 		}
+		public void OnCompleted(Action continuation)
+		{
+			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
+			Assert.IsTrue(State == StateCode.Inactive);
+			State = StateCode.Awaiting;
+			this.continuation = continuation;
+		}
 		public void Set()
 		{
 			Set(default);
@@ -123,6 +121,10 @@ namespace EthansGameKit
 			continuation?.Invoke();
 			continuation = null;
 		}
+		public override string ToString()
+		{
+			return $"{GetType().FullName}({nameof(State)}={State})";
+		}
 		IAwaiter IAwaitable.GetAwaiter()
 		{
 			return this;
@@ -131,13 +133,6 @@ namespace EthansGameKit
 		{
 			return this;
 		}
-		public void OnCompleted(Action continuation)
-		{
-			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
-			Assert.IsTrue(State == StateCode.Inactive);
-			State = StateCode.Awaiting;
-			this.continuation = continuation;
-		}
 		object IAwaiter.GetResult()
 		{
 			return null;
@@ -145,10 +140,6 @@ namespace EthansGameKit
 		T IAwaiter<T>.GetResult()
 		{
 			return result;
-		}
-		public override string ToString()
-		{
-			return $"{GetType().FullName}({nameof(State)}={State})";
 		}
 	}
 }
