@@ -163,16 +163,15 @@ namespace EthansGameKit.Collections
 		void ICollection.CopyTo(Array array, int index)
 		{
 		}
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
 			return GetEnumerator();
 		}
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 	}
-
 	[Serializable]
 	public sealed class SerializableQueueVector3 : SerializableQueue<Vector3>
 	{

@@ -9,19 +9,18 @@ namespace EthansGameKit
 		public T PreferredValue { get; set; }
 		public T Value { get; set; }
 	}
-
 	[Serializable]
 	public class SmoothedSingle : SmoothedValue<float>
 	{
 		[SerializeField] bool useScaledTime;
-		[SerializeField, HideInInspector]  float lastTime;
+		[SerializeField, HideInInspector] float lastTime;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float maxSpeed = float.MaxValue;
 		[SerializeField] float preferredValue;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float smoothTime = 0.1f;
 		[SerializeField] float value;
-		[SerializeField, HideInInspector]  float velocity;
+		[SerializeField, HideInInspector] float velocity;
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -76,19 +75,18 @@ namespace EthansGameKit
 			preferredValue = value;
 		}
 	}
-
 	[Serializable]
 	public class SmoothedVector3 : SmoothedValue<Vector3>
 	{
 		[SerializeField] bool useScaledTime;
-		[SerializeField, HideInInspector]  float lastTime;
+		[SerializeField, HideInInspector] float lastTime;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float maxSpeed = float.MaxValue;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float smoothTime = 0.1f;
 		[SerializeField] Vector3 preferredValue;
 		[SerializeField] Vector3 value;
-		[SerializeField, HideInInspector]  Vector3 velocity;
+		[SerializeField, HideInInspector] Vector3 velocity;
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -143,19 +141,18 @@ namespace EthansGameKit
 			preferredValue = value;
 		}
 	}
-
 	[Serializable]
 	public class SmoothedQuaternion : SmoothedValue<Quaternion>
 	{
 		[SerializeField] bool useScaledTime;
-		[SerializeField, HideInInspector]  float lastTime;
+		[SerializeField, HideInInspector] float lastTime;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float maxSpeed = float.MaxValue;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float smoothTime = 0.1f;
 		[SerializeField] Quaternion preferredValue;
 		[SerializeField] Quaternion value;
-		[SerializeField, HideInInspector]  Quaternion velocity;
+		[SerializeField, HideInInspector] Quaternion velocity;
 		public float SmoothTime
 		{
 			get => smoothTime;
