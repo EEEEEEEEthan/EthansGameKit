@@ -103,6 +103,10 @@ namespace EthansGameKit
 		T result;
 		public bool IsCompleted => State is StateCode.Completed or StateCode.Canceled;
 		public StateCode State { get; private set; }
+		public override string ToString()
+		{
+			return $"{GetType().FullName}({nameof(State)}={State})";
+		}
 		public void Cancel()
 		{
 			Assert.IsTrue(!IsCompleted, $"already completed. {this}");
@@ -131,13 +135,6 @@ namespace EthansGameKit
 		{
 			return this;
 		}
-		public void OnCompleted(Action continuation)
-		{
-			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
-			Assert.IsTrue(State == StateCode.Inactive);
-			State = StateCode.Awaiting;
-			this.continuation = continuation;
-		}
 		object IAwaiter.GetResult()
 		{
 			return null;
@@ -146,9 +143,12 @@ namespace EthansGameKit
 		{
 			return result;
 		}
-		public override string ToString()
+		public void OnCompleted(Action continuation)
 		{
-			return $"{GetType().FullName}({nameof(State)}={State})";
+			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
+			Assert.IsTrue(State == StateCode.Inactive);
+			State = StateCode.Awaiting;
+			this.continuation = continuation;
 		}
 	}
 }

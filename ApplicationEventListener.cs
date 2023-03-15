@@ -19,7 +19,6 @@ namespace EthansGameKit
 		static int screenHeight;
 		static int screenWidth;
 		public static bool Quitting { get; private set; }
-		public static event Action OnScreenSizeChanged;
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
 		{
@@ -27,6 +26,7 @@ namespace EthansGameKit
 			DontDestroyOnLoad(timerManager);
 			instance = timerManager.AddComponent<ApplicationEventListener>();
 		}
+		public static event Action OnScreenSizeChanged;
 		public ApplicationEventListener Instance
 		{
 			get
@@ -34,10 +34,6 @@ namespace EthansGameKit
 				if (!instance) instance = FindObjectOfType<ApplicationEventListener>();
 				return instance;
 			}
-		}
-		void OnApplicationQuit()
-		{
-			Quitting = true;
 		}
 		void Update()
 		{
@@ -54,6 +50,10 @@ namespace EthansGameKit
 					Debug.LogException(e);
 				}
 			}
+		}
+		void OnApplicationQuit()
+		{
+			Quitting = true;
 		}
 	}
 }

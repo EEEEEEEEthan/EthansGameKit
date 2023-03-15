@@ -24,35 +24,6 @@ namespace EthansGameKit
 
 	class TimerInvoker
 	{
-		readonly struct Timer : IComparable<Timer>
-		{
-			public readonly Action callback;
-			public readonly double time;
-			readonly int id;
-			public Timer(int id, double time, Action callback)
-			{
-				this.id = id;
-				this.time = time;
-				this.callback = callback;
-			}
-			public int CompareTo(Timer other)
-			{
-				if (time < other.time) return -1;
-				if (time > other.time) return 1;
-				if (id < other.id) return -1;
-				if (id > other.id) return 1;
-				return 0;
-			}
-			public override bool Equals(object obj)
-			{
-				return obj is Timer other && id == other.id;
-			}
-			public override int GetHashCode()
-			{
-				return id;
-			}
-		}
-
 		int currentId;
 		readonly SortedSet<Timer> timers = new();
 		public bool CancelInvoke(int id)
@@ -71,6 +42,35 @@ namespace EthansGameKit
 				var timer = timers.Min;
 				timers.Remove(timer);
 				timer.callback.TryInvoke();
+			}
+		}
+
+		readonly struct Timer : IComparable<Timer>
+		{
+			public readonly Action callback;
+			public readonly double time;
+			readonly int id;
+			public Timer(int id, double time, Action callback)
+			{
+				this.id = id;
+				this.time = time;
+				this.callback = callback;
+			}
+			public override bool Equals(object obj)
+			{
+				return obj is Timer other && id == other.id;
+			}
+			public override int GetHashCode()
+			{
+				return id;
+			}
+			public int CompareTo(Timer other)
+			{
+				if (time < other.time) return -1;
+				if (time > other.time) return 1;
+				if (id < other.id) return -1;
+				if (id > other.id) return 1;
+				return 0;
 			}
 		}
 	}
