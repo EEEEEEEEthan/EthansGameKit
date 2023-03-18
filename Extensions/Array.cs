@@ -25,5 +25,9 @@ namespace EthansGameKit
 				copiedLength += copyLength;
 			}
 		}
+		public static void MemSet<T>(this T[] @this, T value)
+		{
+			@this.MemSet(0, @this.Length, value);
+		}
 	}
 }
