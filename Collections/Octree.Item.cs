@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Collections
 {
-	public partial class Octree<T>
+	public partial class Octree
 	{
 		static readonly CachePool<Item> itemPool = new(0);
 
@@ -33,7 +33,7 @@ namespace EthansGameKit.Collections
 					tree.Insert(this);
 				}
 			}
-			public Octree<T> Tree { get; internal set; }
+			public Octree Tree { get; internal set; }
 			Item()
 			{
 			}

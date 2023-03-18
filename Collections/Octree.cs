@@ -15,7 +15,7 @@ namespace EthansGameKit.Collections
 	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
 	///     </list>
 	/// </remarks>
-	public partial class Octree<T>
+	public partial class Octree
 	{
 		static readonly Plane[] planes = new Plane[6];
 		static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
