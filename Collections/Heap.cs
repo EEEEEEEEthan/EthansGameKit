@@ -20,10 +20,13 @@ namespace EthansGameKit.Collections
 		T Pop(out float value, int index = 0);
 		void TrimExcess();
 	}
-	[Serializable]
-	public class Heap<T> : IHeap<T>
+	public abstract class Heap
 	{
-		static int[] finder = Array.Empty<int>();
+		private protected static int[] finder = Array.Empty<int>();
+	}
+	[Serializable]
+	public class Heap<T> : Heap, IHeap<T>
+	{
 		/// <summary>
 		///     向堆增加元素
 		/// </summary>
@@ -230,24 +233,6 @@ namespace EthansGameKit.Collections
 				}
 			return false;
 		}
-		/// <summary>
-		///     堆增加一个元素
-		/// </summary>
-		/// <param name="element"></param>
-		/// <param name="sortingValue"></param>
-		public void Add(T element, float sortingValue)
-		{
-			if (length >= keys.Length)
-			{
-				var copiedKeys = new T[keys.Length * 2];
-				Array.Copy(keys, copiedKeys, keys.Length);
-				keys = copiedKeys;
-				var copiedValues = new float[values.Length * 2];
-				Array.Copy(values, copiedValues, values.Length);
-				values = copiedValues;
-			}
-			HeapAdd(element, sortingValue, keys, values, ref length);
-		}
 		public void AddOrUpdate(T element, float sortingValue)
 		{
 			for (var i = 0; i < length; i++)
@@ -277,14 +262,33 @@ namespace EthansGameKit.Collections
 					return i;
 			return -1;
 		}
-		public T Peek(out float value, int index = 0)
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			value = values[index];
-			return keys[index];
+			for (var i = 0; i < length; i++)
+				yield return new KeyValuePair<T, float>(keys[i], values[i]);
 		}
-		public T Peek(int index = 0)
+		IEnumerator<KeyValuePair<T, float>> IEnumerable<KeyValuePair<T, float>>.GetEnumerator()
 		{
-			return keys[index];
+			for (var i = 0; i < length; i++)
+				yield return new(keys[i], values[i]);
+		}
+		/// <summary>
+		///     堆增加一个元素
+		/// </summary>
+		/// <param name="element"></param>
+		/// <param name="sortingValue"></param>
+		public void Add(T element, float sortingValue)
+		{
+			if (length >= keys.Length)
+			{
+				var copiedKeys = new T[keys.Length * 2];
+				Array.Copy(keys, copiedKeys, keys.Length);
+				keys = copiedKeys;
+				var copiedValues = new float[values.Length * 2];
+				Array.Copy(values, copiedValues, values.Length);
+				values = copiedValues;
+			}
+			HeapAdd(element, sortingValue, keys, values, ref length);
 		}
 		public T Pop(out float value, int index = 0)
 		{
@@ -303,6 +307,15 @@ namespace EthansGameKit.Collections
 			var copiedValues = new float[length];
 			Array.Copy(values, copiedValues, length);
 			values = copiedValues;
+		}
+		public T Peek(out float value, int index = 0)
+		{
+			value = values[index];
+			return keys[index];
+		}
+		public T Peek(int index = 0)
+		{
+			return keys[index];
 		}
 		public bool TryPeek(out T key, int index = 0)
 		{
@@ -324,16 +337,6 @@ namespace EthansGameKit.Collections
 			key = default;
 			value = default;
 			return false;
-		}
-		IEnumerator<KeyValuePair<T, float>> IEnumerable<KeyValuePair<T, float>>.GetEnumerator()
-		{
-			for (var i = 0; i < length; i++)
-				yield return new(keys[i], values[i]);
-		}
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			for (var i = 0; i < length; i++)
-				yield return new KeyValuePair<T, float>(keys[i], values[i]);
 		}
 	}
 	[Serializable]

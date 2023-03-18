@@ -163,11 +163,11 @@ namespace EthansGameKit.Collections
 		void ICollection.CopyTo(Array array, int index)
 		{
 		}
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return GetEnumerator();
 		}
-		IEnumerator IEnumerable.GetEnumerator()
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
 			return GetEnumerator();
 		}

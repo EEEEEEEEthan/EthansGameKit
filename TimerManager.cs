@@ -54,14 +54,6 @@ namespace EthansGameKit
 				this.time = time;
 				this.callback = callback;
 			}
-			public int CompareTo(Timer other)
-			{
-				if (time < other.time) return -1;
-				if (time > other.time) return 1;
-				if (id < other.id) return -1;
-				if (id > other.id) return 1;
-				return 0;
-			}
 			public override bool Equals(object obj)
 			{
 				return obj is Timer other && id == other.id;
@@ -69,6 +61,14 @@ namespace EthansGameKit
 			public override int GetHashCode()
 			{
 				return id;
+			}
+			public int CompareTo(Timer other)
+			{
+				if (time < other.time) return -1;
+				if (time > other.time) return 1;
+				if (id < other.id) return -1;
+				if (id > other.id) return 1;
+				return 0;
 			}
 		}
 	}
