@@ -15,7 +15,7 @@ namespace EthansGameKit.Collections
 	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
 	///     </list>
 	/// </remarks>
-	public partial class Octree
+	public partial class Octree<T>
 	{
 		static readonly Plane[] planes = new Plane[6];
 		static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
@@ -34,11 +34,15 @@ namespace EthansGameKit.Collections
 		}
 		Node root;
 		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.allItems;
-		public Item Insert(Vector3 position)
+		public Item Insert(Vector3 position, T obj)
 		{
-			var item = Item.Generate(position);
+			var item = Item.Generate(position, obj);
 			Insert(item);
 			return item;
+		}
+		public void Clear()
+		{
+			root = null;
 		}
 		public void RemoveAndRecycle(ref Item item)
 		{

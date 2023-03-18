@@ -3,21 +3,23 @@ using UnityEngine;
 
 namespace EthansGameKit.Collections
 {
-	public partial class Octree
+	public partial class Octree<T>
 	{
 		static readonly CachePool<Item> itemPool = new(0);
 
 		public class Item
 		{
-			internal static Item Generate(Vector3 position)
+			internal static Item Generate(Vector3 position, T referencedObject)
 			{
 				if (!itemPool.TryGenerate(out var item))
 					item = new();
 				item.position = position;
+				item.ReferencedObject = referencedObject;
 				return item;
 			}
 			internal static void Recycle(ref Item item)
 			{
+				item.ReferencedObject = default;
 				itemPool.Recycle(ref item);
 			}
 			Vector3 position;
@@ -33,7 +35,8 @@ namespace EthansGameKit.Collections
 					tree.Insert(this);
 				}
 			}
-			public Octree Tree { get; internal set; }
+			public Octree<T> Tree { get; internal set; }
+			public T ReferencedObject { get; private set; }
 			Item()
 			{
 			}

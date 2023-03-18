@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 
 namespace EthansGameKit.Collections
 {
-	public partial class Octree
+	public partial class Octree<T>
 	{
 		class Node
 		{
