@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using EthansGameKit.Collections;
 using UnityEngine;
@@ -118,6 +119,11 @@ namespace EthansGameKit
 				}
 			}
 			return hasItem;
+		}
+		public static IEnumerator GetEnumerator(this IEnumerable @this, bool safe)
+		{
+			if (safe) return @this.GetEnumerator().ToSafeEnumerator();
+			return @this.GetEnumerator();
 		}
 	}
 }
