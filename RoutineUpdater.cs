@@ -32,6 +32,7 @@ namespace EthansGameKit
 			}
 		}
 	}
+
 	[DefaultExecutionOrder(int.MinValue)]
 	class RoutineUpdater : MonoBehaviour
 	{

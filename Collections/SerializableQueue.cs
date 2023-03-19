@@ -172,6 +172,7 @@ namespace EthansGameKit.Collections
 			return GetEnumerator();
 		}
 	}
+
 	[Serializable]
 	public sealed class SerializableQueueVector3 : SerializableQueue<Vector3>
 	{

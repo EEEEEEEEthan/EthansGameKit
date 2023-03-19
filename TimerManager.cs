@@ -21,6 +21,7 @@ namespace EthansGameKit
 			unscaledInvoker.TryTrigger(Time.unscaledTimeAsDouble);
 		}
 	}
+
 	class TimerInvoker
 	{
 		int currentId;
@@ -43,6 +44,7 @@ namespace EthansGameKit
 				timer.callback.TryInvoke();
 			}
 		}
+
 		readonly struct Timer : IComparable<Timer>
 		{
 			public readonly Action callback;

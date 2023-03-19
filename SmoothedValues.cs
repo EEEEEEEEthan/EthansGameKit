@@ -9,6 +9,7 @@ namespace EthansGameKit
 		public T PreferredValue { get; set; }
 		public T Value { get; set; }
 	}
+
 	[Serializable]
 	public class SmoothedSingle : SmoothedValue<float>
 	{
@@ -75,6 +76,7 @@ namespace EthansGameKit
 			preferredValue = value;
 		}
 	}
+
 	[Serializable]
 	public class SmoothedVector3 : SmoothedValue<Vector3>
 	{
@@ -141,6 +143,7 @@ namespace EthansGameKit
 			preferredValue = value;
 		}
 	}
+
 	[Serializable]
 	public class SmoothedQuaternion : SmoothedValue<Quaternion>
 	{

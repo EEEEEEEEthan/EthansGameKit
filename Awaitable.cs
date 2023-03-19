@@ -37,33 +37,41 @@ namespace EthansGameKit
 		}
 		new IAwaiter<T> GetAwaiter();
 	}
+
 	public interface IAwaiter : INotifyCompletion
 	{
 		bool IsCompleted { get; }
 		object GetResult();
 	}
+
 	public interface IAwaiter<out T> : IAwaiter
 	{
 		new T GetResult();
 	}
+
 	public interface IAsyncTrigger
 	{
 		void Set();
 	}
+
 	public interface IAsyncTrigger<in T>
 	{
 		void Set(T result);
 	}
+
 	public interface IAsyncStopper
 	{
 		void Cancel();
 	}
+
 	public interface IAsyncHandle : IAsyncTrigger, IAsyncStopper
 	{
 	}
+
 	public interface IAsyncHandle<in T> : IAsyncTrigger<T>, IAsyncStopper
 	{
 	}
+
 	public enum StateCode
 	{
 		Inactive,
@@ -71,6 +79,7 @@ namespace EthansGameKit
 		Completed,
 		Canceled,
 	}
+
 	class Awaiter<T>
 		: IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
 	{
