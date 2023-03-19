@@ -28,6 +28,17 @@ namespace EthansGameKit.Collections
 			collection.CopyTo(items, 0);
 			count = items.Length;
 		}
+		void ICollection.CopyTo(Array array, int index)
+		{
+		}
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
+		IEnumerator<T> IEnumerable<T>.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 		public void Clear()
 		{
 			++changingFlag;
@@ -159,17 +170,6 @@ namespace EthansGameKit.Collections
 			}
 			result = Peek();
 			return true;
-		}
-		void ICollection.CopyTo(Array array, int index)
-		{
-		}
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return GetEnumerator();
-		}
-		IEnumerator<T> IEnumerable<T>.GetEnumerator()
-		{
-			return GetEnumerator();
 		}
 	}
 

@@ -226,55 +226,6 @@ namespace EthansGameKit.Collections
 			keys = new T[defaultCapability];
 			values = new float[defaultCapability];
 		}
-		public bool Update(T element, float sortingValue)
-		{
-			for (var i = 0; i < length; i++)
-				if (keys[i].Equals(element))
-				{
-					HeapUpdate(element, sortingValue, i, keys, values, length);
-					return true;
-				}
-			return false;
-		}
-		public void AddOrUpdate(T element, float sortingValue)
-		{
-			for (var i = 0; i < length; i++)
-			{
-				if (keys[i].Equals(element))
-				{
-					HeapUpdate(element, sortingValue, i, keys, values, length);
-					return;
-				}
-			}
-			Add(element, sortingValue);
-		}
-		public void Clear()
-		{
-			Array.Clear(keys, 0, keys.Length);
-			Array.Clear(values, 0, values.Length);
-			length = 0;
-		}
-		public int Find(T element, float sortingValue)
-		{
-			return HeapFind(element, sortingValue, keys, values, length);
-		}
-		public int Find(T element)
-		{
-			for (var i = 0; i < length; i++)
-				if (keys[i].Equals(element))
-					return i;
-			return -1;
-		}
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			for (var i = 0; i < length; i++)
-				yield return new KeyValuePair<T, float>(keys[i], values[i]);
-		}
-		IEnumerator<KeyValuePair<T, float>> IEnumerable<KeyValuePair<T, float>>.GetEnumerator()
-		{
-			for (var i = 0; i < length; i++)
-				yield return new(keys[i], values[i]);
-		}
 		/// <summary>
 		///     堆增加一个元素
 		/// </summary>
@@ -340,6 +291,55 @@ namespace EthansGameKit.Collections
 			key = default;
 			value = default;
 			return false;
+		}
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			for (var i = 0; i < length; i++)
+				yield return new KeyValuePair<T, float>(keys[i], values[i]);
+		}
+		IEnumerator<KeyValuePair<T, float>> IEnumerable<KeyValuePair<T, float>>.GetEnumerator()
+		{
+			for (var i = 0; i < length; i++)
+				yield return new(keys[i], values[i]);
+		}
+		public bool Update(T element, float sortingValue)
+		{
+			for (var i = 0; i < length; i++)
+				if (keys[i].Equals(element))
+				{
+					HeapUpdate(element, sortingValue, i, keys, values, length);
+					return true;
+				}
+			return false;
+		}
+		public void AddOrUpdate(T element, float sortingValue)
+		{
+			for (var i = 0; i < length; i++)
+			{
+				if (keys[i].Equals(element))
+				{
+					HeapUpdate(element, sortingValue, i, keys, values, length);
+					return;
+				}
+			}
+			Add(element, sortingValue);
+		}
+		public void Clear()
+		{
+			Array.Clear(keys, 0, keys.Length);
+			Array.Clear(values, 0, values.Length);
+			length = 0;
+		}
+		public int Find(T element, float sortingValue)
+		{
+			return HeapFind(element, sortingValue, keys, values, length);
+		}
+		public int Find(T element)
+		{
+			for (var i = 0; i < length; i++)
+				if (keys[i].Equals(element))
+					return i;
+			return -1;
 		}
 	}
 

@@ -127,6 +127,13 @@ namespace EthansGameKit
 			continuation?.Invoke();
 			continuation = null;
 		}
+		public void OnCompleted(Action continuation)
+		{
+			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
+			Assert.IsTrue(State == StateCode.Inactive);
+			State = StateCode.Awaiting;
+			this.continuation = continuation;
+		}
 		IAwaiter IAwaitable.GetAwaiter()
 		{
 			return this;
@@ -142,13 +149,6 @@ namespace EthansGameKit
 		T IAwaiter<T>.GetResult()
 		{
 			return result;
-		}
-		public void OnCompleted(Action continuation)
-		{
-			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
-			Assert.IsTrue(State == StateCode.Inactive);
-			State = StateCode.Awaiting;
-			this.continuation = continuation;
 		}
 	}
 }
