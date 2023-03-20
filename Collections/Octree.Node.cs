@@ -151,11 +151,11 @@ namespace EthansGameKit.Collections
 			public bool Contains(float x, float y, float z)
 			{
 				return xMin <= x &&
-					x < xMax &&
-					yMin <= y &&
-					y < yMax &&
-					zMin <= z &&
-					z < zMax;
+						x < xMax &&
+						yMin <= y &&
+						y < yMax &&
+						zMin <= z &&
+						z < zMax;
 			}
 			public Node Encapsulate(float x, float y, float z)
 			{
@@ -363,18 +363,14 @@ namespace EthansGameKit.Collections
 				return child;
 			}
 #if UNITY_EDITOR
-			static readonly Color invisiableBranchColor = new(1, 1, 1, 0.05f);
-			static readonly Color visiableBranchColor = new(1, 1, 1, 0.1f);
-			static readonly Color invisiableleafColor = new(0, 1, 0, 0.25f);
-			static readonly Color visiableleafColor = new(0, 1, 0, 0.5f);
 			public void Editor_DrawGizmos(Plane[] planes)
 			{
 				var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
 				Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
-					? IsBranch ? visiableBranchColor : visiableleafColor
+					? IsBranch ? editor_visiableBranchColor : editor_visiableleafColor
 					: IsBranch
-						? invisiableBranchColor
-						: invisiableleafColor;
+						? editor_invisiableBranchColor
+						: editor_invisiableleafColor;
 				Gizmos.DrawWireCube(
 					new(xMid, yMid, zMid),
 					new(xMax - xMin, yMax - yMin, zMax - zMin)

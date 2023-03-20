@@ -6,19 +6,10 @@ using UnityEngine.Assertions;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 namespace EthansGameKit.Collections
 {
-	/// <summary>
-	///     自适应八叉树
-	/// </summary>
-	/// <remarks>
-	///     <list type="bullet">
-	///         <item>能根据插入物品坐标自动调整大小.</item>
-	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
-	///     </list>
-	/// </remarks>
-	public partial class Octree<T>
+	public class Octree
 	{
-		static readonly Plane[] planes = new Plane[6];
-		static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
+		private protected static readonly Plane[] planes = new Plane[6];
+		private protected static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
 		{
 			GeometryUtility.CalculateFrustumPlanes(camera, planes);
 			var cameraPos = camera.transform.position;
@@ -32,6 +23,24 @@ namespace EthansGameKit.Collections
 				planes[i] = new(normal, point);
 			}
 		}
+#if UNITY_EDITOR
+		private protected static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
+		private protected static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
+		private protected static readonly Color editor_invisiableleafColor = new(0, 1, 0, 0.25f);
+		private protected static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
+#endif
+	}
+	/// <summary>
+	///     自适应八叉树
+	/// </summary>
+	/// <remarks>
+	///     <list type="bullet">
+	///         <item>能根据插入物品坐标自动调整大小.</item>
+	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
+	///     </list>
+	/// </remarks>
+	public partial class Octree<T> : Octree
+	{
 		Node root;
 		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.allItems;
 		public Item Insert(Vector3 position, T obj)

@@ -6,7 +6,6 @@ namespace EthansGameKit.Collections
 	public partial class Octree<T>
 	{
 		static readonly CachePool<Item> itemPool = new(0);
-
 		public class Item
 		{
 			internal static Item Generate(Vector3 position, T referencedObject)
