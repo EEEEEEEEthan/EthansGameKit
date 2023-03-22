@@ -13,6 +13,7 @@ namespace EthansGameKit.Collections
 		bool TryPeek(out TKey key, int index = 0);
 		bool TryPeek(out TKey key, out TValue value, int index = 0);
 	}
+
 	public interface IHeap<T, TValue> : IReadOnlyHeap<T, TValue> where TValue : IComparable<TValue>
 	{
 		void Add(T element, TValue sortingValue);
@@ -20,45 +21,38 @@ namespace EthansGameKit.Collections
 		T Pop(out TValue value, int index = 0);
 		void TrimExcess();
 	}
+
 	public abstract class Heap
 	{
-		private protected static int[] finder = Array.Empty<int>();
-	}
-	[Serializable]
-	public class Heap<TKey, TValue> : Heap, IHeap<TKey, TValue> where TValue : IComparable<TValue>
-	{
+		static int[] finder = Array.Empty<int>();
 		/// <summary>
 		///     向堆增加元素
 		/// </summary>
-		public static void HeapAdd(TKey key, TValue value, TKey[] keys, TValue[] values, ref int length)
+		public static void HeapAdd<TKey, TValue>(TKey key, TValue value, TKey[] keys, TValue[] values, ref int length) where TValue : IComparable<TValue>
 		{
 			keys[length] = key;
 			values[length] = value;
 			AdjustUp(keys, values, length++);
 		}
-		public static void HeapAdd(TKey key, TValue value, ref TKey[] keys, ref TValue[] values, ref int length)
+		public static void HeapAdd<TKey, TValue>(TKey key, TValue value, ref TKey[] keys, ref TValue[] values, ref int length) where TValue : IComparable<TValue>
 		{
+			var newLength = length + 1;
 			if (keys.Length <= length)
-			{
-				var copy = keys;
-				keys = new TKey[length * 2 + 1];
-				Array.Copy(copy, keys, copy.Length);
-			}
+				Array.Resize(ref keys, newLength);
 			if (values.Length <= length)
-			{
-				var copy = values;
-				values = new TValue[length * 2 + 1];
-				Array.Copy(copy, values, copy.Length);
-			}
+				Array.Resize(ref values, newLength);
 			HeapAdd(key, value, keys, values, ref length);
 		}
-		public static int HeapFind(TKey key, TValue value, TKey[] keys, TValue[] values, int length)
+		public static int HeapFind<TKey, TValue>(TKey key, TValue value, TKey[] keys, TValue[] values, int length)
+			where TValue : IComparable<TValue>
 		{
 			if (length <= 0) return -1;
+			if (finder.Length <= length)
+				finder = new int[length];
 			finder[0] = 0;
 			var start = 0;
-			var count = 1;
-			while (count > 0)
+			var end = 1;
+			while (start < end)
 			{
 				var currentIndex = finder[start];
 				var currentValue = values[currentIndex];
@@ -68,20 +62,47 @@ namespace EthansGameKit.Collections
 					case 0 when keys[currentIndex].Equals(key):
 						return currentIndex;
 					case <= 0:
-						goto NEXT;
+						++start;
+						continue;
 				}
-				var leftIndex = (currentIndex << 1) + 1;
-				if (leftIndex >= length) goto NEXT;
-				if (count + 1 >= finder.Length)
-					Array.Resize(ref finder, count);
-				finder[count++] = leftIndex;
+				var leftIndex = (currentIndex << 1) | 1;
+				if (leftIndex < length)
+					finder[end++] = leftIndex;
 				var rightIndex = leftIndex + 1;
-				if (rightIndex >= length) goto NEXT;
-				if (count + 1 >= finder.Length)
-					Array.Resize(ref finder, count);
-				finder[count++] = rightIndex;
-			NEXT:
-				--count;
+				if (rightIndex < length)
+					finder[end++] = rightIndex;
+				++start;
+			}
+			return -1;
+		}
+		public static int HeapFind<TKey, TValue>(TKey key, TValue value, TKey[] keys, TValue[] values, int length, IEqualityComparer<TKey> comparer)
+			where TValue : IComparable<TValue>
+		{
+			if (length <= 0) return -1;
+			if (finder.Length <= length)
+				finder = new int[length];
+			finder[0] = 0;
+			var start = 0;
+			var end = 1;
+			while (start < end)
+			{
+				var currentIndex = finder[start];
+				var currentValue = values[currentIndex];
+				var cmp = value.CompareTo(currentValue);
+				switch (cmp)
+				{
+					case 0 when comparer.Equals(keys[currentIndex], key):
+						return currentIndex;
+					case <= 0:
+						++start;
+						continue;
+				}
+				var leftIndex = (currentIndex << 1) | 1;
+				if (leftIndex < length)
+					finder[end++] = leftIndex;
+				var rightIndex = leftIndex + 1;
+				if (rightIndex < length)
+					finder[end++] = rightIndex;
 				++start;
 			}
 			return -1;
@@ -93,7 +114,7 @@ namespace EthansGameKit.Collections
 		/// <param name="values"></param>
 		/// <param name="length">长度</param>
 		/// <param name="index">被移除元素下标</param>
-		public static TKey HeapPop(TKey[] keys, TValue[] values, ref int length, int index = 0)
+		public static TKey HeapPop<TKey, TValue>(TKey[] keys, TValue[] values, ref int length, int index = 0) where TValue : IComparable<TValue>
 		{
 			var result = keys[index];
 			keys[index] = keys[--length];
@@ -102,21 +123,21 @@ namespace EthansGameKit.Collections
 			AdjustUp(keys, values, index);
 			return result;
 		}
-		public static void HeapUpdate(TKey key, TValue value, int index, TKey[] keys, TValue[] values, int length)
+		public static void HeapUpdate<TKey, TValue>(TKey key, TValue value, int index, TKey[] keys, TValue[] values, int length) where TValue : IComparable<TValue>
 		{
 			keys[index] = key;
 			values[index] = value;
 			AdjustDown(keys, values, length, index);
 			AdjustUp(keys, values, index);
 		}
-		static void AdjustDown(TKey[] keys, TValue[] values, int length, int index)
+		static void AdjustDown<TKey, TValue>(TKey[] keys, TValue[] values, int length, int index) where TValue : IComparable<TValue>
 		{
 			TKey tempKey;
 			TValue tempValue;
 			int leftIndex, rightIndex;
 			while (true)
 			{
-				leftIndex = (index << 1) + 1;
+				leftIndex = (index << 1) | 1;
 				if (leftIndex >= length)
 					return;
 				rightIndex = leftIndex + 1;
@@ -172,7 +193,7 @@ namespace EthansGameKit.Collections
 				}
 			}
 		}
-		static void AdjustUp(TKey[] keys, TValue[] values, int index)
+		static void AdjustUp<TKey, TValue>(TKey[] keys, TValue[] values, int index) where TValue : IComparable<TValue>
 		{
 			int parentIndex;
 			TKey tempKey;
@@ -194,6 +215,24 @@ namespace EthansGameKit.Collections
 					break;
 			}
 		}
+		static bool HeapCheck<TKey, TValue>(TKey[] keys, TValue[] values, int length) where TValue : IComparable<TValue>
+		{
+			for (var i = 0; i < length; i++)
+			{
+				var leftChildIndex = (i << 1) | 1;
+				var rightChildIndex = leftChildIndex + 1;
+				if (leftChildIndex < length && values[leftChildIndex].CompareTo(values[i]) < 0)
+					return false;
+				if (rightChildIndex < length && values[rightChildIndex].CompareTo(values[i]) < 0)
+					return false;
+			}
+			return true;
+		}
+	}
+
+	[Serializable]
+	public class Heap<TKey, TValue> : Heap, IHeap<TKey, TValue>, IEqualityComparer<TKey> where TValue : IComparable<TValue>
+	{
 		[SerializeField] TKey[] keys;
 		[SerializeField] int length;
 		[SerializeField] TValue[] values;
@@ -227,12 +266,9 @@ namespace EthansGameKit.Collections
 		{
 			if (length >= keys.Length)
 			{
-				var copiedKeys = new TKey[keys.Length * 2];
-				Array.Copy(keys, copiedKeys, keys.Length);
-				keys = copiedKeys;
-				var copiedValues = new TValue[values.Length * 2];
-				Array.Copy(values, copiedValues, values.Length);
-				values = copiedValues;
+				var newLength = length + 1;
+				Array.Resize(ref keys, newLength);
+				Array.Resize(ref values, newLength);
 			}
 			HeapAdd(element, sortingValue, keys, values, ref length);
 		}
@@ -247,12 +283,8 @@ namespace EthansGameKit.Collections
 		}
 		public void TrimExcess()
 		{
-			var copiedKeys = new TKey[length];
-			Array.Copy(keys, copiedKeys, length);
-			keys = copiedKeys;
-			var copiedValues = new TValue[length];
-			Array.Copy(values, copiedValues, length);
-			values = copiedValues;
+			Array.Resize(ref keys, length);
+			Array.Resize(ref values, length);
 		}
 		public TKey Peek(out TValue value, int index = 0)
 		{
@@ -294,9 +326,13 @@ namespace EthansGameKit.Collections
 			for (var i = 0; i < length; i++)
 				yield return new(keys[i], values[i]);
 		}
-		public int IndexOf(TKey key)
+		bool IEqualityComparer<TKey>.Equals(TKey x, TKey y)
 		{
-			return HeapFind(key, default, keys, values, length);
+			return Equals(x, y);
+		}
+		int IEqualityComparer<TKey>.GetHashCode(TKey obj)
+		{
+			return GetHashCode(obj);
 		}
 		public bool Update(TKey element, TValue sortingValue)
 		{
@@ -310,15 +346,19 @@ namespace EthansGameKit.Collections
 		}
 		public void AddOrUpdate(TKey element, TValue sortingValue)
 		{
-			for (var i = 0; i < length; i++)
-			{
-				if (keys[i].Equals(element))
-				{
-					HeapUpdate(element, sortingValue, i, keys, values, length);
-					return;
-				}
-			}
-			Add(element, sortingValue);
+			var index = Find(element);
+			if (index >= 0)
+				HeapUpdate(element, sortingValue, index, keys, values, length);
+			else
+				Add(element, sortingValue);
+		}
+		public void AddOrUpdate(TKey element, TValue oldValue, TValue newValue)
+		{
+			var index = Find(element, oldValue);
+			if (index >= 0)
+				HeapUpdate(element, newValue, index, keys, values, length);
+			else
+				Add(element, newValue);
 		}
 		public void Clear()
 		{
@@ -337,9 +377,26 @@ namespace EthansGameKit.Collections
 					return i;
 			return -1;
 		}
+		protected virtual bool Equals(TKey x, TKey y)
+		{
+			return x.Equals(y);
+		}
+		protected virtual int GetHashCode(TKey obj)
+		{
+			return obj.GetHashCode();
+		}
 	}
+
 	[Serializable]
 	public class HeapInt32 : Heap<int, float>
 	{
+		protected override bool Equals(int x, int y)
+		{
+			return x == y;
+		}
+		protected override int GetHashCode(int obj)
+		{
+			return obj;
+		}
 	}
 }

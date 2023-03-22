@@ -60,13 +60,13 @@ namespace EthansGameKit
 			if (id <= invalidId) return false;
 			var timer = new Timer { id = id };
 			id = invalidId;
-			var index = TimerUpdater.timers.IndexOf(timer);
+			var index = TimerUpdater.timers.Find(timer);
 			if (index >= 0)
 			{
 				TimerUpdater.timers.Pop(index);
 				return true;
 			}
-			index = TimerUpdater.unscaledTimers.IndexOf(timer);
+			index = TimerUpdater.unscaledTimers.Find(timer);
 			TimerUpdater.unscaledTimers.Pop(index);
 			return true;
 		}
