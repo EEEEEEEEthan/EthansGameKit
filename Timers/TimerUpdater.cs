@@ -1,10 +1,9 @@
 ﻿using System.Collections.Generic;
-using EthansGameKit;
 using EthansGameKit.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace Utilities
+namespace EthansGameKit.TimersInternal
 {
 	class TimerUpdater : MonoBehaviour
 	{

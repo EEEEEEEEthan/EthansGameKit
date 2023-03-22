@@ -1,8 +1,8 @@
 ﻿using System;
-using EthansGameKit;
+using EthansGameKit.TimersInternal;
 using UnityEngine;
 
-namespace Utilities
+namespace EthansGameKit
 {
 	public static class Timers
 	{
