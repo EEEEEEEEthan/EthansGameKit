@@ -294,6 +294,10 @@ namespace EthansGameKit.Collections
 			for (var i = 0; i < length; i++)
 				yield return new(keys[i], values[i]);
 		}
+		public int IndexOf(TKey key)
+		{
+			return HeapFind(key, default, keys, values, length);
+		}
 		public bool Update(TKey element, TValue sortingValue)
 		{
 			for (var i = 0; i < length; i++)

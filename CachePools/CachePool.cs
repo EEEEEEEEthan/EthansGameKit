@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using Utilities;
 
 namespace EthansGameKit.CachePools
 {
@@ -47,7 +48,7 @@ namespace EthansGameKit.CachePools
 			autoReleasing = true;
 			while (list.Count > keepCount)
 			{
-				await Timer.Await(Random.Range(0f, 2f));
+				await Timers.Await(Random.Range(0f, 2f));
 				var needRelease = Mathf.CeilToInt((list.Count - keepCount) * 0.01f);
 				for (var i = 0; i < needRelease; i++)
 				{
