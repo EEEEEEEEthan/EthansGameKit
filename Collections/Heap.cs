@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using EthansGameKit.CachePools;
 using UnityEngine;
 
 // ReSharper disable TooWideLocalVariableScope
@@ -233,6 +234,16 @@ namespace EthansGameKit.Collections
 	[Serializable]
 	public class Heap<TKey, TValue> : Heap, IHeap<TKey, TValue>, IEqualityComparer<TKey> where TValue : IComparable<TValue>
 	{
+		public static Heap<TKey, TValue> Generate()
+		{
+			if (!GlobalCachePool<Heap<TKey, TValue>>.TryGenerate(out var heap)) heap = new();
+			return heap;
+		}
+		public static void ClearAndRecycle(ref Heap<TKey, TValue> heap)
+		{
+			heap.Clear();
+			GlobalCachePool<Heap<TKey, TValue>>.Recycle(ref heap);
+		}
 		[SerializeField] TKey[] keys;
 		[SerializeField] int length;
 		[SerializeField] TValue[] values;
@@ -333,6 +344,11 @@ namespace EthansGameKit.Collections
 		int IEqualityComparer<TKey>.GetHashCode(TKey obj)
 		{
 			return GetHashCode(obj);
+		}
+		public void ClearAndRecycle()
+		{
+			var o = this;
+			ClearAndRecycle(ref o);
 		}
 		public bool Update(TKey element, TValue sortingValue)
 		{

@@ -58,15 +58,15 @@ namespace EthansGameKit
 				_ => value,
 			};
 		}
-		public static float FloorToInt(this float @this)
+		public static int FloorToInt(this float @this)
 		{
 			return Mathf.FloorToInt(@this);
 		}
-		public static float CeilToInt(this float @this)
+		public static int CeilToInt(this float @this)
 		{
 			return Mathf.CeilToInt(@this);
 		}
-		public static float RoundToInt(this float @this)
+		public static int RoundToInt(this float @this)
 		{
 			return Mathf.RoundToInt(@this);
 		}
