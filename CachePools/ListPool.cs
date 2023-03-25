@@ -21,7 +21,7 @@ namespace EthansGameKit.CachePools
 		{
 			if (pool.TryGenerate(out var cache))
 			{
-				foreach (var item in cache)
+				foreach (var item in collection)
 					cache.Add(item);
 				return cache;
 			}
