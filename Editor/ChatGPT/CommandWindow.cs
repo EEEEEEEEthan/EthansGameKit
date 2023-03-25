@@ -48,11 +48,10 @@ namespace EthansGameKit.Editor.ChatGPT
 			if (!FileExists) return;
 			AssetDatabase.DeleteAsset(TempFilePath);
 		}
-		static bool ExecuteFile()
+		static void ExecuteFile()
 		{
-			if (!FileExists) return false;
+			if (!FileExists) return;
 			EditorApplication.ExecuteMenuItem(commandMenuItem);
-			return true;
 		}
 		protected override string DefaultInput => "帮我把我选中的GameObject命名为`GameObject{i}`, {i}是我选的序号";
 		new void Awake()

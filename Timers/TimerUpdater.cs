@@ -10,7 +10,7 @@ namespace EthansGameKit.TimersInternal
 		public static uint currentId = Timers.invalidId;
 		public static Heap<Timer, double> timers = new();
 		public static Heap<Timer, double> unscaledTimers = new();
-		static List<Timer> buffer = new();
+		static readonly List<Timer> buffer = new();
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
 		{

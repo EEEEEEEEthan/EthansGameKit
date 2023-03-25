@@ -30,6 +30,7 @@ namespace EthansGameKit.Collections
 		private protected static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
 #endif
 	}
+
 	/// <summary>
 	///     自适应八叉树
 	/// </summary>

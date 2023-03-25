@@ -216,19 +216,6 @@ namespace EthansGameKit.Collections
 					break;
 			}
 		}
-		static bool HeapCheck<TKey, TValue>(TKey[] keys, TValue[] values, int length) where TValue : IComparable<TValue>
-		{
-			for (var i = 0; i < length; i++)
-			{
-				var leftChildIndex = (i << 1) | 1;
-				var rightChildIndex = leftChildIndex + 1;
-				if (leftChildIndex < length && values[leftChildIndex].CompareTo(values[i]) < 0)
-					return false;
-				if (rightChildIndex < length && values[rightChildIndex].CompareTo(values[i]) < 0)
-					return false;
-			}
-			return true;
-		}
 	}
 
 	[Serializable]
