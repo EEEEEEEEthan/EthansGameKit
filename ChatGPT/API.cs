@@ -58,7 +58,15 @@ namespace EthansGameKit.ChatGPT
 				if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
 				{
 					Debug.LogError(request.error);
-					callback.Invoke(null);
+					try
+					{
+						callback.Invoke(null);
+					}
+					catch (Exception e)
+					{
+						Debug.LogException(e);
+					}
+					request.Dispose();
 					return;
 				}
 				try
@@ -73,6 +81,7 @@ namespace EthansGameKit.ChatGPT
 					{
 						Debug.LogException(e);
 					}
+					request.Dispose();
 					return;
 				}
 				catch (Exception e)
@@ -88,6 +97,7 @@ namespace EthansGameKit.ChatGPT
 				{
 					Debug.LogException(e);
 				}
+				request.Dispose();
 			}
 		}
 	}
