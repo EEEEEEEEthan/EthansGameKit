@@ -27,5 +27,15 @@ namespace EthansGameKit.CachePools
 			}
 			return new(collection);
 		}
+		public static List<T> Generate(IReadOnlyList<T> list)
+		{
+			if (pool.TryGenerate(out var cache))
+			{
+				var length = list.Count;
+				for (var i = 0; i < length; ++i)
+					cache.Add(list[i]);
+			}
+			return new(list);
+		}
 	}
 }
