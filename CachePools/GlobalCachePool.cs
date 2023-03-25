@@ -3,7 +3,7 @@ using UnityEngine.Assertions;
 
 namespace EthansGameKit.CachePools
 {
-	public static class GlobalCachePool<T> where T : new()
+	public static class GlobalCachePool<T> where T : class
 	{
 		static readonly CachePool<T> pool = new(0);
 		static readonly Type type = typeof(T);

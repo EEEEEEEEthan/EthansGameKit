@@ -277,7 +277,7 @@ namespace EthansGameKit.Collections
 		{
 			if (length >= keys.Length)
 			{
-				var newLength = length + 1;
+				var newLength = length << 1;
 				Array.Resize(ref keys, newLength);
 				Array.Resize(ref values, newLength);
 			}
@@ -384,7 +384,7 @@ namespace EthansGameKit.Collections
 		}
 		public int Find(TKey element, TValue sortingValue)
 		{
-			return HeapFind(element, sortingValue, keys, values, length);
+			return HeapFind(element, sortingValue, keys, values, length, this);
 		}
 		public int Find(TKey element)
 		{
@@ -404,15 +404,11 @@ namespace EthansGameKit.Collections
 	}
 
 	[Serializable]
-	public class HeapInt32 : Heap<int, float>
+	public class HeapInt32Single : Heap<int, float>
 	{
 		protected override bool Equals(int x, int y)
 		{
 			return x == y;
-		}
-		protected override int GetHashCode(int obj)
-		{
-			return obj;
 		}
 	}
 }
