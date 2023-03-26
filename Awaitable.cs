@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
-using UnityEngine.Assertions;
 
 namespace EthansGameKit
 {
@@ -10,30 +9,14 @@ namespace EthansGameKit
 		{
 			return Awaiter<object>.Create(out handle);
 		}
-		public static IAwaitable Create(out IAsyncTrigger trigger, out IAsyncStopper stopper)
-		{
-			var awaitable = Awaiter<object>.Create(out IAsyncHandle handle);
-			trigger = handle;
-			stopper = handle;
-			return awaitable;
-		}
-		StateCode State { get; }
 		IAwaiter GetAwaiter();
 	}
 
-	// ReSharper disable once TypeParameterCanBeVariant
-	public interface IAwaitable<T> : IAwaitable
+	public interface IAwaitable<out T> : IAwaitable
 	{
 		public static IAwaitable<T> Create(out IAsyncHandle<T> handle)
 		{
 			return Awaiter<T>.Create(out handle);
-		}
-		public static IAwaitable<T> Create(out IAsyncTrigger<T> trigger, out IAsyncStopper stopper)
-		{
-			var awaitable = Awaiter<T>.Create(out IAsyncHandle<T> handle);
-			trigger = handle;
-			stopper = handle;
-			return awaitable;
 		}
 		new IAwaiter<T> GetAwaiter();
 	}
@@ -49,39 +32,17 @@ namespace EthansGameKit
 		new T GetResult();
 	}
 
-	public interface IAsyncTrigger
+	public interface IAsyncHandle
 	{
 		void Set();
 	}
 
-	public interface IAsyncTrigger<in T>
+	public interface IAsyncHandle<in T>
 	{
 		void Set(T result);
 	}
 
-	public interface IAsyncStopper
-	{
-		void Cancel();
-	}
-
-	public interface IAsyncHandle : IAsyncTrigger, IAsyncStopper
-	{
-	}
-
-	public interface IAsyncHandle<in T> : IAsyncTrigger<T>, IAsyncStopper
-	{
-	}
-
-	public enum StateCode
-	{
-		Inactive,
-		Awaiting,
-		Completed,
-		Canceled,
-	}
-
-	class Awaiter<T>
-		: IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
+	class Awaiter<T> : IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
 	{
 		public static IAwaitable Create(out IAsyncHandle trigger)
 		{
@@ -101,18 +62,10 @@ namespace EthansGameKit
 		}
 		Action continuation;
 		T result;
-		public bool IsCompleted => State is StateCode.Completed or StateCode.Canceled;
-		public StateCode State { get; private set; }
+		public bool IsCompleted { get; private set; }
 		public override string ToString()
 		{
-			return $"{GetType().FullName}({nameof(State)}={State})";
-		}
-		public void Cancel()
-		{
-			Assert.IsTrue(!IsCompleted, $"already completed. {this}");
-			State = StateCode.Canceled;
-			continuation?.Invoke();
-			continuation = null;
+			return $"{GetType().FullName}({nameof(IsCompleted)}={IsCompleted})";
 		}
 		public void Set()
 		{
@@ -120,18 +73,13 @@ namespace EthansGameKit
 		}
 		public void Set(T result)
 		{
-			//Debug.Log($"{nameof(Set)}({result})");
-			Assert.IsTrue(!IsCompleted, $"already completed. {this}");
-			State = StateCode.Completed;
+			IsCompleted = true;
 			this.result = result;
 			continuation?.Invoke();
 			continuation = null;
 		}
 		public void OnCompleted(Action continuation)
 		{
-			//Debug.Log($"{nameof(OnCompleted)}({continuation})");
-			Assert.IsTrue(State == StateCode.Inactive);
-			State = StateCode.Awaiting;
 			this.continuation = continuation;
 		}
 		IAwaiter IAwaitable.GetAwaiter()
