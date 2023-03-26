@@ -73,6 +73,7 @@ namespace EthansGameKit
 		}
 		public void Set(T result)
 		{
+			if (IsCompleted) return;
 			IsCompleted = true;
 			this.result = result;
 			continuation?.Invoke();
