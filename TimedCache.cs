@@ -48,6 +48,9 @@ namespace EthansGameKit
 			}
 		}
 		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
+		TimedCache()
+		{
+		}
 		void AutoRelease()
 		{
 			Timers.InvokeAfterUnscaled(ref timerId, keepSeconds, AutoRelease2);
