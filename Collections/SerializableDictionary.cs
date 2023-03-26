@@ -6,11 +6,7 @@ using UnityEngine;
 namespace EthansGameKit.Collections
 {
 	[Serializable]
-	public abstract class SerializableDictionary<TKey, TValue>
-		: IDictionary<TKey, TValue>,
-			IReadOnlyDictionary<TKey, TValue>,
-			IDictionary,
-			ISerializationCallbackReceiver
+	public abstract class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary, ISerializationCallbackReceiver
 	{
 		readonly Dictionary<TKey, TValue> dict;
 		[SerializeField, HideInInspector] Data[] serializeData;
