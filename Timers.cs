@@ -1,5 +1,5 @@
 ﻿using System;
-using EthansGameKit.TimersInternal;
+using EthansGameKit.Internal;
 using UnityEngine;
 
 namespace EthansGameKit

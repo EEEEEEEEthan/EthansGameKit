@@ -3,7 +3,7 @@ using EthansGameKit.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-namespace EthansGameKit.TimersInternal
+namespace EthansGameKit.Internal
 {
 	class TimerUpdater : MonoBehaviour
 	{

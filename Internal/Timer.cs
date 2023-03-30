@@ -1,6 +1,6 @@
 using System;
 
-namespace EthansGameKit.TimersInternal
+namespace EthansGameKit.Internal
 {
 	struct Timer : IComparable<Timer>, IEquatable<Timer>
 	{
