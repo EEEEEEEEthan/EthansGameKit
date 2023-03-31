@@ -367,10 +367,10 @@ namespace EthansGameKit.Collections
 			{
 				var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
 				Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
-					? IsBranch ? editor_visiableBranchColor : editor_visiableleafColor
+					? IsBranch ? OctreeDefines.editor_visiableBranchColor : OctreeDefines.editor_visiableleafColor
 					: IsBranch
-						? editor_invisiableBranchColor
-						: editor_invisiableleafColor;
+						? OctreeDefines.editor_invisiableBranchColor
+						: OctreeDefines.editor_invisiableleafColor;
 				Gizmos.DrawWireCube(
 					new(xMid, yMid, zMid),
 					new(xMax - xMin, yMax - yMin, zMax - zMin)

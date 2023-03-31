@@ -6,10 +6,10 @@ using UnityEngine.Assertions;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 namespace EthansGameKit.Collections
 {
-	public class Octree
+	class OctreeDefines
 	{
-		private protected static readonly Plane[] planes = new Plane[6];
-		private protected static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
+		protected internal static readonly Plane[] planes = new Plane[6];
+		protected internal static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
 		{
 			GeometryUtility.CalculateFrustumPlanes(camera, planes);
 			var cameraPos = camera.transform.position;
@@ -24,10 +24,10 @@ namespace EthansGameKit.Collections
 			}
 		}
 #if UNITY_EDITOR
-		private protected static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
-		private protected static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
-		private protected static readonly Color editor_invisiableleafColor = new(0, 1, 0, 0.25f);
-		private protected static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
+		protected internal static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
+		protected internal static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
+		protected internal static readonly Color editor_invisiableleafColor = new(0, 1, 0, 0.25f);
+		protected internal static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
 #endif
 	}
 	/// <summary>
@@ -39,10 +39,25 @@ namespace EthansGameKit.Collections
 	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
 	///     </list>
 	/// </remarks>
-	public partial class Octree<T> : Octree
+	[Serializable]
+	public partial class Octree<T> : ISerializationCallbackReceiver
 	{
 		Node root;
+		[SerializeField] List<Item> serializedData = new();
 		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.allItems;
+		void ISerializationCallbackReceiver.OnBeforeSerialize()
+		{
+			serializedData.Clear();
+			foreach (var data in AllItems)
+				serializedData.Add(data);
+		}
+		void ISerializationCallbackReceiver.OnAfterDeserialize()
+		{
+			Clear();
+			foreach (var data in serializedData)
+				Insert(data);
+			serializedData.Clear();
+		}
 		public Item Insert(Vector3 position, T obj)
 		{
 			var item = Item.Generate(position, obj);
@@ -61,17 +76,17 @@ namespace EthansGameKit.Collections
 		public int Query(ref Item[] result, Matrix4x4 worldToLocal, Camera camera, float expansion)
 		{
 			if (root is null) return 0;
-			RecalculatePlanes(camera, worldToLocal, expansion);
+			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
 			var count = 0;
-			root.Query(ref result, planes, ref count);
+			root.Query(ref result, OctreeDefines.planes, ref count);
 			return count;
 		}
 		public void Query(ICollection<Item> result, Matrix4x4 worldToLocal, Camera camera, float expansion)
 		{
 			result.Clear();
 			if (root is null) return;
-			RecalculatePlanes(camera, worldToLocal, expansion);
-			root.Query(result, planes);
+			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
+			root.Query(result, OctreeDefines.planes);
 		}
 		public void Query(ICollection<Item> result, Vector3 center, float radius)
 		{
@@ -80,15 +95,15 @@ namespace EthansGameKit.Collections
 		}
 		public bool InScreen(Camera camera, Matrix4x4 worldToLocal, float expansion, Item item)
 		{
-			RecalculatePlanes(camera, worldToLocal, expansion);
+			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
 			var bounds = new Bounds(item.Position, Vector3.zero);
-			return GeometryUtility.TestPlanesAABB(planes, bounds);
+			return GeometryUtility.TestPlanesAABB(OctreeDefines.planes, bounds);
 		}
 		public void DrawGizmos(Camera camera, Matrix4x4 worldToLocal, float expansion)
 		{
 #if UNITY_EDITOR
-			RecalculatePlanes(camera, worldToLocal, expansion);
-			root?.Editor_DrawGizmos(planes);
+			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
+			root?.Editor_DrawGizmos(OctreeDefines.planes);
 #endif
 		}
 		void Insert(Item item)
