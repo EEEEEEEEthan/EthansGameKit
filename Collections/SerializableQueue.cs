@@ -172,7 +172,6 @@ namespace EthansGameKit.Collections
 			return true;
 		}
 	}
-
 	[Serializable]
 	public sealed class SerializableQueueVector3 : SerializableQueue<Vector3>
 	{

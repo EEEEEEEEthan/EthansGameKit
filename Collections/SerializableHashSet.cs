@@ -158,7 +158,6 @@ namespace EthansGameKit.Collections
 			return set.TryGetValue(equalValue, out actualValue);
 		}
 	}
-
 	[Serializable]
 	public class SerializableHashSetInt32 : SerializableHashSet<int>
 	{

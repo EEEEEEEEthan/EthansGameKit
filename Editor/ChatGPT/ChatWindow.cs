@@ -11,6 +11,12 @@ namespace EthansGameKit.Editor.ChatGPT
 			GetWindow<ChatWindow>("Chat");
 		}
 		protected override string DefaultInput => "你好";
+		void OnGUI()
+		{
+			if (GUILayout.Button("Clear"))
+				Messages.Clear();
+			DrawChat();
+		}
 		protected override void OnResponse(string response)
 		{
 			Messages.Add(
@@ -23,12 +29,6 @@ namespace EthansGameKit.Editor.ChatGPT
 		}
 		protected override void OnSend()
 		{
-		}
-		void OnGUI()
-		{
-			if (GUILayout.Button("Clear"))
-				Messages.Clear();
-			DrawChat();
 		}
 	}
 }

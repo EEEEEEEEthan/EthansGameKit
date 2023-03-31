@@ -41,11 +41,8 @@ namespace EthansGameKit
 				Array.Copy(oldCodeLines, endIndex, newCodeLines, startIndex + newLines.Count, oldCodeLines.Length - endIndex);
 				return string.Join(Environment.NewLine, newCodeLines);
 			}
-			else
-			{
-				Debug.LogError("Start and/or end marks not found.");
-				return code;
-			}
+			Debug.LogError("Start and/or end marks not found.");
+			return code;
 		}
 	}
 }

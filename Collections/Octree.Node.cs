@@ -151,11 +151,11 @@ namespace EthansGameKit.Collections
 			public bool Contains(float x, float y, float z)
 			{
 				return xMin <= x &&
-					x < xMax &&
-					yMin <= y &&
-					y < yMax &&
-					zMin <= z &&
-					z < zMax;
+						x < xMax &&
+						yMin <= y &&
+						y < yMax &&
+						zMin <= z &&
+						z < zMax;
 			}
 			public Node Encapsulate(float x, float y, float z)
 			{

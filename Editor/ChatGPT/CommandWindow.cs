@@ -27,19 +27,20 @@ namespace EthansGameKit.Editor.ChatGPT
 			{
 				role = "system",
 				content = "我需要你帮我写一些Unity Editor功能在下面代码的Execute()方法里.对于我之后的每一条发言,你需要针对我描述的功能补充我的脚本代码.\n" +
-					"脚本代码模板如下:\n" +
-					"```\n" +
-					Template +
-					"```\n" +
-					"不要修改Execute方法的标签\n" +
-					"可以补全usings\n" +
-					"要求你回复的格式如下:\n" +
-					" - 回复包含模板在内的完整代码\n" +
-					" - 只回复我代码,不需要任何解释说明\n" +
-					" - 不包含注释\n" +
-					" - 不包含任何空行\n",
+						"脚本代码模板如下:\n" +
+						"```\n" +
+						Template +
+						"```\n" +
+						"不要修改Execute方法的标签\n" +
+						"可以补全usings\n" +
+						"要求你回复的格式如下:\n" +
+						" - 回复包含模板在内的完整代码\n" +
+						" - 只回复我代码,不需要任何解释说明\n" +
+						" - 不包含注释\n" +
+						" - 不包含任何空行\n",
 			};
-		[MenuItem("Window/ChatGPT/Command")] public static void ShowWindow()
+		[MenuItem("Window/ChatGPT/Command")]
+		public static void ShowWindow()
 		{
 			GetWindow<CommandWindow>("Command");
 		}
@@ -68,17 +69,6 @@ namespace EthansGameKit.Editor.ChatGPT
 				);
 			}
 		}
-		protected override void OnResponse(string response)
-		{
-			const BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
-			var method = typeof(ProjectWindowUtil).GetMethod("CreateScriptAssetWithContent", flags);
-			Assert.IsNotNull(method);
-			method.Invoke(null, new object[] { TempFilePath, response });
-		}
-		protected override void OnSend()
-		{
-			Messages.Clear();
-		}
 		void OnGUI()
 		{
 			EditorGUILayout.BeginHorizontal();
@@ -97,6 +87,17 @@ namespace EthansGameKit.Editor.ChatGPT
 			GUI.enabled = true;
 			EditorGUILayout.EndHorizontal();
 			DrawChat();
+		}
+		protected override void OnResponse(string response)
+		{
+			const BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
+			var method = typeof(ProjectWindowUtil).GetMethod("CreateScriptAssetWithContent", flags);
+			Assert.IsNotNull(method);
+			method.Invoke(null, new object[] { TempFilePath, response });
+		}
+		protected override void OnSend()
+		{
+			Messages.Clear();
 		}
 	}
 }

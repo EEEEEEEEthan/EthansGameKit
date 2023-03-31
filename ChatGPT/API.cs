@@ -11,26 +11,22 @@ namespace EthansGameKit.ChatGPT
 		public string content;
 		public string role;
 	}
-
 	[Serializable]
 	public struct OpenAIRequest
 	{
 		public Message[] messages;
 		public string model;
 	}
-
 	[Serializable]
 	public struct OpenAIResponse
 	{
 		public Choice[] choices;
 	}
-
 	[Serializable]
 	public struct Choice
 	{
 		public Message message;
 	}
-
 	public static class API
 	{
 		const string url = "https://api.openai.com/v1/chat/completions";

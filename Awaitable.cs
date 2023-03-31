@@ -11,7 +11,6 @@ namespace EthansGameKit
 		}
 		IAwaiter GetAwaiter();
 	}
-
 	public interface IAwaitable<out T> : IAwaitable
 	{
 		public static IAwaitable<T> Create(out IAsyncHandle<T> handle)
@@ -20,28 +19,23 @@ namespace EthansGameKit
 		}
 		new IAwaiter<T> GetAwaiter();
 	}
-
 	public interface IAwaiter : INotifyCompletion
 	{
 		bool IsCompleted { get; }
 		object GetResult();
 	}
-
 	public interface IAwaiter<out T> : IAwaiter
 	{
 		new T GetResult();
 	}
-
 	public interface IAsyncHandle
 	{
 		void Set();
 	}
-
 	public interface IAsyncHandle<in T>
 	{
 		void Set(T result);
 	}
-
 	class Awaiter<T> : IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
 	{
 		public static IAwaitable Create(out IAsyncHandle trigger)

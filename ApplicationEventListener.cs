@@ -12,7 +12,6 @@ namespace EthansGameKit
 			remove => ApplicationEventListener.OnScreenSizeChanged -= value;
 		}
 	}
-
 	class ApplicationEventListener : MonoBehaviour
 	{
 		static ApplicationEventListener instance;

@@ -14,7 +14,6 @@ namespace EthansGameKit.Collections
 		bool TryPeek(out TKey key, int index = 0);
 		bool TryPeek(out TKey key, out TValue value, int index = 0);
 	}
-
 	public interface IHeap<T, TValue> : IReadOnlyHeap<T, TValue> where TValue : IComparable<TValue>
 	{
 		void Add(T element, TValue sortingValue);
@@ -22,7 +21,6 @@ namespace EthansGameKit.Collections
 		T Pop(out TValue value, int index = 0);
 		void TrimExcess();
 	}
-
 	public abstract class Heap
 	{
 		static int[] finder = Array.Empty<int>();
@@ -217,7 +215,6 @@ namespace EthansGameKit.Collections
 			}
 		}
 	}
-
 	[Serializable]
 	public class Heap<TKey, TValue> : Heap, IHeap<TKey, TValue>, IEqualityComparer<TKey> where TValue : IComparable<TValue>
 	{
@@ -389,7 +386,6 @@ namespace EthansGameKit.Collections
 			return obj.GetHashCode();
 		}
 	}
-
 	[Serializable]
 	public class HeapInt32Single : Heap<int, float>
 	{
