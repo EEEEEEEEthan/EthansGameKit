@@ -9,6 +9,7 @@ namespace EthansGameKit
 		Resource,
 		Unimportant,
 	}
+
 	public static class TaskQueue
 	{
 		public static void InvokeAtFreeFrame(Action callback, TaskQueuePriorities priority, bool crossScene)
@@ -36,6 +37,10 @@ namespace EthansGameKit
 		public static IAwaitable InvokeAtFreeFrame(bool crossScene)
 		{
 			return InvokeAtFreeFrame(TaskQueuePriorities.Unimportant, crossScene);
+		}
+		public static IAwaitable InvokeAtFreeFrame()
+		{
+			return InvokeAtFreeFrame(TaskQueuePriorities.Unimportant, false);
 		}
 	}
 }
