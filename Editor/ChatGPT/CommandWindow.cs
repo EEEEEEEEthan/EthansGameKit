@@ -1,7 +1,6 @@
 using System.IO;
 using System.Reflection;
 using EthansGameKit.ChatGPT;
-using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
@@ -92,7 +91,7 @@ namespace EthansGameKit.Editor.ChatGPT
 		{
 			const BindingFlags flags = BindingFlags.Static | BindingFlags.NonPublic;
 			var method = typeof(ProjectWindowUtil).GetMethod("CreateScriptAssetWithContent", flags);
-			Assert.IsNotNull(method);
+			//Assert.IsNotNull(method);
 			method.Invoke(null, new object[] { TempFilePath, response });
 		}
 		protected override void OnSend()
