@@ -118,6 +118,7 @@ namespace EthansGameKit.Collections
 		void ISerializationCallbackReceiver.OnAfterDeserialize()
 		{
 			set.Clear();
+			if (backup.IsNullOrEmpty()) return;
 			set.UnionWith(backup);
 			backup = Array.Empty<T>();
 		}
@@ -158,6 +159,7 @@ namespace EthansGameKit.Collections
 			return set.TryGetValue(equalValue, out actualValue);
 		}
 	}
+
 	[Serializable]
 	public class SerializableHashSetInt32 : SerializableHashSet<int>
 	{

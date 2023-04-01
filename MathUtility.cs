@@ -90,5 +90,12 @@ namespace EthansGameKit
 			var b = -Mathf.Pow(x - mean, 2) / (2 * Mathf.Pow(stdDev, 2));
 			return a * Mathf.Exp(b);
 		}
+		public static int LinearCongruentialGenerator(int seed, int a, int c, int mPower)
+		{
+			var tmp = a * seed;
+			tmp += (tmp << mPower);
+			var mask = (1 << mPower) - 1;
+			return (tmp & mask) + c;
+		}
 	}
 }

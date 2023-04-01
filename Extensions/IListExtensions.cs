@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 namespace EthansGameKit
@@ -37,6 +38,11 @@ namespace EthansGameKit
 			}
 			item = @this.Pop(index);
 			return true;
+		}
+		public static T RandomPop<T>(this IList<T> @this)
+		{
+			var index = Random.Range(0, @this.Count);
+			return @this.Pop(index);
 		}
 		public static bool Remove<T>(this IList<T> @this, T item, bool keepOrder)
 		{

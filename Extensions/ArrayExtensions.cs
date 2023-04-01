@@ -29,5 +29,9 @@ namespace EthansGameKit
 		{
 			@this.MemSet(0, @this.Length, value);
 		}
+		public static bool IsNullOrEmpty<T>(this T[] @this)
+		{
+			return @this == null || @this.Length == 0;
+		}
 	}
 }

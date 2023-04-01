@@ -67,8 +67,12 @@ namespace EthansGameKit
 				return true;
 			}
 			index = TimerUpdater.unscaledTimers.Find(timer);
-			TimerUpdater.unscaledTimers.Pop(index);
-			return true;
+			if (index >= 0)
+			{
+				TimerUpdater.unscaledTimers.Pop(index);
+				return true;
+			}
+			return false;
 		}
 	}
 }
