@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace EthansGameKit
+namespace EthansGameKit.Internal
 {
 	class RefreshableItemManager : MonoBehaviour
 	{
