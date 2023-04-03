@@ -6,6 +6,7 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
+		// ReSharper disable Unity.PerformanceAnalysis
 		public static void TryInvoke(this Action @this)
 		{
 			try
@@ -17,6 +18,7 @@ namespace EthansGameKit
 				Debug.LogException(e);
 			}
 		}
+		// ReSharper disable Unity.PerformanceAnalysis
 		public static void TryInvoke<T>(this Action<T> @this, T arg)
 		{
 			try
