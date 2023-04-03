@@ -142,10 +142,10 @@ namespace EthansGameKit.Collections
 				if (leftIndex >= length)
 					return;
 				rightIndex = leftIndex + 1;
-				var cmp_left_to_me = values[leftIndex].CompareTo(values[index]);
+				var cmpLeftToMe = values[leftIndex].CompareTo(values[index]);
 				if (rightIndex >= length)
 				{
-					if (cmp_left_to_me >= 0) return;
+					if (cmpLeftToMe >= 0) return;
 					tempKey = keys[leftIndex];
 					keys[leftIndex] = keys[index];
 					keys[index] = tempKey;
@@ -154,7 +154,7 @@ namespace EthansGameKit.Collections
 					values[index] = tempValue;
 					return;
 				}
-				if (cmp_left_to_me < 0)
+				if (cmpLeftToMe < 0)
 				{
 					if (values[rightIndex].CompareTo(values[leftIndex]) < 0)
 					{

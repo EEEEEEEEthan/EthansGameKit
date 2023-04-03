@@ -4,11 +4,19 @@ using UnityEngine;
 
 namespace EthansGameKit.Collections
 {
+	public interface IReadOnlyBitCollection
+	{
+		IReadOnlyList<ulong> RawData { get; }
+		IEnumerable<int> Values { get; }
+		bool Get(int value);
+	}
+
 	[Serializable]
-	public class BitCollection
+	public class BitCollection : IReadOnlyBitCollection
 	{
 		[SerializeField] ulong[] bits = Array.Empty<ulong>();
 		[NonSerialized] int arrayLength = -1;
+		public IReadOnlyList<ulong> RawData => bits;
 
 		public IEnumerable<int> Values
 		{
@@ -49,28 +57,40 @@ namespace EthansGameKit.Collections
 			}
 		}
 
-		public void And(BitCollection other)
+		public bool Get(int index)
 		{
-			for (var i = Mathf.Min(ArrayLength, other.bits.Length); i-- > 0;)
-				bits[i] &= other.bits[i];
+			if (index < 0) return false;
+			var arrayIndex = index >> 6;
+			var bitIndex = index & 0b_0011_1111;
+			if (arrayIndex >= bits.Length) return false;
+			return (bits[arrayIndex] & (1UL << bitIndex)) != 0;
+		}
+		public void And(IReadOnlyBitCollection other)
+		{
+			var rawData = other.RawData;
+			var length = rawData.Count;
+			for (var i = Mathf.Min(ArrayLength, length); i-- > 0;)
+				bits[i] &= rawData[i];
 			arrayLength = -1;
 		}
-		public void Or(BitCollection other)
+		public void Or(IReadOnlyBitCollection other)
 		{
-			var length = other.bits.Length;
+			var rawData = other.RawData;
+			var length = rawData.Count;
 			if (length > bits.Length)
 				Array.Resize(ref bits, length);
 			for (var i = 0; i < length; i++)
-				bits[i] |= other.bits[i];
+				bits[i] |= rawData[i];
 			arrayLength = -1;
 		}
-		public void Xor(BitCollection other)
+		public void Xor(IReadOnlyBitCollection other)
 		{
-			var length = other.bits.Length;
+			var rawData = other.RawData;
+			var length = rawData.Count;
 			if (length > bits.Length)
 				Array.Resize(ref bits, length);
 			for (var i = 0; i < length; i++)
-				bits[i] ^= other.bits[i];
+				bits[i] ^= rawData[i];
 			arrayLength = -1;
 		}
 		public bool IsEmpty()
@@ -91,14 +111,6 @@ namespace EthansGameKit.Collections
 			else
 				bits[arrayIndex] &= ~(1UL << bitIndex);
 			arrayLength = -1;
-		}
-		public bool Get(int index)
-		{
-			if (index < 0) return false;
-			var arrayIndex = index >> 6;
-			var bitIndex = index & 0b_0011_1111;
-			if (arrayIndex >= bits.Length) return false;
-			return (bits[arrayIndex] & (1UL << bitIndex)) != 0;
 		}
 		public void Trim()
 		{
