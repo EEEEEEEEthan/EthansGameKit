@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Internal
 {
-	class RefreshableItemManager : MonoBehaviour
+	internal class RefreshableItemManager : MonoBehaviour
 	{
 		internal static readonly HashSet<IRefreshableItem> dirtyItems = new();
 		static IRefreshableItem[] buffer = Array.Empty<IRefreshableItem>();

@@ -78,7 +78,9 @@ namespace EthansGameKit.Collections
 				Array.Copy(items, 0, array, arrayIndex + firstPartLength, secondPartLength);
 			}
 			else
+			{
 				Array.Copy(items, start, array, arrayIndex, count);
+			}
 		}
 		public T Dequeue()
 		{
@@ -172,6 +174,7 @@ namespace EthansGameKit.Collections
 			return true;
 		}
 	}
+
 	[Serializable]
 	public sealed class SerializableQueueVector3 : SerializableQueue<Vector3>
 	{

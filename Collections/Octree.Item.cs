@@ -7,6 +7,7 @@ namespace EthansGameKit.Collections
 	public partial class Octree<T>
 	{
 		static readonly CachePool<Item> itemPool = new(0);
+
 		[Serializable]
 		public class Item
 		{
@@ -25,6 +26,7 @@ namespace EthansGameKit.Collections
 			}
 			[SerializeField] Vector3 position;
 			[SerializeField] T referencedObject;
+
 			public Vector3 Position
 			{
 				get => position;
@@ -37,12 +39,15 @@ namespace EthansGameKit.Collections
 					tree.Insert(this);
 				}
 			}
+
 			public Octree<T> Tree { get; internal set; }
+
 			public T ReferencedObject
 			{
 				get => referencedObject;
 				private set => referencedObject = value;
 			}
+
 			Item()
 			{
 			}

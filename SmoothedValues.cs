@@ -9,18 +9,24 @@ namespace EthansGameKit
 		public T PreferredValue { get; set; }
 		public T Value { get; set; }
 	}
+
 	[Serializable]
 	public class SmoothedSingle : SmoothedValue<float>
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
+
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float maxSpeed = float.MaxValue;
+
 		[SerializeField] float preferredValue;
+
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float smoothTime = 0.1f;
+
 		[SerializeField] float value;
 		[SerializeField, HideInInspector] float velocity;
+
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -30,6 +36,7 @@ namespace EthansGameKit
 				smoothTime = value;
 			}
 		}
+
 		public float PreferredValue
 		{
 			get => preferredValue;
@@ -39,6 +46,7 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
+
 		public float MaxSpeed
 		{
 			get => maxSpeed;
@@ -48,6 +56,7 @@ namespace EthansGameKit
 				maxSpeed = value;
 			}
 		}
+
 		public float Value
 		{
 			get
@@ -65,6 +74,7 @@ namespace EthansGameKit
 				velocity = 0;
 			}
 		}
+
 		public SmoothedSingle(float value, float smoothTime, float maxSpeed, bool useScaledTime = true)
 		{
 			this.value = value;
@@ -75,18 +85,23 @@ namespace EthansGameKit
 			preferredValue = value;
 		}
 	}
+
 	[Serializable]
 	public class SmoothedVector3 : SmoothedValue<Vector3>
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
+
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float maxSpeed = float.MaxValue;
+
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float smoothTime = 0.1f;
+
 		[SerializeField] Vector3 preferredValue;
 		[SerializeField] Vector3 value;
 		[SerializeField, HideInInspector] Vector3 velocity;
+
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -96,6 +111,7 @@ namespace EthansGameKit
 				smoothTime = value;
 			}
 		}
+
 		public Vector3 PreferredValue
 		{
 			get => preferredValue;
@@ -105,6 +121,7 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
+
 		public float MaxSpeed
 		{
 			get => maxSpeed;
@@ -114,6 +131,7 @@ namespace EthansGameKit
 				maxSpeed = value;
 			}
 		}
+
 		public Vector3 Value
 		{
 			get
@@ -131,6 +149,7 @@ namespace EthansGameKit
 				velocity = default;
 			}
 		}
+
 		public SmoothedVector3(Vector3 value, float smoothTime, float maxSpeed, bool useScaledTime = true)
 		{
 			this.value = value;
@@ -141,18 +160,23 @@ namespace EthansGameKit
 			preferredValue = value;
 		}
 	}
+
 	[Serializable]
 	public class SmoothedQuaternion : SmoothedValue<Quaternion>
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
+
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float maxSpeed = float.MaxValue;
+
 		[SerializeField, Range(float.Epsilon, float.MaxValue)]
 		float smoothTime = 0.1f;
+
 		[SerializeField] Quaternion preferredValue;
 		[SerializeField] Quaternion value;
 		[SerializeField, HideInInspector] Quaternion velocity;
+
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -162,6 +186,7 @@ namespace EthansGameKit
 				smoothTime = value;
 			}
 		}
+
 		public Quaternion PreferredValue
 		{
 			get => preferredValue;
@@ -171,6 +196,7 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
+
 		public float MaxSpeed
 		{
 			get => maxSpeed;
@@ -180,6 +206,7 @@ namespace EthansGameKit
 				maxSpeed = value;
 			}
 		}
+
 		public Quaternion Value
 		{
 			get
@@ -202,6 +229,7 @@ namespace EthansGameKit
 				velocity = default;
 			}
 		}
+
 		public SmoothedQuaternion(Quaternion value, float smoothTime, float maxSpeed, bool useScaledTime = true)
 		{
 			this.value = value;

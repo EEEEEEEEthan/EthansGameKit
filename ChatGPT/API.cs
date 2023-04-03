@@ -11,22 +11,26 @@ namespace EthansGameKit.ChatGPT
 		public string content;
 		public string role;
 	}
+
 	[Serializable]
 	public struct OpenAIRequest
 	{
 		public Message[] messages;
 		public string model;
 	}
+
 	[Serializable]
 	public struct OpenAIResponse
 	{
 		public Choice[] choices;
 	}
+
 	[Serializable]
 	public struct Choice
 	{
 		public Message message;
 	}
+
 	public static class API
 	{
 		const string url = "https://api.openai.com/v1/chat/completions";
@@ -48,6 +52,7 @@ namespace EthansGameKit.ChatGPT
 			request.SetRequestHeader("Authorization", "Bearer " + apiKey);
 			var asyncOperation = request.SendWebRequest();
 			asyncOperation.completed += onCompleted;
+
 			void onCompleted(AsyncOperation _)
 			{
 				// ReSharper disable once MergeIntoLogicalPattern

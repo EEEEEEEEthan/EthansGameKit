@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 namespace EthansGameKit.Collections
 {
-	class OctreeDefines
+	internal class OctreeDefines
 	{
 		protected internal static readonly Plane[] planes = new Plane[6];
 		protected internal static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
@@ -30,6 +30,7 @@ namespace EthansGameKit.Collections
 		protected internal static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
 #endif
 	}
+
 	/// <summary>
 	///     自适应八叉树
 	/// </summary>

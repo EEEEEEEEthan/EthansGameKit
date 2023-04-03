@@ -190,7 +190,9 @@ namespace EthansGameKit.Collections
 						index = rightIndex;
 					}
 					else
+					{
 						return;
+					}
 				}
 			}
 		}
@@ -213,7 +215,9 @@ namespace EthansGameKit.Collections
 					index = parentIndex;
 				}
 				else
+				{
 					break;
+				}
 			}
 		}
 	}

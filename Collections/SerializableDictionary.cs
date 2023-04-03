@@ -144,22 +144,26 @@ namespace EthansGameKit.Collections
 				dict.Add(pair.key, pair.value);
 			serializeData = null;
 		}
+
 		[Serializable]
 		struct Data
 		{
 			[SerializeField] public TKey key;
 			[SerializeField] public TValue value;
 		}
+
 		public TValue this[TKey key]
 		{
 			get => dict[key];
 			set => dict[key] = value;
 		}
+
 		object IDictionary.this[object key]
 		{
 			get => ((IDictionary)dict)[key];
 			set => ((IDictionary)dict)[key] = value;
 		}
+
 		public bool ContainsValue(TValue value)
 		{
 			return dict.ContainsValue(value);

@@ -41,6 +41,7 @@ namespace EthansGameKit.Collections
 			float x, y, z;
 			float xMin, xMid, xMax, yMin, yMid, yMax, zMin, zMid, zMax;
 			public bool IsBranch => children != null;
+
 			public bool IsEmpty
 			{
 				get
@@ -54,11 +55,13 @@ namespace EthansGameKit.Collections
 					return true;
 				}
 			}
+
 			public IEnumerable<Item> allItems
 			{
 				get
 				{
 					if (IsBranch)
+					{
 						for (var i = 0; i < 8; i++)
 						{
 							var child = children[i];
@@ -66,6 +69,7 @@ namespace EthansGameKit.Collections
 								foreach (var item in child.allItems)
 									yield return item;
 						}
+					}
 					else
 					{
 						var cnt = items.Count;
@@ -74,6 +78,7 @@ namespace EthansGameKit.Collections
 					}
 				}
 			}
+
 			Bounds Bounds => new(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
 			public void Query(ref Item[] result, Plane[] planes, ref int count)
 			{
@@ -97,11 +102,13 @@ namespace EthansGameKit.Collections
 				var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
 				if (!GeometryUtility.TestPlanesAABB(planes, bounds)) return;
 				if (IsBranch)
+				{
 					for (var i = 0; i < 8; i++)
 					{
 						var child = children[i];
 						child?.Query(result, planes);
 					}
+				}
 				else
 				{
 					var count = items.Count;

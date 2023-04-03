@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Editor.ChatGPT
 {
-	abstract class ChatGPTWindow : EditorWindow
+	internal abstract class ChatGPTWindow : EditorWindow
 	{
 		static void DrawSeparator()
 		{
@@ -90,6 +90,7 @@ namespace EthansGameKit.Editor.ChatGPT
 			OnSend();
 			Repaint();
 			API.SendRequest("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", messages.ToArray(), callback);
+
 			void callback(string response)
 			{
 				historyScrollPosition = new(historyScrollPosition.x, float.MaxValue);

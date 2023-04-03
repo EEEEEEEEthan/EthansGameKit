@@ -6,11 +6,12 @@ using UnityEngine;
 
 namespace EthansGameKit.Editor.ChatGPT
 {
-	sealed class CommandWindow : ChatGPTWindow
+	internal sealed class CommandWindow : ChatGPTWindow
 	{
 		const string commandMenuItem = "Command/Execute";
 		const string TempFilePath = "Assets/ChatGPTUtility/AICommandTemp.cs";
 		static bool FileExists => File.Exists(TempFilePath);
+
 		static string Template =>
 			"using UnityEditor;\n" +
 			"static class ChatGPT_DO_TASK\n" +
@@ -21,6 +22,7 @@ namespace EthansGameKit.Editor.ChatGPT
 			"        // 填写代码\n" +
 			"    }\n" +
 			"}";
+
 		static Message SystemMessage =>
 			new()
 			{
@@ -38,6 +40,7 @@ namespace EthansGameKit.Editor.ChatGPT
 						" - 不包含注释\n" +
 						" - 不包含任何空行\n",
 			};
+
 		[MenuItem("Window/ChatGPT/Command")]
 		public static void ShowWindow()
 		{

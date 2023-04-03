@@ -25,7 +25,9 @@ namespace EthansGameKit.Components
 		{
 			GameObject obj;
 			if (inactiveObjects.Count <= 0)
+			{
 				obj = Instantiate(prefab, prefab.transform.parent);
+			}
 			else
 			{
 				var index = inactiveObjects.Count - 1;

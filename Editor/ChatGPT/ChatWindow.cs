@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Editor.ChatGPT
 {
-	sealed class ChatWindow : ChatGPTWindow
+	internal sealed class ChatWindow : ChatGPTWindow
 	{
 		[MenuItem("Window/ChatGPT/Chat")]
 		public static void ShowWindow()

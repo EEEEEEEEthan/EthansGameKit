@@ -6,12 +6,13 @@ using UnityEngine.SceneManagement;
 
 namespace EthansGameKit.Internal
 {
-	struct TaskQueueItem
+	internal struct TaskQueueItem
 	{
 		public Action callback;
 		public bool crossScene;
 	}
-	class TaskQueueUpdater : MonoBehaviour
+
+	internal class TaskQueueUpdater : MonoBehaviour
 	{
 		static readonly List<TaskQueueItem>[] delayedLists;
 		static readonly Queue<TaskQueueItem>[] currentQueues;

@@ -6,13 +6,15 @@ namespace EthansGameKit
 	public static class ApplicationEvents
 	{
 		public static bool Quitting => ApplicationEventListener.Quitting;
+
 		public static event Action OnScreenSizeChanged
 		{
 			add => ApplicationEventListener.OnScreenSizeChanged += value;
 			remove => ApplicationEventListener.OnScreenSizeChanged -= value;
 		}
 	}
-	class ApplicationEventListener : MonoBehaviour
+
+	internal class ApplicationEventListener : MonoBehaviour
 	{
 		static ApplicationEventListener instance;
 		static int screenHeight;
@@ -26,6 +28,7 @@ namespace EthansGameKit
 			instance = timerManager.AddComponent<ApplicationEventListener>();
 		}
 		public static event Action OnScreenSizeChanged;
+
 		public ApplicationEventListener Instance
 		{
 			get
@@ -34,6 +37,7 @@ namespace EthansGameKit
 				return instance;
 			}
 		}
+
 		void Update()
 		{
 			if (screenWidth != Screen.width || screenHeight != Screen.height)

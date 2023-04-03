@@ -9,6 +9,7 @@ namespace EthansGameKit.Collections
 	{
 		[SerializeField] ulong[] bits = Array.Empty<ulong>();
 		[NonSerialized] int arrayLength = -1;
+
 		public IEnumerable<int> Values
 		{
 			get
@@ -27,6 +28,7 @@ namespace EthansGameKit.Collections
 				}
 			}
 		}
+
 		int ArrayLength
 		{
 			get
@@ -46,6 +48,7 @@ namespace EthansGameKit.Collections
 				return arrayLength;
 			}
 		}
+
 		public void And(BitCollection other)
 		{
 			for (var i = Mathf.Min(ArrayLength, other.bits.Length); i-- > 0;)

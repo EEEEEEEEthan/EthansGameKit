@@ -5,7 +5,7 @@ using UnityEngine;
 namespace EthansGameKit.Editor
 {
 	[CustomPropertyDrawer(typeof(InspectorReadOnlyAttribute))]
-	sealed class InspectorReadOnlyAttributeDrawer : PropertyDrawer
+	internal sealed class InspectorReadOnlyAttributeDrawer : PropertyDrawer
 	{
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
@@ -38,7 +38,9 @@ namespace EthansGameKit.Editor
 				}
 			}
 			else
+			{
 				EditorGUI.PropertyField(position, property, label, true);
+			}
 			EditorGUI.EndDisabledGroup();
 		}
 	}

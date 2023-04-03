@@ -36,7 +36,9 @@ namespace EthansGameKit
 					}
 				}
 				else
+				{
 					heap.Add(item, score);
+				}
 			}
 			foreach (var item in heap)
 				yield return item.Key;
@@ -70,7 +72,9 @@ namespace EthansGameKit
 					}
 				}
 				else
+				{
 					heap.Add(item, score);
+				}
 			}
 			foreach (var item in heap)
 				yield return item.Key;

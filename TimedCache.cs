@@ -30,6 +30,7 @@ namespace EthansGameKit
 		T cachedValue;
 		bool autoReleasing;
 		uint timerId;
+
 		public T Value
 		{
 			get
@@ -47,6 +48,7 @@ namespace EthansGameKit
 				return cachedValue;
 			}
 		}
+
 		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
 		TimedCache()
 		{
@@ -63,7 +65,9 @@ namespace EthansGameKit
 				autoReleasing = false;
 			}
 			else
+			{
 				AutoRelease();
+			}
 		}
 	}
 }
