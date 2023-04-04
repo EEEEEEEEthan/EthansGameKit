@@ -1,69 +1,149 @@
 ﻿using System;
-using EthansGameKit.CachePools;
 using UnityEngine;
+using UnityEngine.Assertions;
 
 namespace EthansGameKit
 {
-	public class TimedCache<T>
+	public class AbsTimedCache<T>
 	{
 		const float keepSeconds = 10f;
-		static readonly CachePool<TimedCache<T>> pool = new(0);
-		public static TimedCache<T> Generate(Func<T> valueGetter)
-		{
-			if (!pool.TryGenerate(out var cache)) cache = new();
-			cache.valueGetter = valueGetter;
-			cache.lastAccess = -keepSeconds;
-			cache.autoReleasing = false;
-			return cache;
-		}
-		public static void Recycle(ref TimedCache<T> cache)
-		{
-			Timers.CancelInvoke(ref cache.timerId);
-			cache.valueGetter = null;
-			cache.cachedValue = default;
-			pool.Recycle(ref cache);
-			cache = null;
-		}
 		float lastAccess;
-		Func<T> valueGetter;
 		T cachedValue;
 		bool autoReleasing;
 		uint timerId;
-		public T Value
+		public bool HasValue { get; private set; }
+		protected T Value
 		{
-			get
+			get => cachedValue;
+			set
 			{
-				if (Expired)
-				{
-					cachedValue = valueGetter();
-					if (!autoReleasing)
-					{
-						autoReleasing = true;
-						AutoRelease();
-					}
-				}
-				lastAccess = Time.unscaledTime;
-				return cachedValue;
+				HasValue = true;
+				cachedValue = value;
 			}
 		}
 		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
-		TimedCache()
+		protected AbsTimedCache()
 		{
+		}
+		protected void MarkAccess()
+		{
+			lastAccess = Time.unscaledTime;
+			if (!autoReleasing)
+			{
+				autoReleasing = true;
+				AutoRelease();
+			}
 		}
 		void AutoRelease()
 		{
-			Timers.InvokeAfterUnscaled(ref timerId, keepSeconds, AutoRelease2);
-		}
-		void AutoRelease2()
-		{
 			if (Expired)
 			{
+				HasValue = false;
 				cachedValue = default;
 				autoReleasing = false;
 			}
 			else
 			{
+				Timers.InvokeAfterUnscaled(keepSeconds, AutoRelease);
+			}
+		}
+	}
+
+	public sealed class TimedCache<T> : AbsTimedCache<T>
+	{
+		readonly Func<T> valueGetter;
+		readonly Action<Action<T>> asyncValueGetter;
+		public new T Value
+		{
+			get
+			{
+				MarkAccess();
+				if (HasValue)
+					return base.Value;
+				return base.Value = valueGetter();
+			}
+		}
+		public TimedCache(Func<T> valueGetter, Action<Action<T>> asyncValueGetter)
+		{
+			this.valueGetter = valueGetter;
+			this.asyncValueGetter = asyncValueGetter;
+		}
+		public void LoadAsync(Action callback)
+		{
+			asyncValueGetter(onLoaded);
+
+			void onLoaded(T value)
+			{
+				MarkAccess();
+				base.Value = value;
+				callback.TryInvoke();
+			}
+		}
+	}
+
+	public class ResourceCache<T> where T : UnityEngine.Object
+	{
+		const float keepSeconds = 10f;
+		T asset;
+		float lastAccess;
+		bool autoReleasing;
+		readonly string resourcePath;
+		public T Asset
+		{
+			get
+			{
+				RecordAccess();
+				return asset;
+			}
+		}
+		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
+		public ResourceCache(string resourcePath)
+		{
+			this.resourcePath = resourcePath;
+			lastAccess = -keepSeconds;
+		}
+		void RecordAccess()
+		{
+			lastAccess = Time.unscaledTime;
+			if (!autoReleasing)
+			{
+				autoReleasing = true;
 				AutoRelease();
+			}
+		}
+		public T Load()
+		{
+			asset = Resources.Load<T>(resourcePath);
+			return Asset;
+		}
+		public void LoadAsync(Action<T> callback)
+		{
+			var operation = Resources.LoadAsync<T>(resourcePath);
+			operation.completed += cb;
+
+			void cb(AsyncOperation _)
+			{
+				var result = operation.asset as T;
+				Assert.IsNotNull(result);
+				callback.TryInvoke(result);
+			}
+		}
+		public IAwaitable<T> LoadAsync()
+		{
+			var awaitable = IAwaitable<T>.Create(out var handle);
+			LoadAsync(handle.Set);
+			return awaitable;
+		}
+		void AutoRelease()
+		{
+			if (Expired)
+			{
+				asset = null;
+				autoReleasing = false;
+			}
+			else
+			{
+				Timers.InvokeAfterUnscaled(keepSeconds, AutoRelease);
 			}
 		}
 	}
