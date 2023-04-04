@@ -6,6 +6,14 @@ namespace EthansGameKit
 {
 	public static class CodeGeneratorUtility
 	{
+		public static void Replace(TextAsset script, string startMark, string endMark, string replace)
+		{
+#if UNITY_EDITOR
+			var newCode = Replace(script.text, startMark, endMark, replace);
+			System.IO.File.WriteAllText(UnityEditor.AssetDatabase.GetAssetPath(script), newCode);
+			UnityEditor.AssetDatabase.Refresh();
+#endif
+		}
 		public static string Replace(string code, string startMark, string endMark, string replace)
 		{
 			var oldCodeLines = code.Split(Environment.NewLine);
@@ -33,8 +41,8 @@ namespace EthansGameKit
 			{
 				var newLines = new List<string>();
 				var lines = replace.Split(Environment.NewLine);
-				for (var i = 0; i < lines.Length; i++)
-					newLines.Add($"{ident}{lines[i]}");
+				foreach (var t in lines)
+					newLines.Add($"{ident}{t}");
 				var newCodeLines = new string[oldCodeLines.Length - (endIndex - startIndex - 1) + newLines.Count];
 				Array.Copy(oldCodeLines, 0, newCodeLines, 0, startIndex);
 				newLines.CopyTo(newCodeLines, startIndex);

@@ -6,12 +6,12 @@ namespace EthansGameKit
 {
 	public class TimedCache<T>
 	{
+		const float keepSeconds = 10f;
 		static readonly CachePool<TimedCache<T>> pool = new(0);
-		public static TimedCache<T> Generate(Func<T> valueGetter, float keepSeconds)
+		public static TimedCache<T> Generate(Func<T> valueGetter)
 		{
 			if (!pool.TryGenerate(out var cache)) cache = new();
 			cache.valueGetter = valueGetter;
-			cache.keepSeconds = keepSeconds;
 			cache.lastAccess = -keepSeconds;
 			cache.autoReleasing = false;
 			return cache;
@@ -25,12 +25,10 @@ namespace EthansGameKit
 			cache = null;
 		}
 		float lastAccess;
-		float keepSeconds;
 		Func<T> valueGetter;
 		T cachedValue;
 		bool autoReleasing;
 		uint timerId;
-
 		public T Value
 		{
 			get
@@ -48,7 +46,6 @@ namespace EthansGameKit
 				return cachedValue;
 			}
 		}
-
 		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
 		TimedCache()
 		{
