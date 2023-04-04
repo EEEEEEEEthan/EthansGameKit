@@ -24,6 +24,7 @@ namespace EthansGameKit
 		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
 		protected AbsTimedCache()
 		{
+			lastAccess = -keepSeconds;
 		}
 		protected void MarkAccess()
 		{
@@ -81,42 +82,25 @@ namespace EthansGameKit
 		}
 	}
 
-	public class ResourceCache<T> where T : UnityEngine.Object
+	public sealed class ResourceCache<T> : AbsTimedCache<T> where T : UnityEngine.Object
 	{
 		const float keepSeconds = 10f;
-		T asset;
-		float lastAccess;
-		bool autoReleasing;
 		readonly string resourcePath;
-		public T Asset
+		public new T Value
 		{
 			get
 			{
-				RecordAccess();
-				return asset;
+				MarkAccess();
+				if (HasValue)
+					return base.Value;
+				return base.Value = Resources.Load<T>(resourcePath);
 			}
 		}
-		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
 		public ResourceCache(string resourcePath)
 		{
 			this.resourcePath = resourcePath;
-			lastAccess = -keepSeconds;
 		}
-		void RecordAccess()
-		{
-			lastAccess = Time.unscaledTime;
-			if (!autoReleasing)
-			{
-				autoReleasing = true;
-				AutoRelease();
-			}
-		}
-		public T Load()
-		{
-			asset = Resources.Load<T>(resourcePath);
-			return Asset;
-		}
-		public void LoadAsync(Action<T> callback)
+		void LoadAsync(Action<T> callback)
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
@@ -133,18 +117,6 @@ namespace EthansGameKit
 			var awaitable = IAwaitable<T>.Create(out var handle);
 			LoadAsync(handle.Set);
 			return awaitable;
-		}
-		void AutoRelease()
-		{
-			if (Expired)
-			{
-				asset = null;
-				autoReleasing = false;
-			}
-			else
-			{
-				Timers.InvokeAfterUnscaled(keepSeconds, AutoRelease);
-			}
 		}
 	}
 }
