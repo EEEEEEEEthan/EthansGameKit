@@ -80,6 +80,12 @@ namespace EthansGameKit
 				callback.TryInvoke();
 			}
 		}
+		public IAwaitable LoadAsync()
+		{
+			var awaitable = IAwaitable.Create(out var handle);
+			LoadAsync(handle.Set);
+			return awaitable;
+		}
 	}
 
 	public sealed class ResourceCache<T> : AbsTimedCache<T> where T : UnityEngine.Object
@@ -100,7 +106,7 @@ namespace EthansGameKit
 		{
 			this.resourcePath = resourcePath;
 		}
-		void LoadAsync(Action<T> callback)
+		public void LoadAsync(Action<T> callback)
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
