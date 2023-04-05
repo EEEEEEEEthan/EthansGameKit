@@ -1,5 +1,4 @@
-﻿using System;
-using EthansGameKit.CachePools;
+﻿using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.Collections
@@ -8,7 +7,6 @@ namespace EthansGameKit.Collections
 	{
 		static readonly CachePool<Item> itemPool = new(0);
 
-		[Serializable]
 		public class Item
 		{
 			internal static Item Generate(Vector3 position, T referencedObject)
@@ -24,9 +22,7 @@ namespace EthansGameKit.Collections
 				item.ReferencedObject = default;
 				itemPool.Recycle(ref item);
 			}
-			[SerializeField] Vector3 position;
-			[SerializeField] T referencedObject;
-
+			Vector3 position;
 			public Vector3 Position
 			{
 				get => position;
@@ -39,15 +35,8 @@ namespace EthansGameKit.Collections
 					tree.Insert(this);
 				}
 			}
-
 			public Octree<T> Tree { get; internal set; }
-
-			public T ReferencedObject
-			{
-				get => referencedObject;
-				private set => referencedObject = value;
-			}
-
+			public T ReferencedObject { get; private set; }
 			Item()
 			{
 			}
