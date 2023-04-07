@@ -112,10 +112,6 @@ namespace EthansGameKit.Editor
 			{
 				return guid2Info.TryGetValue(guid, out info);
 			}
-			public bool TryGetViaAlias(string alias, out ResourceInfo info)
-			{
-				return alias2Info.TryGetValue(alias, out info);
-			}
 			public void Save()
 			{
 				var builder = new StringBuilder();
