@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EthansGameKit.CachePools;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -21,19 +22,41 @@ namespace EthansGameKit.Collections
 				float zMax
 			)
 			{
-				var node = new Node
-				{
-					xMin = xMin,
-					xMid = xMid,
-					xMax = xMax,
-					yMin = yMin,
-					yMid = yMid,
-					yMax = yMax,
-					zMin = zMin,
-					zMid = zMid,
-					zMax = zMax,
-				};
+				if (!GlobalCachePool<Node>.TryGenerate(out var node)) node = new();
+				node.xMin = xMin;
+				node.xMid = xMid;
+				node.xMax = xMax;
+				node.yMin = yMin;
+				node.yMid = yMid;
+				node.yMax = yMax;
+				node.zMin = zMin;
+				node.zMid = zMid;
+				node.zMax = zMax;
 				return node;
+			}
+			static void Recycle(ref Node node)
+			{
+				node.children = null;
+				node.items = null;
+				GlobalCachePool<Node>.Recycle(ref node);
+			}
+			static Node[] GenerateNodeArray()
+			{
+				return GlobalCachePool<Node[]>.TryGenerate(out var a) ? a : new Node[8];
+			}
+			static void RecycleNodeArray(ref Node[] array)
+			{
+				Array.Clear(array, 0, 8);
+				GlobalCachePool<Node[]>.Recycle(ref array);
+			}
+			static List<Item> GenerateItemList()
+			{
+				return GlobalCachePool<List<Item>>.TryGenerate(out var a) ? a : new();
+			}
+			static void RecycleItemList(ref List<Item> list)
+			{
+				list.Clear();
+				GlobalCachePool<List<Item>>.Recycle(ref list);
 			}
 			Node[] children;
 			List<Item> items;
@@ -249,7 +272,7 @@ namespace EthansGameKit.Collections
 						zMax = zMax,
 					};
 					var index = node.GetChildIndex(this.xMid, this.yMid, this.zMid);
-					node.children = new Node[8];
+					node.children = GenerateNodeArray();
 					node.children[index] = this;
 					return node.Contains(x, y, z) ? node : node.Encapsulate(x, y, z);
 				}
@@ -304,7 +327,8 @@ namespace EthansGameKit.Collections
 						this.x = x;
 						this.y = y;
 						this.z = z;
-						items = new() { item };
+						items = GenerateItemList();
+						items.Add(item);
 						return;
 					}
 					if (x == this.x && y == this.y && z == this.z)
@@ -330,8 +354,9 @@ namespace EthansGameKit.Collections
 					this.x = theOnlyChild.x;
 					this.y = theOnlyChild.y;
 					this.z = theOnlyChild.z;
-					children = null;
+					RecycleNodeArray(ref children);
 					items = theOnlyChild.items;
+					Recycle(ref theOnlyChild);
 					return;
 				}
 				items.Remove(item);
@@ -356,7 +381,7 @@ namespace EthansGameKit.Collections
 			}
 			void Subdivide()
 			{
-				children = new Node[8];
+				children = GenerateNodeArray();
 				foreach (var item in items)
 				{
 					var childIndex = GetChildIndex(item.x, item.y, item.z);
@@ -369,7 +394,7 @@ namespace EthansGameKit.Collections
 						);
 					child.Insert(item, item.x, item.y, item.z);
 				}
-				items = null;
+				RecycleItemList(ref items);
 			}
 			int GetChildIndex(float x, float y, float z)
 			{
