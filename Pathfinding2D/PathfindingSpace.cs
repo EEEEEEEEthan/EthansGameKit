@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Pathfinding2D
 {
-	public abstract class PathfindingSpace : MonoBehaviour
+	public abstract class PathfindingSpace
 	{
 		static readonly int[] inversedSequence = { 2, 3, 0, 1, 6, 7, 4, 5 };
 		public readonly int widthPower;
