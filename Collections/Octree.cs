@@ -24,10 +24,10 @@ namespace EthansGameKit.Collections
 			}
 		}
 #if UNITY_EDITOR
-		internal static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
-		internal static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
-		internal static readonly Color editor_invisiableLeafColor = new(0, 1, 0, 0.25f);
-		internal static readonly Color editor_visiableLeafColor = new(0, 1, 0, 0.5f);
+		internal static readonly Color editor_invisibleBranchColor = new(1, 1, 1, 0.05f);
+		internal static readonly Color editor_visibleBranchColor = new(1, 1, 1, 0.1f);
+		internal static readonly Color editor_invisibleLeafColor = new(0, 1, 0, 0.25f);
+		internal static readonly Color editor_visibleLeafColor = new(0, 1, 0, 0.5f);
 #endif
 	}
 
