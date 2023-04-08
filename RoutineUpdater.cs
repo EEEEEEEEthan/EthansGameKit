@@ -34,11 +34,10 @@ namespace EthansGameKit
 	}
 
 	[DefaultExecutionOrder(int.MinValue)]
-	internal class RoutineUpdater : MonoBehaviour
+	class RoutineUpdater : MonoBehaviour
 	{
 		static bool iKnowWhereTheInstanceIs;
 		static RoutineUpdater instance;
-
 		internal static RoutineUpdater Instance
 		{
 			get
@@ -50,7 +49,6 @@ namespace EthansGameKit
 				return instance;
 			}
 		}
-
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
 		{

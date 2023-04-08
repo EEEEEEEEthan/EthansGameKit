@@ -26,7 +26,6 @@ namespace EthansGameKit
 
 		[SerializeField] float value;
 		[SerializeField, HideInInspector] float velocity;
-
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -36,7 +35,6 @@ namespace EthansGameKit
 				smoothTime = value;
 			}
 		}
-
 		public float PreferredValue
 		{
 			get => preferredValue;
@@ -46,7 +44,6 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
-
 		public float MaxSpeed
 		{
 			get => maxSpeed;
@@ -56,7 +53,6 @@ namespace EthansGameKit
 				maxSpeed = value;
 			}
 		}
-
 		public float Value
 		{
 			get
@@ -74,7 +70,6 @@ namespace EthansGameKit
 				velocity = 0;
 			}
 		}
-
 		public SmoothedSingle(float value, float smoothTime, float maxSpeed, bool useScaledTime = true)
 		{
 			this.value = value;
@@ -101,7 +96,6 @@ namespace EthansGameKit
 		[SerializeField] Vector3 preferredValue;
 		[SerializeField] Vector3 value;
 		[SerializeField, HideInInspector] Vector3 velocity;
-
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -111,7 +105,6 @@ namespace EthansGameKit
 				smoothTime = value;
 			}
 		}
-
 		public Vector3 PreferredValue
 		{
 			get => preferredValue;
@@ -121,7 +114,6 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
-
 		public float MaxSpeed
 		{
 			get => maxSpeed;
@@ -131,7 +123,6 @@ namespace EthansGameKit
 				maxSpeed = value;
 			}
 		}
-
 		public Vector3 Value
 		{
 			get
@@ -149,7 +140,6 @@ namespace EthansGameKit
 				velocity = default;
 			}
 		}
-
 		public SmoothedVector3(Vector3 value, float smoothTime, float maxSpeed, bool useScaledTime = true)
 		{
 			this.value = value;
@@ -176,7 +166,6 @@ namespace EthansGameKit
 		[SerializeField] Quaternion preferredValue;
 		[SerializeField] Quaternion value;
 		[SerializeField, HideInInspector] Quaternion velocity;
-
 		public float SmoothTime
 		{
 			get => smoothTime;
@@ -186,7 +175,6 @@ namespace EthansGameKit
 				smoothTime = value;
 			}
 		}
-
 		public Quaternion PreferredValue
 		{
 			get => preferredValue;
@@ -196,7 +184,6 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
-
 		public float MaxSpeed
 		{
 			get => maxSpeed;
@@ -206,7 +193,6 @@ namespace EthansGameKit
 				maxSpeed = value;
 			}
 		}
-
 		public Quaternion Value
 		{
 			get
@@ -229,7 +215,6 @@ namespace EthansGameKit
 				velocity = default;
 			}
 		}
-
 		public SmoothedQuaternion(Quaternion value, float smoothTime, float maxSpeed, bool useScaledTime = true)
 		{
 			this.value = value;

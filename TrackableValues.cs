@@ -7,7 +7,6 @@ namespace EthansGameKit
 	public abstract class TrackableValue<T>
 	{
 		[SerializeField] T value;
-
 		public T Value
 		{
 			get => value;
@@ -19,7 +18,6 @@ namespace EthansGameKit
 				OnSetValue(value);
 			}
 		}
-
 		public event Action<T> ValueChanged;
 		protected TrackableValue()
 		{

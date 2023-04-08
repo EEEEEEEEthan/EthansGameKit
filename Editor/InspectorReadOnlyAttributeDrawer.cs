@@ -5,7 +5,7 @@ using UnityEngine;
 namespace EthansGameKit.Editor
 {
 	[CustomPropertyDrawer(typeof(InspectorReadOnlyAttribute))]
-	internal sealed class InspectorReadOnlyAttributeDrawer : PropertyDrawer
+	sealed class InspectorReadOnlyAttributeDrawer : PropertyDrawer
 	{
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{

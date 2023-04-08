@@ -2,7 +2,7 @@ using System;
 
 namespace EthansGameKit.Internal
 {
-	internal struct Timer : IComparable<Timer>, IEquatable<Timer>
+	struct Timer : IComparable<Timer>, IEquatable<Timer>
 	{
 		public Action callback;
 		public bool crossScene;

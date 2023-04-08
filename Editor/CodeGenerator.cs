@@ -7,6 +7,30 @@ namespace EthansGameKit.Editor
 {
 	public abstract class CodeGenerator : ScriptableObject
 	{
+		[CustomEditor(typeof(CodeGenerator), true), CanEditMultipleObjects]
+		public class Editor : UnityEditor.Editor
+		{
+			new IEnumerable<CodeGenerator> targets
+			{
+				get
+				{
+					foreach (var target in base.targets)
+						yield return target as CodeGenerator;
+				}
+			}
+			public override void OnInspectorGUI()
+			{
+				base.OnInspectorGUI();
+				if (GUILayout.Button("Generate"))
+				{
+					foreach (var target in targets)
+					{
+						target.Replace();
+					}
+				}
+			}
+		}
+
 		public static void Replace(TextAsset script, string startMark, string endMark, string replace)
 		{
 #if UNITY_EDITOR
@@ -55,29 +79,6 @@ namespace EthansGameKit.Editor
 		}
 		[SerializeField] TextAsset script;
 		[SerializeField] string regionName;
-		[CustomEditor(typeof(CodeGenerator), true), CanEditMultipleObjects]
-		public class Editor : UnityEditor.Editor
-		{
-			new IEnumerable<CodeGenerator> targets
-			{
-				get
-				{
-					foreach (var target in base.targets)
-						yield return target as CodeGenerator;
-				}
-			}
-			public override void OnInspectorGUI()
-			{
-				base.OnInspectorGUI();
-				if (GUILayout.Button("Generate"))
-				{
-					foreach (var target in targets)
-					{
-						target.Replace();
-					}
-				}
-			}
-		}
 		public void Replace()
 		{
 			var startMark = $"#region {regionName}";

@@ -17,7 +17,6 @@ namespace EthansGameKit.Collections
 		[SerializeField] ulong[] bits = Array.Empty<ulong>();
 		[NonSerialized] int arrayLength = -1;
 		public IReadOnlyList<ulong> RawData => bits;
-
 		public IEnumerable<int> Values
 		{
 			get
@@ -36,7 +35,6 @@ namespace EthansGameKit.Collections
 				}
 			}
 		}
-
 		int ArrayLength
 		{
 			get
@@ -56,7 +54,6 @@ namespace EthansGameKit.Collections
 				return arrayLength;
 			}
 		}
-
 		public bool Get(int index)
 		{
 			if (index < 0) return false;

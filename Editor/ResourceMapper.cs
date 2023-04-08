@@ -7,8 +7,59 @@ using UnityEngine;
 namespace EthansGameKit.Editor
 {
 	[CreateAssetMenu(fileName = "ResourceMapper", menuName = "EthansGameKit/ResourceMapper")]
-	internal class ResourceMapper : CodeGenerator
+	class ResourceMapper : CodeGenerator
 	{
+		class ResourceInfo
+		{
+			public string guid;
+			public string path;
+			public string alias;
+		}
+
+		class ResourceIndexer
+		{
+			const string filePath = "ResourceMap.txt";
+			readonly Dictionary<string, ResourceInfo> guid2Info = new();
+			readonly SortedDictionary<string, ResourceInfo> alias2Info = new();
+			public ResourceIndexer()
+			{
+				if (System.IO.File.Exists(filePath))
+				{
+					var lines = System.IO.File.ReadAllLines(filePath);
+					foreach (var line in lines)
+					{
+						var parts = line.Split('\t');
+						var info = new ResourceInfo { alias = parts[0], guid = parts[1], path = parts[2] };
+						guid2Info.Add(info.guid, info);
+						alias2Info.Add(info.alias, info);
+					}
+				}
+			}
+			public bool ContainsAlias(string alias)
+			{
+				return alias2Info.ContainsKey(alias);
+			}
+			public void Add(string guid, string path, string alias)
+			{
+				Assert.IsFalse(guid2Info.ContainsKey(guid));
+				Assert.IsFalse(alias2Info.ContainsKey(alias));
+				var info = new ResourceInfo { guid = guid, path = path, alias = alias };
+				guid2Info.Add(guid, info);
+				alias2Info.Add(alias, info);
+			}
+			public bool TryGetViaGuid(string guid, out ResourceInfo info)
+			{
+				return guid2Info.TryGetValue(guid, out info);
+			}
+			public void Save()
+			{
+				var builder = new StringBuilder();
+				foreach (var (alias, info) in alias2Info)
+					builder.AppendLine($"{alias}\t{info.guid}\t{info.path}");
+				System.IO.File.WriteAllText("ResourceMap.txt", builder.ToString());
+			}
+		}
+
 		static ResourceIndexer indexer;
 		static ResourceIndexer Indexer => indexer ??= new();
 		static void UpdateGuidMap()
@@ -68,57 +119,6 @@ namespace EthansGameKit.Editor
 				builder.AppendLine("};");
 			}
 			return builder.ToString();
-		}
-
-		class ResourceInfo
-		{
-			public string guid;
-			public string path;
-			public string alias;
-		}
-
-		class ResourceIndexer
-		{
-			const string filePath = "ResourceMap.txt";
-			readonly Dictionary<string, ResourceInfo> guid2Info = new();
-			readonly SortedDictionary<string, ResourceInfo> alias2Info = new();
-			public ResourceIndexer()
-			{
-				if (System.IO.File.Exists(filePath))
-				{
-					var lines = System.IO.File.ReadAllLines(filePath);
-					foreach (var line in lines)
-					{
-						var parts = line.Split('\t');
-						var info = new ResourceInfo { alias = parts[0], guid = parts[1], path = parts[2] };
-						guid2Info.Add(info.guid, info);
-						alias2Info.Add(info.alias, info);
-					}
-				}
-			}
-			public bool ContainsAlias(string alias)
-			{
-				return alias2Info.ContainsKey(alias);
-			}
-			public void Add(string guid, string path, string alias)
-			{
-				Assert.IsFalse(guid2Info.ContainsKey(guid));
-				Assert.IsFalse(alias2Info.ContainsKey(alias));
-				var info = new ResourceInfo { guid = guid, path = path, alias = alias };
-				guid2Info.Add(guid, info);
-				alias2Info.Add(alias, info);
-			}
-			public bool TryGetViaGuid(string guid, out ResourceInfo info)
-			{
-				return guid2Info.TryGetValue(guid, out info);
-			}
-			public void Save()
-			{
-				var builder = new StringBuilder();
-				foreach (var (alias, info) in alias2Info)
-					builder.AppendLine($"{alias}\t{info.guid}\t{info.path}");
-				System.IO.File.WriteAllText("ResourceMap.txt", builder.ToString());
-			}
 		}
 	}
 }

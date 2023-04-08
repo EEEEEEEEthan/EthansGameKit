@@ -42,7 +42,7 @@ namespace EthansGameKit
 		void Set(T result);
 	}
 
-	internal class Awaiter<T> : IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
+	class Awaiter<T> : IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
 	{
 		public static IAwaitable Create(out IAsyncHandle trigger)
 		{
