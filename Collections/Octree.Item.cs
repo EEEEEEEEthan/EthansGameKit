@@ -22,7 +22,7 @@ namespace EthansGameKit.Collections
 				item.ReferencedObject = default;
 				itemPool.Recycle(ref item);
 			}
-			float x, y, z; // 原始数据要用float，避免Vector3造成的精度损失
+			internal float x, y, z; // 原始数据要用float，避免Vector3造成的精度损失
 			public Vector3 Position
 			{
 				get => new(x, y, z);

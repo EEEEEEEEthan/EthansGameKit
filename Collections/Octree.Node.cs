@@ -154,103 +154,101 @@ namespace EthansGameKit.Collections
 			}
 			public bool Contains(float x, float y, float z)
 			{
-				return xMin <= x &&
-						x < xMax &&
-						yMin <= y &&
-						y < yMax &&
-						zMin <= z &&
-						z < zMax;
+				return xMin <= x && x < xMax && yMin <= y && y < yMax && zMin <= z && z < zMax;
 			}
 			public Node Encapsulate(float x, float y, float z)
 			{
 				Assert.IsFalse(Contains(x, y, z));
-				if (IsBranch)
+				while (true)
 				{
-					float xMin, xMid, xMax, yMin, yMid, yMax, zMin, zMid, zMax;
-					if (x < this.xMid)
+					if (IsBranch)
 					{
-						xMax = this.xMax;
-						xMid = this.xMin;
-						xMin = this.xMin + this.xMin - this.xMax;
+						float xMin, xMid, xMax, yMin, yMid, yMax, zMin, zMid, zMax;
+						if (x < this.xMid)
+						{
+							xMax = this.xMax;
+							xMid = this.xMin;
+							xMin = this.xMin + this.xMin - this.xMax;
+						}
+						else
+						{
+							xMin = this.xMin;
+							xMid = this.xMax;
+							xMax = this.xMax + this.xMax - this.xMin;
+						}
+						if (y < this.yMid)
+						{
+							yMax = this.yMax;
+							yMid = this.yMin;
+							yMin = this.yMin + this.yMin - this.yMax;
+						}
+						else
+						{
+							yMin = this.yMin;
+							yMid = this.yMax;
+							yMax = this.yMax + this.yMax - this.yMin;
+						}
+						if (z < this.zMid)
+						{
+							zMax = this.zMax;
+							zMid = this.zMin;
+							zMin = this.zMin + this.zMin - this.zMax;
+						}
+						else
+						{
+							zMin = this.zMin;
+							zMid = this.zMax;
+							zMax = this.zMax + this.zMax - this.zMin;
+						}
+						var node = new Node
+						{
+							xMin = xMin,
+							xMid = xMid,
+							xMax = xMax,
+							yMin = yMin,
+							yMid = yMid,
+							yMax = yMax,
+							zMin = zMin,
+							zMid = zMid,
+							zMax = zMax,
+						};
+						var index = node.GetChildIndex(this.xMid, this.yMid, this.zMid);
+						node.children = new Node[8];
+						node.children[index] = this;
+						return node.Contains(x, y, z) ? node : node.Encapsulate(x, y, z);
+					}
+					if (x < xMid)
+					{
+						xMid = xMin;
+						xMin = xMin + xMin - xMax;
 					}
 					else
 					{
-						xMin = this.xMin;
-						xMid = this.xMax;
-						xMax = this.xMax + this.xMax - this.xMin;
+						xMid = xMax;
+						xMax = xMax + xMax - xMin;
 					}
-					if (y < this.yMid)
+					if (y < yMid)
 					{
-						yMax = this.yMax;
-						yMid = this.yMin;
-						yMin = this.yMin + this.yMin - this.yMax;
+						yMid = yMin;
+						yMin = yMin + yMin - yMax;
 					}
 					else
 					{
-						yMin = this.yMin;
-						yMid = this.yMax;
-						yMax = this.yMax + this.yMax - this.yMin;
+						yMid = yMax;
+						yMax = yMax + yMax - yMin;
 					}
-					if (z < this.zMid)
+					if (z < zMid)
 					{
-						zMax = this.zMax;
-						zMid = this.zMin;
-						zMin = this.zMin + this.zMin - this.zMax;
+						zMid = zMin;
+						zMin = zMin + zMin - zMax;
 					}
 					else
 					{
-						zMin = this.zMin;
-						zMid = this.zMax;
-						zMax = this.zMax + this.zMax - this.zMin;
+						zMid = zMax;
+						zMax = zMax + zMax - zMin;
 					}
-					var node = new Node
-					{
-						xMin = xMin,
-						xMid = xMid,
-						xMax = xMax,
-						yMin = yMin,
-						yMid = yMid,
-						yMax = yMax,
-						zMin = zMin,
-						zMid = zMid,
-						zMax = zMax,
-					};
-					var index = node.GetChildIndex(this.xMid, this.yMid, this.zMid);
-					node.children = new Node[8];
-					node.children[index] = this;
-					return node.Contains(x, y, z) ? node : node.Encapsulate(x, y, z);
+					if (Contains(x, y, z)) return this;
 				}
-				if (x < xMid)
-				{
-					xMid = xMin;
-					xMin = xMin + xMin - xMax;
-				}
-				else
-				{
-					xMid = xMax;
-					xMax = xMax + xMax - xMin;
-				}
-				if (y < yMid)
-				{
-					yMid = yMin;
-					yMin = yMin + yMin - yMax;
-				}
-				else
-				{
-					yMid = yMax;
-					yMax = yMax + yMax - yMin;
-				}
-				if (z < zMid)
-				{
-					zMid = zMin;
-					zMin = zMin + zMin - zMax;
-				}
-				else
-				{
-					zMid = zMax;
-					zMax = zMax + zMax - zMin;
-				}
-				return Contains(x, y, z) ? this : Encapsulate(x, y, z);
 			}
 			[SuppressMessage("ReSharper", "CompareOfFloatsByEqualityOperator")]
 			public void Insert(Item item, float x, float y, float z)
@@ -314,16 +312,6 @@ namespace EthansGameKit.Collections
 				Remove(item, x0, y0, z0);
 				Insert(item, x1, y1, z1);
 			}
-			public void TryShorten()
-			{
-				if (!TryGetTheOnlyChild(out var theOnlyChild)) return;
-				if (theOnlyChild.IsBranch) return;
-				x = theOnlyChild.x;
-				y = theOnlyChild.y;
-				z = theOnlyChild.z;
-				children = null;
-				items = theOnlyChild.items;
-			}
 #if UNITY_EDITOR
 			public void Editor_DrawGizmos(Plane[] planes)
 			{
@@ -345,6 +333,16 @@ namespace EthansGameKit.Collections
 				}
 			}
 #endif
+			void TryShorten()
+			{
+				if (!TryGetTheOnlyChild(out var theOnlyChild)) return;
+				if (theOnlyChild.IsBranch) return;
+				x = theOnlyChild.x;
+				y = theOnlyChild.y;
+				z = theOnlyChild.z;
+				children = null;
+				items = theOnlyChild.items;
+			}
 			void Subdivide()
 			{
 				children = new Node[8];
@@ -353,11 +351,13 @@ namespace EthansGameKit.Collections
 					var childIndex = GetChildIndex(item.Position.x, item.Position.y, item.Position.z);
 					var child = children[childIndex];
 					if (child is null)
+					{
 						children[childIndex] = child = CreateChild(
-							item.Position.x,
-							item.Position.y,
-							item.Position.z
+							item.x,
+							item.y,
+							item.z
 						);
+					}
 					child.Insert(item, item.Position.x, item.Position.y, item.Position.z);
 				}
 				items = null;
