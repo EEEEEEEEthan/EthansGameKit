@@ -6,7 +6,7 @@ using UnityEngine.Assertions;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 namespace EthansGameKit.Collections
 {
-	internal class OctreeDefines
+	class OctreeDefines
 	{
 		protected internal static readonly Plane[] planes = new Plane[6];
 		protected internal static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
@@ -40,12 +40,11 @@ namespace EthansGameKit.Collections
 	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
 	///     </list>
 	/// </remarks>
-	[Serializable]
 	public partial class Octree<T> : ISerializationCallbackReceiver
 	{
 		Node root;
-		[SerializeField] List<Item> serializedData = new();
-		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.allItems;
+		readonly List<Item> serializedData = new();
+		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.AllItems;
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
 			serializedData.Clear();
@@ -136,6 +135,16 @@ namespace EthansGameKit.Collections
 					root = theOnlyChild;
 			if (root.IsEmpty) root = null;
 			item.Tree = null;
+		}
+		void Update(Item item, float newX, float newY, float newZ)
+		{
+			Assert.IsNotNull(item.Tree);
+			if (!root.Contains(newX, newY, newZ)) root = root.Encapsulate(newX, newY, newZ);
+			var pos = item.Position;
+			root.Update(item, pos.x, pos.y, pos.z, newX, newY, newZ);
+			if (root.IsBranch)
+				if (root.TryGetTheOnlyChild(out var theOnlyChild))
+					root = theOnlyChild;
 		}
 	}
 }

@@ -41,7 +41,6 @@ namespace EthansGameKit.Collections
 			float x, y, z;
 			float xMin, xMid, xMax, yMin, yMid, yMax, zMin, zMid, zMax;
 			public bool IsBranch => children != null;
-
 			public bool IsEmpty
 			{
 				get
@@ -55,8 +54,7 @@ namespace EthansGameKit.Collections
 					return true;
 				}
 			}
-
-			public IEnumerable<Item> allItems
+			public IEnumerable<Item> AllItems
 			{
 				get
 				{
@@ -66,7 +64,7 @@ namespace EthansGameKit.Collections
 						{
 							var child = children[i];
 							if (child != null)
-								foreach (var item in child.allItems)
+								foreach (var item in child.AllItems)
 									yield return item;
 						}
 					}
@@ -78,7 +76,6 @@ namespace EthansGameKit.Collections
 					}
 				}
 			}
-
 			Bounds Bounds => new(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
 			public void Query(ref Item[] result, Plane[] planes, ref int count)
 			{
@@ -294,18 +291,60 @@ namespace EthansGameKit.Collections
 					var child = children[childIndex];
 					child.Remove(item, x, y, z);
 					if (child.IsEmpty) children[childIndex] = null;
-					if (!TryGetTheOnlyChild(out var theOnlyChild)) return;
-					if (theOnlyChild.IsBranch) return;
-					this.x = theOnlyChild.x;
-					this.y = theOnlyChild.y;
-					this.z = theOnlyChild.z;
-					children = null;
-					items = theOnlyChild.items;
+					TryShorten();
 					return;
 				}
 				items.Remove(item);
 				if (items.Count == 0) items = null;
 			}
+			public void Update(Item item, float x0, float y0, float z0, float x1, float y1, float z1)
+			{
+				if (IsBranch)
+				{
+					var childIndex0 = GetChildIndex(x0, y0, z0);
+					var childIndex1 = GetChildIndex(x1, y1, z1);
+					if (childIndex0 == childIndex1)
+					{
+						var child = children[childIndex0];
+						child.Update(item, x0, y0, z0, x1, y1, z1);
+						TryShorten();
+						return;
+					}
+				}
+				Remove(item, x0, y0, z0);
+				Insert(item, x1, y1, z1);
+			}
+			public void TryShorten()
+			{
+				if (!TryGetTheOnlyChild(out var theOnlyChild)) return;
+				if (theOnlyChild.IsBranch) return;
+				x = theOnlyChild.x;
+				y = theOnlyChild.y;
+				z = theOnlyChild.z;
+				children = null;
+				items = theOnlyChild.items;
+			}
+#if UNITY_EDITOR
+			public void Editor_DrawGizmos(Plane[] planes)
+			{
+				var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
+				Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
+					? IsBranch ? OctreeDefines.editor_visiableBranchColor : OctreeDefines.editor_visiableleafColor
+					: IsBranch
+						? OctreeDefines.editor_invisiableBranchColor
+						: OctreeDefines.editor_invisiableleafColor;
+				Gizmos.DrawWireCube(
+					new(xMid, yMid, zMid),
+					new(xMax - xMin, yMax - yMin, zMax - zMin)
+				);
+				if (!IsBranch) return;
+				for (var i = 0; i < 8; i++)
+				{
+					var child = children[i];
+					child?.Editor_DrawGizmos(planes);
+				}
+			}
+#endif
 			void Subdivide()
 			{
 				children = new Node[8];
@@ -369,27 +408,6 @@ namespace EthansGameKit.Collections
 				child.zMid = (child.zMin + child.zMax) * 0.5f;
 				return child;
 			}
-#if UNITY_EDITOR
-			public void Editor_DrawGizmos(Plane[] planes)
-			{
-				var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
-				Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
-					? IsBranch ? OctreeDefines.editor_visiableBranchColor : OctreeDefines.editor_visiableleafColor
-					: IsBranch
-						? OctreeDefines.editor_invisiableBranchColor
-						: OctreeDefines.editor_invisiableleafColor;
-				Gizmos.DrawWireCube(
-					new(xMid, yMid, zMid),
-					new(xMax - xMin, yMax - yMin, zMax - zMin)
-				);
-				if (!IsBranch) return;
-				for (var i = 0; i < 8; i++)
-				{
-					var child = children[i];
-					child?.Editor_DrawGizmos(planes);
-				}
-			}
-#endif
 		}
 	}
 }

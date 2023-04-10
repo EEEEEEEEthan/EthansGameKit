@@ -5,15 +5,15 @@ namespace EthansGameKit.Collections
 {
 	public partial class Octree<T>
 	{
-		static readonly CachePool<Item> itemPool = new(0);
-
 		public class Item
 		{
 			internal static Item Generate(Vector3 position, T referencedObject)
 			{
 				if (!itemPool.TryGenerate(out var item))
 					item = new();
-				item.position = position;
+				item.x = position.x;
+				item.y = position.y;
+				item.z = position.z;
 				item.ReferencedObject = referencedObject;
 				return item;
 			}
@@ -22,17 +22,20 @@ namespace EthansGameKit.Collections
 				item.ReferencedObject = default;
 				itemPool.Recycle(ref item);
 			}
-			Vector3 position;
+			float x, y, z; // 原始数据要用float，避免Vector3造成的精度损失
 			public Vector3 Position
 			{
-				get => position;
+				get => new(x, y, z);
 				set
 				{
-					if (position.Equals(value)) return;
+					if (x == value.x && y == value.y && z == value.z) return;
 					var tree = Tree;
-					tree.Remove(this);
-					position = value;
-					tree.Insert(this);
+					tree.Update(this, value.x, value.y, value.z);
+					//tree.Remove(this);
+					x = value.x;
+					y = value.y;
+					z = value.z;
+					//tree.Insert(this);
 				}
 			}
 			public Octree<T> Tree { get; internal set; }
@@ -41,5 +44,7 @@ namespace EthansGameKit.Collections
 			{
 			}
 		}
+
+		static readonly CachePool<Item> itemPool = new(0);
 	}
 }
