@@ -6,10 +6,10 @@ using UnityEngine.Assertions;
 // ReSharper disable CompareOfFloatsByEqualityOperator
 namespace EthansGameKit.Collections
 {
-	static class OctreeDefines
+	internal class OctreeDefines
 	{
-		internal static readonly Plane[] planes = new Plane[6];
-		internal static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
+		protected internal static readonly Plane[] planes = new Plane[6];
+		protected internal static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
 		{
 			GeometryUtility.CalculateFrustumPlanes(camera, planes);
 			var cameraPos = camera.transform.position;
@@ -24,10 +24,10 @@ namespace EthansGameKit.Collections
 			}
 		}
 #if UNITY_EDITOR
-		internal static readonly Color editor_invisibleBranchColor = new(1, 1, 1, 0.05f);
-		internal static readonly Color editor_visibleBranchColor = new(1, 1, 1, 0.1f);
-		internal static readonly Color editor_invisibleLeafColor = new(0, 1, 0, 0.25f);
-		internal static readonly Color editor_visibleLeafColor = new(0, 1, 0, 0.5f);
+		protected internal static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
+		protected internal static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
+		protected internal static readonly Color editor_invisiableleafColor = new(0, 1, 0, 0.25f);
+		protected internal static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
 #endif
 	}
 
@@ -40,11 +40,12 @@ namespace EthansGameKit.Collections
 	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
 	///     </list>
 	/// </remarks>
+	[Serializable]
 	public partial class Octree<T> : ISerializationCallbackReceiver
 	{
 		Node root;
-		readonly List<Item> serializedData = new();
-		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.AllItems;
+		[SerializeField] List<Item> serializedData = new();
+		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.allItems;
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
 			serializedData.Clear();
@@ -96,7 +97,7 @@ namespace EthansGameKit.Collections
 		public bool InScreen(Camera camera, Matrix4x4 worldToLocal, float expansion, Item item)
 		{
 			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
-			var bounds = new Bounds(new(item.x, item.y, item.z), Vector3.zero);
+			var bounds = new Bounds(item.Position, Vector3.zero);
 			return GeometryUtility.TestPlanesAABB(OctreeDefines.planes, bounds);
 		}
 		public void DrawGizmos(Camera camera, Matrix4x4 worldToLocal, float expansion)
@@ -109,38 +110,32 @@ namespace EthansGameKit.Collections
 		void Insert(Item item)
 		{
 			Assert.IsNull(item.Tree);
+			var pos = item.Position;
 			root ??= Node.Generate(
-				item.x - 1,
-				item.x,
-				item.x + 1,
-				item.y - 1,
-				item.y,
-				item.y + 1,
-				item.z - 1,
-				item.z,
-				item.z + 1
+				pos.x - 1,
+				pos.x,
+				pos.x + 1,
+				pos.y - 1,
+				pos.y,
+				pos.y + 1,
+				pos.z - 1,
+				pos.z,
+				pos.z + 1
 			);
-			if (!root.Contains(item.x, item.y, item.z)) root = root.Encapsulate(item.x, item.y, item.z);
-			root.Insert(item, item.x, item.y, item.z);
+			if (!root.Contains(pos.x, pos.y, pos.z)) root = root.Encapsulate(pos.x, pos.y, pos.z);
+			root.Insert(item, pos.x, pos.y, pos.z);
 			item.Tree = this;
 		}
 		void Remove(Item item)
 		{
 			Assert.IsNotNull(item.Tree);
-			root.Remove(item, item.x, item.y, item.z);
+			var pos = item.Position;
+			root.Remove(item, pos.x, pos.y, pos.z);
 			if (root.IsBranch)
 				if (root.TryGetTheOnlyChild(out var theOnlyChild))
 					root = theOnlyChild;
 			if (root.IsEmpty) root = null;
 			item.Tree = null;
-		}
-		void Update(Item item, float oldX, float oldY, float oldZ, float newX, float newY, float newZ)
-		{
-			Assert.IsNotNull(item.Tree);
-			root.Update(item, oldX, oldY, oldZ, newX, newY, newZ);
-			if (root.IsBranch)
-				if (root.TryGetTheOnlyChild(out var theOnlyChild))
-					root = theOnlyChild;
 		}
 	}
 }
