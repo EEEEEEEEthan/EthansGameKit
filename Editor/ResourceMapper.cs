@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace EthansGameKit.Editor
 {
@@ -86,37 +88,42 @@ namespace EthansGameKit.Editor
 		}
 		[SerializeField] DefaultAsset resourceFolder;
 		[SerializeField] bool @public;
+
 		protected override string Generate()
 		{
 			UpdateGuidMap();
 			var builder = new StringBuilder();
 			var folderPath = AssetDatabase.GetAssetPath(resourceFolder);
-			var dir2Caches = new Dictionary<string, List<string>>();
 			var @public = this.@public ? "public " : "";
-			foreach (var guid in AssetDatabase.FindAssets("t:GameObject", new[] { folderPath }))
+			foreach (var type in ("GameObject", "ScriptableObject"))
 			{
-				var assetPath = AssetDatabase.GUIDToAssetPath(guid);
-				var suffix = assetPath[(folderPath.Length + 1)..];
-				var suffixWithoutExtension = suffix[..^7];
-				Indexer.TryGetViaGuid(guid, out var info);
-				var propertyName = info.alias;
-				builder.AppendLine($"{@public}static ResourceCache<GameObject> {propertyName} {{ get; }} = new(\"{suffixWithoutExtension}\");");
-				var lastSlash = suffixWithoutExtension.LastIndexOf('/');
-				if (lastSlash >= 0)
+				var dir2Caches = new Dictionary<string, List<string>>();
+				foreach (var guid in AssetDatabase.FindAssets($"t:{type}", new[] { folderPath }))
 				{
-					var dir = suffixWithoutExtension[..lastSlash];
-					if (!dir2Caches.TryGetValue(dir, out var list))
-						dir2Caches[dir] = list = new();
-					list.Add(propertyName + ",");
+					var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+					var fileName = assetPath[(folderPath.Length + 1)..];
+					var index = fileName.LastIndexOf('.');
+					var fileNameWithoutExtension = fileName[..index];
+					Indexer.TryGetViaGuid(guid, out var info);
+					var propertyName = info.alias;
+					builder.AppendLine($"{@public}static ResourceCache<{type}> {propertyName} {{ get; }} = new(\"{fileNameWithoutExtension}\");");
+					var lastSlash = fileNameWithoutExtension.LastIndexOf('/');
+					if (lastSlash >= 0)
+					{
+						var dir = fileNameWithoutExtension[..lastSlash];
+						if (!dir2Caches.TryGetValue(dir, out var list))
+							dir2Caches[dir] = list = new();
+						list.Add(propertyName + ",");
+					}
 				}
-			}
-			foreach (var (dir, caches) in dir2Caches)
-			{
-				builder.AppendLine($"{@public}static IReadOnlyList<ResourceCache<GameObject>> GameObjectGroup_{dir.Replace('/', '_')} {{ get; }} = new ResourceCache<GameObject>[]");
-				builder.AppendLine("{");
-				foreach (var cache in caches)
-					builder.AppendLine($"\t{cache}");
-				builder.AppendLine("};");
+				foreach (var (dir, caches) in dir2Caches)
+				{
+					builder.AppendLine($"{@public}static IReadOnlyList<ResourceCache<{type}>> {type}Group_{dir.Replace('/', '_')} {{ get; }} = new[]");
+					builder.AppendLine("{");
+					foreach (var cache in caches)
+						builder.AppendLine($"\t{cache}");
+					builder.AppendLine("};");
+				}
 			}
 			return builder.ToString();
 		}

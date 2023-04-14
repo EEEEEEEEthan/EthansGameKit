@@ -131,6 +131,7 @@ namespace EthansGameKit.Pathfinding2D
 			OnClear();
 		} // ReSharper disable Unity.PerformanceAnalysis
 		protected abstract void OnClear();
+		// ReSharper disable Unity.PerformanceAnalysis
 		float GetHeuristic(int tileIndex)
 		{
 			var heuristic = heuristicMap[tileIndex];
@@ -153,6 +154,7 @@ namespace EthansGameKit.Pathfinding2D
 			heuristicMap[tileIndex] = heuristic;
 			return heuristic;
 		}
+		// ReSharper disable Unity.PerformanceAnalysis
 		void UpdateStep(int currentIndex, double totalCost)
 		{
 			for (var i = 0; i < directionCount; ++i)
