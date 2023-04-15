@@ -1,5 +1,4 @@
 using System;
-using UnityEngine.Assertions;
 
 namespace EthansGameKit.CachePools
 {
@@ -14,7 +13,8 @@ namespace EthansGameKit.CachePools
 		}
 		public static void Recycle(T item)
 		{
-			Assert.IsTrue(item.GetType() == type);
+			if (item.GetType() != typeof(T))
+				throw new ArgumentException($"The type of the item is not {type.Name}.");
 			pool.Recycle(ref item);
 		}
 		public static bool TryGenerate(out T value)

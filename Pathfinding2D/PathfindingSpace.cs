@@ -83,6 +83,10 @@ namespace EthansGameKit.Pathfinding2D
 		internal float GetCost(int toIndex, int fromDirection)
 		{
 			var index = (toIndex << 3) | fromDirection;
+			if (index > costs.Length)
+			{
+				throw new($"index {index} out of range {costs.Length}. toIndex={toIndex}");
+			}
 			var cost = costs[index];
 			if (cost <= 0)
 			{

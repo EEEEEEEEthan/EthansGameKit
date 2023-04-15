@@ -42,7 +42,7 @@ namespace EthansGameKit
 			// 不调用带权重的RandomPick，因为可以进一步提高效率
 			if (@this is null)
 				yield break;
-			var heap = new Heap<T, float>();
+			using var heap = Heap<T, float>.Generate();
 			while (@this.MoveNext())
 			{
 				var item = @this.Current;
@@ -67,7 +67,7 @@ namespace EthansGameKit
 		{
 			if (@this is null)
 				yield break;
-			var heap = new Heap<T, float>();
+			using var heap = Heap<T, float>.Generate();
 			while (@this.MoveNext())
 			{
 				var item = @this.Current;

@@ -16,7 +16,7 @@ namespace EthansGameKit.Pathfinding2D
 		int directionCount;
 		float maxCost;
 		float maxHeuristic;
-		readonly HeapInt32Single openList = new();
+		readonly Heap<int, float> openList = Heap<int, float>.Generate();
 		int width;
 		int widthPower;
 		int allTileCount;
