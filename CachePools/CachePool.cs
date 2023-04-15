@@ -33,10 +33,14 @@ namespace EthansGameKit.CachePools
 		}
 		public void Recycle(ref T item)
 		{
+			Recycle(item);
+			item = default;
+		}
+		public void Recycle(T item)
+		{
 			list.Add(item);
 			if (!autoReleasing)
 				AutoRelease();
-			item = default;
 		}
 		public bool TryGenerate(out T cache)
 		{

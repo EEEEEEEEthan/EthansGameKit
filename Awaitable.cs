@@ -1,22 +1,23 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
+using EthansGameKit.CachePools;
 
 namespace EthansGameKit
 {
 	public interface IAwaitable : INotifyCompletion
 	{
-		public static IAwaitable Create(out IAsyncHandle handle)
+		public static IAwaitable Create(out AsyncHandle handle)
 		{
-			return Awaiter<object>.Create(out handle);
+			return Awaitable.Create(out handle);
 		}
 		IAwaiter GetAwaiter();
 	}
 
 	public interface IAwaitable<out T> : IAwaitable
 	{
-		public static IAwaitable<T> Create(out IAsyncHandle<T> handle)
+		public static IAwaitable<T> Create(out AsyncHandle<T> handle)
 		{
-			return Awaiter<T>.Create(out handle);
+			return Awaitable<T>.Create(out handle);
 		}
 		new IAwaiter<T> GetAwaiter();
 	}
@@ -32,34 +33,88 @@ namespace EthansGameKit
 		new T GetResult();
 	}
 
-	public interface IAsyncHandle
+	public struct AsyncHandle<T>
 	{
-		void Set();
+		internal int flag;
+		internal Awaitable<T> awaitable;
+		public void Set(T result)
+		{
+			if (awaitable.flag != flag)
+				throw new InvalidOperationException("The awaiter has been recycled");
+			awaitable.Set(result);
+		}
 	}
 
-	public interface IAsyncHandle<in T>
+	public struct AsyncHandle
 	{
-		void Set(T result);
+		internal int flag;
+		internal Awaitable awaitable;
+		public void Set()
+		{
+			if (awaitable.flag != flag)
+				throw new InvalidOperationException("The awaiter has been recycled");
+			awaitable.Set();
+		}
 	}
 
-	class Awaiter<T> : IAsyncHandle, IAwaiter<T>, IAwaitable<T>, IAsyncHandle<T>
+	class Awaitable : IAwaiter, IAwaitable
 	{
-		public static IAwaitable Create(out IAsyncHandle trigger)
+		public static IAwaitable Create(out AsyncHandle handle)
 		{
-			var awaitable = Generate();
-			trigger = awaitable;
+			var awaitable = GlobalCachePool<Awaitable>.TryGenerate(out var awaiter) ? awaiter : new();
+			handle = new()
+			{
+				awaitable = awaitable,
+				flag = ++awaitable.flag,
+			};
 			return awaitable;
 		}
-		public static IAwaitable<T> Create(out IAsyncHandle<T> trigger)
+		internal int flag;
+		Action continuation;
+		public bool IsCompleted { get; private set; }
+		public override string ToString()
 		{
-			var awaitable = Generate();
-			trigger = awaitable;
+			return $"{GetType().FullName}({nameof(IsCompleted)}={IsCompleted})";
+		}
+		public object GetResult()
+		{
+			return null;
+		}
+		public void OnCompleted(Action continuation)
+		{
+			this.continuation = continuation;
+		}
+		public IAwaiter GetAwaiter()
+		{
+			return this;
+		}
+		public void Dispose()
+		{
+			GlobalCachePool<Awaitable>.Recycle(this);
+		}
+		public void Set()
+		{
+			if (IsCompleted) return;
+			IsCompleted = true;
+			continuation?.Invoke();
+			continuation = null;
+			GlobalCachePool<Awaitable>.Recycle(this);
+		}
+	}
+
+	class Awaitable<T> : IAwaiter<T>, IAwaitable<T>
+	{
+		public static IAwaitable<T> Create(out AsyncHandle<T> handle)
+		{
+			var awaitable = GlobalCachePool<Awaitable<T>>.TryGenerate(out var awaiter) ? awaiter : new();
+			handle = new()
+			{
+				awaitable = awaitable,
+				flag = ++awaitable.flag,
+			};
 			return awaitable;
 		}
-		public static Awaiter<T> Generate()
-		{
-			return new();
-		}
+		internal int flag;
 		Action continuation;
 		T result;
 		public bool IsCompleted { get; private set; }
@@ -67,9 +122,25 @@ namespace EthansGameKit
 		{
 			return $"{GetType().FullName}({nameof(IsCompleted)}={IsCompleted})";
 		}
-		public void Set()
+		public T GetResult()
 		{
-			Set(default);
+			return result;
+		}
+		public void OnCompleted(Action continuation)
+		{
+			this.continuation = continuation;
+		}
+		public IAwaiter<T> GetAwaiter()
+		{
+			return this;
+		}
+		object IAwaiter.GetResult()
+		{
+			return result;
+		}
+		IAwaiter IAwaitable.GetAwaiter()
+		{
+			return this;
 		}
 		public void Set(T result)
 		{
@@ -78,26 +149,7 @@ namespace EthansGameKit
 			this.result = result;
 			continuation?.Invoke();
 			continuation = null;
-		}
-		public void OnCompleted(Action continuation)
-		{
-			this.continuation = continuation;
-		}
-		IAwaiter IAwaitable.GetAwaiter()
-		{
-			return this;
-		}
-		IAwaiter<T> IAwaitable<T>.GetAwaiter()
-		{
-			return this;
-		}
-		object IAwaiter.GetResult()
-		{
-			return null;
-		}
-		T IAwaiter<T>.GetResult()
-		{
-			return result;
+			GlobalCachePool<Awaitable<T>>.Recycle(this);
 		}
 	}
 }
