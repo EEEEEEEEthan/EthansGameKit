@@ -31,15 +31,11 @@ namespace EthansGameKit.CachePools
 			list.RemoveAt(index);
 			return obj;
 		}
-		public void Recycle(T item)
+		public void Recycle(ref T item)
 		{
 			list.Add(item);
 			if (!autoReleasing)
 				AutoRelease();
-		}
-		public void Recycle(ref T item)
-		{
-			Recycle(item);
 			item = default;
 		}
 		public bool TryGenerate(out T cache)

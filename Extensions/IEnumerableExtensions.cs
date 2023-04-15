@@ -23,7 +23,7 @@ namespace EthansGameKit
 			// 不调用带权重的RandomPick，因为可以进一步提高效率
 			if (@this is null)
 				yield break;
-			using var heap = Heap<T, float>.Generate();
+			var heap = new Heap<T, float>();
 			foreach (var item in @this)
 			{
 				var score = Random.value;
@@ -47,7 +47,7 @@ namespace EthansGameKit
 		{
 			if (@this is null)
 				yield break;
-			using var heap = Heap<T, float>.Generate();
+			var heap = new Heap<T, float>();
 			foreach (var item in @this)
 			{
 				float weight;

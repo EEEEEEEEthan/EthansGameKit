@@ -31,7 +31,7 @@ namespace EthansGameKit
 		/// <returns>被移除元素</returns>
 		public static bool TryPop<T>(this IList<T> @this, int index, out T item)
 		{
-			if (index >= @this.Count || index < 0)
+			if (index >= @this.Count)
 			{
 				item = default;
 				return false;

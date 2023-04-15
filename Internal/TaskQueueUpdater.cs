@@ -80,20 +80,18 @@ namespace EthansGameKit.Internal
 			for (var i = 0; i < length; i++)
 			{
 				var delayed = delayedLists[i];
-				while (delayed.Count > 0)
+				var queue = currentQueues[i];
+				var cnt = delayed.Count;
+				for (var j = 0; j < cnt; j++)
+					queue.Enqueue(delayed[j]);
+				delayed.Clear();
+				while (queue.Count > 0)
 				{
-					var queue = currentQueues[i];
-					for (var j = delayed.Count; j-- > 0;)
-						queue.Enqueue(delayed[j]);
-					delayed.Clear();
-					while (queue.Count > 0)
-					{
-						queue.Dequeue().callback.TryInvoke();
-						var currentTime = DateTime.Now;
-						var delta = (currentTime - startTime).Ticks;
-						if (delta is < 0 or > ticks)
-							return;
-					}
+					queue.Dequeue().callback.TryInvoke();
+					var currentTime = DateTime.Now;
+					var delta = (currentTime - startTime).Ticks;
+					if (delta is < 0 or > ticks)
+						return;
 				}
 			}
 		}

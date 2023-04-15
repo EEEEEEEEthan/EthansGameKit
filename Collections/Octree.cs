@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using EthansGameKit.Internal;
 using UnityEngine;
 using UnityEngine.Assertions;
 
@@ -41,11 +40,11 @@ namespace EthansGameKit.Collections
 	///         <item>不会因为同坐标物品数量过多导致栈溢出</item>
 	///     </list>
 	/// </remarks>
-	public class Octree<T> : ISerializationCallbackReceiver
+	public partial class Octree<T> : ISerializationCallbackReceiver
 	{
-		OctreeNode<T> root;
-		readonly List<OctreeItem<T>> serializedData = new();
-		public IEnumerable<OctreeItem<T>> AllItems => root is null ? Array.Empty<OctreeItem<T>>() : root.AllItems;
+		Node root;
+		readonly List<Item> serializedData = new();
+		public IEnumerable<Item> AllItems => root is null ? Array.Empty<Item>() : root.AllItems;
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{
 			serializedData.Clear();
@@ -59,9 +58,9 @@ namespace EthansGameKit.Collections
 				Insert(data);
 			serializedData.Clear();
 		}
-		public OctreeItem<T> Insert(Vector3 position, T obj)
+		public Item Insert(Vector3 position, T obj)
 		{
-			var item = OctreeItem<T>.Generate(position, obj);
+			var item = Item.Generate(position, obj);
 			Insert(item);
 			return item;
 		}
@@ -69,19 +68,35 @@ namespace EthansGameKit.Collections
 		{
 			root = null;
 		}
-		public void RemoveAndRecycle(ref OctreeItem<T> octreeItem)
+		public void RemoveAndRecycle(ref Item item)
 		{
-			Remove(octreeItem);
-			OctreeItem<T>.ClearAndRecycle(ref octreeItem);
+			Remove(item);
+			Item.Recycle(ref item);
 		}
-		public IEnumerable<OctreeItem<T>> Query(Vector3 center, float maxDistance)
+		public int Query(ref Item[] result, Matrix4x4 worldToLocal, Camera camera, float expansion)
 		{
-			return root is null ? Array.Empty<OctreeItem<T>>() : root.Query(center, maxDistance);
+			if (root is null) return 0;
+			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
+			var count = 0;
+			root.Query(ref result, OctreeDefines.planes, ref count);
+			return count;
 		}
-		public bool InScreen(Camera camera, Matrix4x4 worldToLocal, float expansion, OctreeItem<T> octreeItem)
+		public void Query(ICollection<Item> result, Matrix4x4 worldToLocal, Camera camera, float expansion)
+		{
+			result.Clear();
+			if (root is null) return;
+			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
+			root.Query(result, OctreeDefines.planes);
+		}
+		public void Query(ICollection<Item> result, Vector3 center, float radius)
+		{
+			result.Clear();
+			root?.Query(result, center, radius * radius);
+		}
+		public bool InScreen(Camera camera, Matrix4x4 worldToLocal, float expansion, Item item)
 		{
 			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
-			var bounds = new Bounds(octreeItem.Position, Vector3.zero);
+			var bounds = new Bounds(item.Position, Vector3.zero);
 			return GeometryUtility.TestPlanesAABB(OctreeDefines.planes, bounds);
 		}
 		public void DrawGizmos(Camera camera, Matrix4x4 worldToLocal, float expansion)
@@ -91,21 +106,11 @@ namespace EthansGameKit.Collections
 			root?.Editor_DrawGizmos(OctreeDefines.planes);
 #endif
 		}
-		internal void Update(OctreeItem<T> octreeItem, float newX, float newY, float newZ)
+		void Insert(Item item)
 		{
-			Assert.IsNotNull(octreeItem.Tree);
-			if (!root.Contains(newX, newY, newZ)) root = root.Encapsulate(newX, newY, newZ);
-			var pos = octreeItem.Position;
-			root.Update(octreeItem, pos.x, pos.y, pos.z, newX, newY, newZ);
-			if (root.IsBranch)
-				if (root.TryGetTheOnlyChild(out var theOnlyChild))
-					root = theOnlyChild;
-		}
-		void Insert(OctreeItem<T> octreeItem)
-		{
-			Assert.IsNull(octreeItem.Tree);
-			var pos = octreeItem.Position;
-			root ??= OctreeNode<T>.Generate(
+			Assert.IsNull(item.Tree);
+			var pos = item.Position;
+			root ??= Node.Generate(
 				pos.x - 1,
 				pos.x,
 				pos.x + 1,
@@ -117,19 +122,29 @@ namespace EthansGameKit.Collections
 				pos.z + 1
 			);
 			if (!root.Contains(pos.x, pos.y, pos.z)) root = root.Encapsulate(pos.x, pos.y, pos.z);
-			root.Insert(octreeItem, pos.x, pos.y, pos.z);
-			octreeItem.Tree = this;
+			root.Insert(item, pos.x, pos.y, pos.z);
+			item.Tree = this;
 		}
-		void Remove(OctreeItem<T> octreeItem)
+		void Remove(Item item)
 		{
-			Assert.IsNotNull(octreeItem.Tree);
-			var pos = octreeItem.Position;
-			root.Remove(octreeItem, pos.x, pos.y, pos.z);
+			Assert.IsNotNull(item.Tree);
+			var pos = item.Position;
+			root.Remove(item, pos.x, pos.y, pos.z);
 			if (root.IsBranch)
 				if (root.TryGetTheOnlyChild(out var theOnlyChild))
 					root = theOnlyChild;
 			if (root.IsEmpty) root = null;
-			octreeItem.Tree = null;
+			item.Tree = null;
+		}
+		void Update(Item item, float newX, float newY, float newZ)
+		{
+			Assert.IsNotNull(item.Tree);
+			if (!root.Contains(newX, newY, newZ)) root = root.Encapsulate(newX, newY, newZ);
+			var pos = item.Position;
+			root.Update(item, pos.x, pos.y, pos.z, newX, newY, newZ);
+			if (root.IsBranch)
+				if (root.TryGetTheOnlyChild(out var theOnlyChild))
+					root = theOnlyChild;
 		}
 	}
 }

@@ -8,8 +8,8 @@ namespace EthansGameKit.Internal
 	class TimerUpdater : MonoBehaviour
 	{
 		public static uint currentId = Timers.invalidId;
-		public static Heap<Timer, double> timers = Heap<Timer, double>.Generate();
-		public static Heap<Timer, double> unscaledTimers = Heap<Timer, double>.Generate();
+		public static Heap<Timer, double> timers = new();
+		public static Heap<Timer, double> unscaledTimers = new();
 		static readonly List<Timer> buffer = new();
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
@@ -21,12 +21,12 @@ namespace EthansGameKit.Internal
 		static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
 			var copiedTimers = timers;
-			timers = Heap<Timer, double>.Generate();
+			timers = new();
 			foreach (var item in copiedTimers)
 				if (item.Key.crossScene)
 					timers.Add(item.Key, item.Value);
 			var copiedUnscaledTimers = unscaledTimers;
-			unscaledTimers = Heap<Timer, double>.Generate();
+			unscaledTimers = new();
 			foreach (var item in copiedUnscaledTimers)
 				if (item.Key.crossScene)
 					unscaledTimers.Add(item.Key, item.Value);
