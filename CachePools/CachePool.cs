@@ -24,22 +24,10 @@ namespace EthansGameKit.CachePools
 			}
 			this.keepCount = keepCount;
 		}
-		public object Generate()
-		{
-			var index = list.Count - 1;
-			var obj = list[index];
-			list.RemoveAt(index);
-			return obj;
-		}
-		public void Recycle(T item)
-		{
-			Recycle(item);
-			item = default;
-		}
 		public void Recycle(T item)
 		{
 			list.Add(item);
-			if (!autoReleasing)
+			if (!autoReleasing && list.Count > keepCount)
 				AutoRelease();
 		}
 		public void Recycle(ref T item)

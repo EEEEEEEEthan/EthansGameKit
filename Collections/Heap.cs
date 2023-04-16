@@ -57,24 +57,10 @@ namespace EthansGameKit.Collections
 		Heap()
 		{
 		}
-		protected virtual int GetHashCode(TKey obj)
-		{
-			return obj.GetHashCode();
-		}
 		public virtual void Dispose()
 		{
 			var o = this;
 			ClearAndRecycle(ref o);
-		}
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			for (var i = 0; i < Count; i++)
-				yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
-		}
-		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
-		{
-			for (var i = 0; i < Count; i++)
-				yield return new(keys[i], values[i]);
 		}
 		/// <summary>
 		///     堆增加一个元素
@@ -141,6 +127,20 @@ namespace EthansGameKit.Collections
 			key = default;
 			value = default;
 			return false;
+		}
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			for (var i = 0; i < Count; i++)
+				yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
+		}
+		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
+		{
+			for (var i = 0; i < Count; i++)
+				yield return new(keys[i], values[i]);
+		}
+		protected virtual int GetHashCode(TKey obj)
+		{
+			return obj.GetHashCode();
 		}
 		public bool Update(TKey element, TValue sortingValue)
 		{
