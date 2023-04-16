@@ -281,6 +281,22 @@ namespace EthansGameKit.Internal
 				child?.Editor_DrawGizmos(planes);
 			}
 		}
+		public void Editor_DrawGizmos()
+		{
+			Gizmos.color = IsBranch
+				? OctreeDefines.editor_invisiableBranchColor
+				: OctreeDefines.editor_invisiableleafColor;
+			Gizmos.DrawWireCube(
+				new(xMid, yMid, zMid),
+				new(xMax - xMin, yMax - yMin, zMax - zMin)
+			);
+			if (!IsBranch) return;
+			for (var i = 0; i < 8; i++)
+			{
+				var child = children[i];
+				child?.Editor_DrawGizmos();
+			}
+		}
 #endif
 		void TryShorten()
 		{

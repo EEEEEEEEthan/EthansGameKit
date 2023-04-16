@@ -91,6 +91,12 @@ namespace EthansGameKit.Collections
 			root?.Editor_DrawGizmos(OctreeDefines.planes);
 #endif
 		}
+		public void DrawGizmos()
+		{
+#if UNITY_EDITOR
+			root?.Editor_DrawGizmos();
+#endif
+		}
 		internal void Update(OctreeItem<T> octreeItem, float newX, float newY, float newZ)
 		{
 			Assert.IsNotNull(octreeItem.Tree);
