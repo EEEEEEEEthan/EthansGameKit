@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using EthansGameKit.Collections;
 using UnityEngine;
@@ -80,11 +79,36 @@ namespace EthansGameKit.Internal
 		{
 			var sqrMagnitude = distance * distance;
 			if (IsBranch)
-				return OctreeNodeBranchEnumerator<T>.Generate(this, center, sqrMagnitude);
+			{
+				using var heap = Heap<IEnumerator<OctreeItem<T>>, float>.Generate();
+				for (var i = 0; i < 8; ++i)
+				{
+					var child = children[i];
+					if (child is null) continue;
+					using var subEnumerator = child.Query(center, distance).GetEnumerator();
+					if (!subEnumerator.MoveNext()) continue;
+					var subItem = subEnumerator.Current;
+					// ReSharper disable once PossibleNullReferenceException
+					var subDistance = Vector3.SqrMagnitude(center - subItem.Position);
+					heap.Add(subEnumerator, subDistance);
+				}
+				while (heap.Count > 0)
+				{
+					var enumerator = heap.Pop();
+					yield return enumerator.Current;
+					if (enumerator.MoveNext())
+					{
+						var subItem = enumerator.Current;
+						// ReSharper disable once PossibleNullReferenceException
+						var subDistance = Vector3.SqrMagnitude(center - subItem.Position);
+						heap.Add(enumerator, subDistance);
+					}
+				}
+			}
 			var sqr = Vector3.SqrMagnitude(center - new Vector3(x, y, z));
-			if (sqr >= sqrMagnitude)
-				return Array.Empty<OctreeItem<T>>();
-			return LeafEnumerator<T>.Generate(this);
+			if (sqr >= sqrMagnitude) yield break;
+			foreach (var item in items)
+				yield return item;
 		}
 		public bool TryGetTheOnlyChild(out OctreeNode<T> firstChild)
 		{
