@@ -11,6 +11,11 @@ namespace EthansGameKit
 			add => ApplicationEventListener.OnScreenSizeChanged += value;
 			remove => ApplicationEventListener.OnScreenSizeChanged -= value;
 		}
+		public static event Action OnDrawGizmos
+		{
+			add => ApplicationEventListener.OnGizmos += value;
+			remove => ApplicationEventListener.OnGizmos -= value;
+		}
 	}
 
 	class ApplicationEventListener : MonoBehaviour
@@ -27,6 +32,7 @@ namespace EthansGameKit
 			instance = timerManager.AddComponent<ApplicationEventListener>();
 		}
 		public static event Action OnScreenSizeChanged;
+		public static event Action OnGizmos;
 		public ApplicationEventListener Instance
 		{
 			get
@@ -54,6 +60,10 @@ namespace EthansGameKit
 		void OnApplicationQuit()
 		{
 			Quitting = true;
+		}
+		void OnDrawGizmos()
+		{
+			OnGizmos?.TryInvoke();
 		}
 	}
 }

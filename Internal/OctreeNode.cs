@@ -107,6 +107,7 @@ namespace EthansGameKit.Internal
 			}
 			var sqr = Vector3.SqrMagnitude(center - new Vector3(x, y, z));
 			if (sqr >= sqrMagnitude) yield break;
+			if (items is null) yield break;
 			foreach (var item in items)
 				yield return item;
 		}
