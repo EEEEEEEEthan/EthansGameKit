@@ -10,6 +10,16 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
+		public static string Join(this IEnumerable<string> @this, string seperator)
+		{
+			var output = "";
+			using var enumerator = @this.GetEnumerator();
+			if (enumerator.MoveNext())
+				output = enumerator.Current;
+			while (enumerator.MoveNext())
+				output = output + seperator + enumerator.Current;
+			return output;
+		}
 		public static T RandomPick<T>(this IEnumerable<T> @this)
 		{
 			return @this.TryRandomPick(out var value) ? value : default;

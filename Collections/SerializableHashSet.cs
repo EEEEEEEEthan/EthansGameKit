@@ -164,4 +164,9 @@ namespace EthansGameKit.Collections
 	public class SerializableHashSetInt32 : SerializableHashSet<int>
 	{
 	}
+	
+	[Serializable]
+	public class SerializableHashSetUInt32 : SerializableHashSet<uint>
+	{
+	}
 }
