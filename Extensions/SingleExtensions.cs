@@ -35,9 +35,8 @@ namespace EthansGameKit
 		}
 		public static float InverseLerp(this float @this, float min, float max)
 		{
-			// ReSharper disable once IntroduceOptionalParameters.Global
 			return InverseLerp(@this, min, max, true);
-		}
+		} // ReSharper disable Unity.PerformanceAnalysis
 		public static float InverseLerp(this float @this, float min, float max, bool clamp)
 		{
 			var delta = max - min;
