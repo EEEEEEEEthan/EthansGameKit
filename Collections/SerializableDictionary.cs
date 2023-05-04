@@ -8,6 +8,13 @@ namespace EthansGameKit.Collections
 	[Serializable]
 	public abstract class SerializableDictionary<TKey, TValue> : IDictionary<TKey, TValue>, IReadOnlyDictionary<TKey, TValue>, IDictionary, ISerializationCallbackReceiver
 	{
+		[Serializable]
+		struct Data
+		{
+			[SerializeField] public TKey key;
+			[SerializeField] public TValue value;
+		}
+
 		readonly Dictionary<TKey, TValue> dict;
 		[SerializeField, HideInInspector] Data[] serializeData;
 		public IEqualityComparer<TKey> Comparer => dict.Comparer;
@@ -144,23 +151,10 @@ namespace EthansGameKit.Collections
 				dict.Add(pair.key, pair.value);
 			serializeData = null;
 		}
-
-		[Serializable]
-		struct Data
-		{
-			[SerializeField] public TKey key;
-			[SerializeField] public TValue value;
-		}
-
 		public TValue this[TKey key]
 		{
 			get => dict[key];
 			set => dict[key] = value;
-		}
-		object IDictionary.this[object key]
-		{
-			get => ((IDictionary)dict)[key];
-			set => ((IDictionary)dict)[key] = value;
 		}
 		public bool ContainsValue(TValue value)
 		{
@@ -189,6 +183,11 @@ namespace EthansGameKit.Collections
 		public bool TryAdd(TKey key, TValue value)
 		{
 			return dict.TryAdd(key, value);
+		}
+		object IDictionary.this[object key]
+		{
+			get => ((IDictionary)dict)[key];
+			set => ((IDictionary)dict)[key] = value;
 		}
 	}
 }
