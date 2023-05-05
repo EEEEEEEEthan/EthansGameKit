@@ -7,7 +7,7 @@ using UnityEngine;
 namespace EthansGameKit.Collections
 {
 	[Serializable]
-	public class SerializableQueue<T> : IReadOnlyCollection<T>, ICollection
+	public class SerializableQueue<T> : IReadOnlyCollection<T>, ICollection, IDisposable
 	{
 		[SerializeField, HideInInspector] T[] items;
 		[SerializeField, HideInInspector] int start;
@@ -38,6 +38,10 @@ namespace EthansGameKit.Collections
 		IEnumerator<T> IEnumerable<T>.GetEnumerator()
 		{
 			return GetEnumerator();
+		}
+		void IDisposable.Dispose()
+		{
+			Dispose();
 		}
 		public void Clear()
 		{
@@ -173,6 +177,9 @@ namespace EthansGameKit.Collections
 			result = Peek();
 			return true;
 		}
+		protected virtual void Dispose()
+		{
+		}
 	}
 
 	[Serializable]
@@ -182,10 +189,24 @@ namespace EthansGameKit.Collections
 		{
 			return GlobalCachePool<SerializableQueueVector3>.TryGenerate(out var q) ? q : new();
 		}
-		public static void ClearAndRecycle(ref SerializableQueueVector3 queue)
+		protected override void Dispose()
 		{
-			queue.Clear();
-			GlobalCachePool<SerializableQueueVector3>.Recycle(ref queue);
+			Clear();
+			GlobalCachePool<SerializableQueueVector3>.Recycle(this);
+		}
+	}
+
+	[Serializable]
+	public sealed class SerializableQueueSingle : SerializableQueue<float>
+	{
+		public static SerializableQueueSingle Generate()
+		{
+			return GlobalCachePool<SerializableQueueSingle>.TryGenerate(out var q) ? q : new();
+		}
+		protected override void Dispose()
+		{
+			Clear();
+			GlobalCachePool<SerializableQueueSingle>.Recycle(this);
 		}
 	}
 }
