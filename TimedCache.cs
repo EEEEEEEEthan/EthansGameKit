@@ -1,9 +1,23 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Object = UnityEngine.Object;
 
 namespace EthansGameKit
 {
+	public interface ITimedCache
+	{
+		bool HasValue { get; }
+		object Value { get; }
+		IAwaitable LoadAsync();
+		void LoadAsync(Action callback);
+	}
+
+	public interface ITimedCache<out T> : ITimedCache
+	{
+		T Value { get; }
+	}
+
 	public class AbsTimedCache<T>
 	{
 		const float keepSeconds = 10f;
@@ -17,11 +31,11 @@ namespace EthansGameKit
 			get => cachedValue;
 			set
 			{
+				MarkAccess();
 				HasValue = true;
 				cachedValue = value;
 			}
 		}
-		bool Expired => Time.unscaledTime - lastAccess > keepSeconds;
 		protected AbsTimedCache()
 		{
 			lastAccess = -keepSeconds;
@@ -37,7 +51,8 @@ namespace EthansGameKit
 		}
 		void AutoRelease()
 		{
-			if (Expired)
+			var remainingTime = keepSeconds - (Time.unscaledTime - lastAccess);
+			if (remainingTime <= 0)
 			{
 				HasValue = false;
 				cachedValue = default;
@@ -45,12 +60,12 @@ namespace EthansGameKit
 			}
 			else
 			{
-				Timers.InvokeAfterUnscaled(keepSeconds, AutoRelease);
+				Timers.InvokeAfterUnscaled(remainingTime, AutoRelease);
 			}
 		}
 	}
 
-	public sealed class TimedCache<T> : AbsTimedCache<T>
+	public sealed class TimedCache<T> : AbsTimedCache<T>, ITimedCache<T>
 	{
 		readonly Func<T> valueGetter;
 		readonly Action<Action<T>> asyncValueGetter;
@@ -64,10 +79,17 @@ namespace EthansGameKit
 				return base.Value = valueGetter();
 			}
 		}
+		object ITimedCache.Value => Value;
 		public TimedCache(Func<T> valueGetter, Action<Action<T>> asyncValueGetter)
 		{
 			this.valueGetter = valueGetter;
 			this.asyncValueGetter = asyncValueGetter;
+		}
+		public IAwaitable LoadAsync()
+		{
+			var awaitable = IAwaitable.Create(out var handle);
+			LoadAsync(handle.Set);
+			return awaitable;
 		}
 		public void LoadAsync(Action callback)
 		{
@@ -80,17 +102,10 @@ namespace EthansGameKit
 				callback.TryInvoke();
 			}
 		}
-		public IAwaitable LoadAsync()
-		{
-			var awaitable = IAwaitable.Create(out var handle);
-			LoadAsync(handle.Set);
-			return awaitable;
-		}
 	}
 
-	public sealed class ResourceCache<T> : AbsTimedCache<T> where T : UnityEngine.Object
+	public sealed class ResourceCache<T> : AbsTimedCache<T>, ITimedCache<T> where T : Object
 	{
-		const float keepSeconds = 10f;
 		readonly string resourcePath;
 		public new T Value
 		{
@@ -102,11 +117,18 @@ namespace EthansGameKit
 				return base.Value = Resources.Load<T>(resourcePath);
 			}
 		}
+		object ITimedCache.Value => Value;
 		public ResourceCache(string resourcePath)
 		{
 			this.resourcePath = resourcePath;
 		}
-		public void LoadAsync(Action<T> callback)
+		public IAwaitable LoadAsync()
+		{
+			var awaitable = IAwaitable.Create(out var handle);
+			LoadAsync(handle.Set);
+			return awaitable;
+		}
+		public void LoadAsync(Action callback)
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
@@ -115,14 +137,9 @@ namespace EthansGameKit
 			{
 				var result = operation.asset as T;
 				Assert.IsNotNull(result);
-				callback.TryInvoke(result);
+				callback.TryInvoke();
+				base.Value = result;
 			}
-		}
-		public IAwaitable<T> LoadAsync()
-		{
-			var awaitable = IAwaitable<T>.Create(out var handle);
-			LoadAsync(handle.Set);
-			return awaitable;
 		}
 	}
 }

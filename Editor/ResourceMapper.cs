@@ -93,14 +93,18 @@ namespace EthansGameKit.Editor
 			var folderPath = AssetDatabase.GetAssetPath(resourceFolder);
 			var dir2Caches = new Dictionary<string, List<string>>();
 			var @public = this.@public ? "public " : "";
-			foreach (var guid in AssetDatabase.FindAssets("t:GameObject", new[] { folderPath }))
+			foreach (var guid in AssetDatabase.FindAssets("", new[] { folderPath }))
 			{
 				var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+				var obj = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
+				var type = obj.GetType();
+				if (type.Namespace != null && type.Namespace.StartsWith("UnityEditor")) continue;
 				var suffix = assetPath[(folderPath.Length + 1)..];
-				var suffixWithoutExtension = suffix[..^7];
+				var extension = System.IO.Path.GetExtension(assetPath);
+				var suffixWithoutExtension = suffix[..^extension.Length];
 				Indexer.TryGetViaGuid(guid, out var info);
 				var propertyName = info.alias;
-				builder.AppendLine($"{@public}static ResourceCache<GameObject> {propertyName} {{ get; }} = new(\"{suffixWithoutExtension}\");");
+				builder.AppendLine($"{@public}static ResourceCache<{type.FullName}> {propertyName} {{ get; }} = new(\"{suffixWithoutExtension}\");");
 				var lastSlash = suffixWithoutExtension.LastIndexOf('/');
 				if (lastSlash >= 0)
 				{
@@ -112,7 +116,7 @@ namespace EthansGameKit.Editor
 			}
 			foreach (var (dir, caches) in dir2Caches)
 			{
-				builder.AppendLine($"{@public}static IReadOnlyList<ResourceCache<GameObject>> GameObjectGroup_{dir.Replace('/', '_')} {{ get; }} = new ResourceCache<GameObject>[]");
+				builder.AppendLine($"{@public}static IReadOnlyList<ITimedCache<object>> ResourceGroup_{dir.Replace('/', '_')} {{ get; }} = new ITimedCache[]");
 				builder.AppendLine("{");
 				foreach (var cache in caches)
 					builder.AppendLine($"\t{cache}");
