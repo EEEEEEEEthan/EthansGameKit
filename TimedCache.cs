@@ -15,7 +15,27 @@ namespace EthansGameKit
 
 	public interface ITimedCache<out T> : ITimedCache
 	{
-		T Value { get; }
+		new T Value { get; }
+	}
+
+	class CacheConverter<T> : ITimedCache<T>, ITimedCache
+	{
+		readonly ITimedCache source;
+		public bool HasValue => source.HasValue;
+		public T Value => (T)source.Value;
+		object ITimedCache.Value => source.Value;
+		public CacheConverter(ITimedCache source)
+		{
+			this.source = source;
+		}
+		public IAwaitable LoadAsync()
+		{
+			return source.LoadAsync();
+		}
+		public void LoadAsync(Action callback)
+		{
+			source.LoadAsync(callback);
+		}
 	}
 
 	public class AbsTimedCache<T>

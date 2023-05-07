@@ -96,7 +96,13 @@ namespace EthansGameKit.Editor
 			foreach (var guid in AssetDatabase.FindAssets("", new[] { folderPath }))
 			{
 				var assetPath = AssetDatabase.GUIDToAssetPath(guid);
+				if(string.IsNullOrEmpty(assetPath)) continue;
 				var obj = AssetDatabase.LoadAssetAtPath<Object>(assetPath);
+				if (!obj)
+				{
+					Debug.LogError($"unexpected asset at {assetPath}");
+					continue;
+				}
 				var type = obj.GetType();
 				if (type.Namespace != null && type.Namespace.StartsWith("UnityEditor")) continue;
 				var suffix = assetPath[(folderPath.Length + 1)..];
@@ -104,22 +110,22 @@ namespace EthansGameKit.Editor
 				var suffixWithoutExtension = suffix[..^extension.Length];
 				Indexer.TryGetViaGuid(guid, out var info);
 				var propertyName = info.alias;
-				builder.AppendLine($"{@public}static ResourceCache<{type.FullName}> {propertyName} {{ get; }} = new(\"{suffixWithoutExtension}\");");
+				builder.AppendLine($"{@public}static ITimedCache<{type.FullName}> {propertyName} {{ get; }} = new ResourceCache<{type.FullName}>(\"{suffixWithoutExtension}\");");
 				var lastSlash = suffixWithoutExtension.LastIndexOf('/');
 				if (lastSlash >= 0)
 				{
 					var dir = suffixWithoutExtension[..lastSlash];
 					if (!dir2Caches.TryGetValue(dir, out var list))
 						dir2Caches[dir] = list = new();
-					list.Add(propertyName + ",");
+					list.Add(propertyName);
 				}
 			}
 			foreach (var (dir, caches) in dir2Caches)
 			{
-				builder.AppendLine($"{@public}static IReadOnlyList<ITimedCache> ResourceGroup_{dir.Replace('/', '_')} {{ get; }} = new ITimedCache[]");
+				builder.AppendLine($"{@public}static IReadOnlyList<ITimedCache<UnityEngine.Object>> ResourceGroup_{dir.Replace('/', '_')} {{ get; }} = new ITimedCache<UnityEngine.Object>[]");
 				builder.AppendLine("{");
 				foreach (var cache in caches)
-					builder.AppendLine($"\t{cache}");
+					builder.AppendLine($"\t{cache}.Cast<UnityEngine.Object>(),");
 				builder.AppendLine("};");
 			}
 			return builder.ToString();
