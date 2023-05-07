@@ -116,7 +116,7 @@ namespace EthansGameKit.Editor
 			}
 			foreach (var (dir, caches) in dir2Caches)
 			{
-				builder.AppendLine($"{@public}static IReadOnlyList<ITimedCache<object>> ResourceGroup_{dir.Replace('/', '_')} {{ get; }} = new ITimedCache[]");
+				builder.AppendLine($"{@public}static IReadOnlyList<ITimedCache> ResourceGroup_{dir.Replace('/', '_')} {{ get; }} = new ITimedCache[]");
 				builder.AppendLine("{");
 				foreach (var cache in caches)
 					builder.AppendLine($"\t{cache}");
