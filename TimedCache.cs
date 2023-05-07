@@ -18,7 +18,7 @@ namespace EthansGameKit
 		new T Value { get; }
 	}
 
-	class CacheConverter<T> : ITimedCache<T>, ITimedCache
+	class CacheConverter<T> : ITimedCache<T>
 	{
 		readonly ITimedCache source;
 		public bool HasValue => source.HasValue;
@@ -48,7 +48,11 @@ namespace EthansGameKit
 		public bool HasValue { get; private set; }
 		protected T Value
 		{
-			get => cachedValue;
+			get
+			{
+				MarkAccess();
+				return cachedValue;
+			}
 			set
 			{
 				MarkAccess();
@@ -131,7 +135,6 @@ namespace EthansGameKit
 		{
 			get
 			{
-				MarkAccess();
 				if (HasValue)
 					return base.Value;
 				return base.Value = Resources.Load<T>(resourcePath);
@@ -159,6 +162,44 @@ namespace EthansGameKit
 				Assert.IsNotNull(result);
 				callback.TryInvoke();
 				base.Value = result;
+			}
+		}
+	}
+
+	public sealed class ResourceGroupCache<T> : AbsTimedCache<T[]>, ITimedCache<T[]> where T : Object
+	{
+		readonly string resourcePath;
+		public new T[] Value
+		{
+			get
+			{
+				if (HasValue)
+					return base.Value;
+				return base.Value = Resources.LoadAll<T>(resourcePath);
+			}
+		}
+		object ITimedCache.Value => Value;
+		public ResourceGroupCache(string resourcePath)
+		{
+			this.resourcePath = resourcePath;
+		}
+		public IAwaitable LoadAsync()
+		{
+			var awaitable = IAwaitable.Create(out var handle);
+			LoadAsync(handle.Set);
+			return awaitable;
+		}
+		public void LoadAsync(Action callback)
+		{
+			var operation = Resources.LoadAsync<T>(resourcePath);
+			operation.completed += cb;
+
+			void cb(AsyncOperation _)
+			{
+				var result = operation.asset as T;
+				Assert.IsNotNull(result);
+				callback.TryInvoke();
+				base.Value = Value;
 			}
 		}
 	}
