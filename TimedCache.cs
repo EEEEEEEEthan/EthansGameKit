@@ -10,7 +10,6 @@ namespace EthansGameKit
 		bool HasValue { get; }
 		object Value { get; }
 		IAwaitable LoadAsync();
-		void LoadAsync(Action callback);
 	}
 
 	public interface ITimedCache<out T> : ITimedCache
@@ -32,13 +31,9 @@ namespace EthansGameKit
 		{
 			return source.LoadAsync();
 		}
-		public void LoadAsync(Action callback)
-		{
-			source.LoadAsync(callback);
-		}
 	}
 
-	public class AbsTimedCache<T>
+	public abstract class AbsTimedCache<T> : ITimedCache<T>
 	{
 		const float keepSeconds = 10f;
 		float lastAccess;
@@ -46,10 +41,16 @@ namespace EthansGameKit
 		bool autoReleasing;
 		uint timerId;
 		public bool HasValue { get; private set; }
-		protected T Value
+		T Value
 		{
 			get
 			{
+				if (HasValue)
+				{
+					MarkAccess();
+					return cachedValue;
+				}
+				cachedValue = LoadValue();
 				MarkAccess();
 				return cachedValue;
 			}
@@ -60,11 +61,27 @@ namespace EthansGameKit
 				cachedValue = value;
 			}
 		}
+		T ITimedCache<T>.Value => Value;
+		object ITimedCache.Value => Value;
 		protected AbsTimedCache()
 		{
 			lastAccess = -keepSeconds;
 		}
-		protected void MarkAccess()
+		IAwaitable ITimedCache.LoadAsync()
+		{
+			var awaitable = IAwaitable.Create(out var handle);
+			LoadValueAsync(onLoaded);
+			return awaitable;
+
+			void onLoaded(T result)
+			{
+				Value = result;
+				handle.Set();
+			}
+		}
+		protected abstract T LoadValue();
+		protected abstract void LoadValueAsync(Action<T> onLoaded);
+		void MarkAccess()
 		{
 			lastAccess = Time.unscaledTime;
 			if (!autoReleasing)
@@ -89,69 +106,37 @@ namespace EthansGameKit
 		}
 	}
 
-	public sealed class TimedCache<T> : AbsTimedCache<T>, ITimedCache<T>
+	public sealed class TimedCache<T> : AbsTimedCache<T>
 	{
 		readonly Func<T> valueGetter;
 		readonly Action<Action<T>> asyncValueGetter;
-		public new T Value
-		{
-			get
-			{
-				MarkAccess();
-				if (HasValue)
-					return base.Value;
-				return base.Value = valueGetter();
-			}
-		}
-		object ITimedCache.Value => Value;
 		public TimedCache(Func<T> valueGetter, Action<Action<T>> asyncValueGetter)
 		{
 			this.valueGetter = valueGetter;
 			this.asyncValueGetter = asyncValueGetter;
 		}
-		public IAwaitable LoadAsync()
+		protected override T LoadValue()
 		{
-			var awaitable = IAwaitable.Create(out var handle);
-			LoadAsync(handle.Set);
-			return awaitable;
+			return valueGetter();
 		}
-		public void LoadAsync(Action callback)
+		protected override void LoadValueAsync(Action<T> callback)
 		{
-			asyncValueGetter(onLoaded);
-
-			void onLoaded(T value)
-			{
-				MarkAccess();
-				base.Value = value;
-				callback.TryInvoke();
-			}
+			asyncValueGetter(callback);
 		}
 	}
 
-	public sealed class ResourceCache<T> : AbsTimedCache<T>, ITimedCache<T> where T : Object
+	public sealed class ResourceCache<T> : AbsTimedCache<T> where T : Object
 	{
 		readonly string resourcePath;
-		public new T Value
-		{
-			get
-			{
-				if (HasValue)
-					return base.Value;
-				return base.Value = Resources.Load<T>(resourcePath);
-			}
-		}
-		object ITimedCache.Value => Value;
 		public ResourceCache(string resourcePath)
 		{
 			this.resourcePath = resourcePath;
 		}
-		public IAwaitable LoadAsync()
+		protected override T LoadValue()
 		{
-			var awaitable = IAwaitable.Create(out var handle);
-			LoadAsync(handle.Set);
-			return awaitable;
+			return Resources.Load<T>(resourcePath);
 		}
-		public void LoadAsync(Action callback)
+		protected override void LoadValueAsync(Action<T> callback)
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
@@ -160,36 +145,23 @@ namespace EthansGameKit
 			{
 				var result = operation.asset as T;
 				Assert.IsNotNull(result);
-				callback.TryInvoke();
-				base.Value = result;
+				callback.TryInvoke(result);
 			}
 		}
 	}
 
-	public sealed class ResourceGroupCache<T> : AbsTimedCache<T[]>, ITimedCache<T[]> where T : Object
+	public sealed class ResourceGroupCache<T> : AbsTimedCache<T[]> where T : Object
 	{
 		readonly string resourcePath;
-		public new T[] Value
-		{
-			get
-			{
-				if (HasValue)
-					return base.Value;
-				return base.Value = Resources.LoadAll<T>(resourcePath);
-			}
-		}
-		object ITimedCache.Value => Value;
 		public ResourceGroupCache(string resourcePath)
 		{
 			this.resourcePath = resourcePath;
 		}
-		public IAwaitable LoadAsync()
+		protected override T[] LoadValue()
 		{
-			var awaitable = IAwaitable.Create(out var handle);
-			LoadAsync(handle.Set);
-			return awaitable;
+			return Resources.LoadAll<T>(resourcePath);
 		}
-		public void LoadAsync(Action callback)
+		protected override void LoadValueAsync(Action<T[]> callback)
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
@@ -198,8 +170,7 @@ namespace EthansGameKit
 			{
 				var result = operation.asset as T;
 				Assert.IsNotNull(result);
-				callback.TryInvoke();
-				base.Value = Value;
+				callback.TryInvoke(LoadValue());
 			}
 		}
 	}
