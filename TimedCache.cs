@@ -21,7 +21,22 @@ namespace EthansGameKit
 	{
 		readonly ITimedCache source;
 		public bool HasValue => source.HasValue;
-		public T Value => (T)source.Value;
+		public T Value
+		{
+			get
+			{
+				try
+				{
+					return (T)source.Value;
+				}
+				catch (Exception e)
+				{
+					Debug.LogError($"convert failed: {source.Value.GetType()} -> {typeof(T)}");
+					Debug.LogException(e);
+					return default;
+				}
+			}
+		}
 		object ITimedCache.Value => source.Value;
 		public CacheConverter(ITimedCache source)
 		{
@@ -41,7 +56,7 @@ namespace EthansGameKit
 		bool autoReleasing;
 		uint timerId;
 		public bool HasValue { get; private set; }
-		T Value
+		public T Value
 		{
 			get
 			{
@@ -54,7 +69,7 @@ namespace EthansGameKit
 				MarkAccess();
 				return cachedValue;
 			}
-			set
+			private set
 			{
 				MarkAccess();
 				HasValue = true;
