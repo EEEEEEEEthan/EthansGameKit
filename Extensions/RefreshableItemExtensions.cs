@@ -1,9 +1,8 @@
-﻿// ReSharper disable once CheckNamespace
-
-using System;
+﻿using System;
 using EthansGameKit.Internal;
 using UnityEngine;
 
+// ReSharper disable once CheckNamespace
 namespace EthansGameKit
 {
 	public static partial class Extensions
