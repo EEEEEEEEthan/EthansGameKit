@@ -41,66 +41,6 @@ namespace EthansGameKit.Editor
 				EditorGUIUtility.PingObject(obj);
 			EditorUtility.SetDirty(obj);
 		}
-		protected static T GetComponent<T>(string path, bool create) where T : Component
-		{
-			var gameObject = GetGameObject(path, create);
-			if (!gameObject) return null;
-			if (!gameObject.TryGetComponent<T>(out var component) && create)
-				component = gameObject.AddComponent<T>();
-			return component;
-		}
-		protected static GameObject GetGameObject(string path, bool create)
-		{
-			var pieces = new Queue<string>(path.Split('/'));
-			ActiveScene.GetRootGameObjects(buffer);
-			var rootName = pieces.Dequeue();
-			var count = buffer.Count;
-			for (var i = 0; i < count; ++i)
-			{
-				if (buffer[i].name == rootName)
-					return GetGameObject(buffer[i].transform, pieces, create);
-			}
-			if (create)
-			{
-				var gameObject = new GameObject(rootName);
-				SetDirty(gameObject, true);
-				return GetGameObject(gameObject.transform, pieces, true);
-			}
-			return null;
-		}
-		protected static GameObject GetGameObject(Transform parent, string path, bool create)
-		{
-			var pieces = new Queue<string>(path.Split('/'));
-			return GetGameObject(parent, pieces, create);
-		}
-		protected static void LockLocalPosition(Transform transform, Vector3 localPosition)
-		{
-			if (transform.localPosition != localPosition)
-			{
-				transform.localPosition = localPosition;
-				SetDirty(transform, false);
-			}
-		}
-		protected static void LockLocalRotation(Transform transform, Quaternion localRotation)
-		{
-			if (transform.localRotation != localRotation)
-			{
-				transform.localRotation = localRotation;
-				SetDirty(transform, false);
-			}
-		}
-		protected static void LockLocalScale(Transform transform, Vector3 localScale)
-		{
-			if (transform.localScale != localScale)
-			{
-				transform.localScale = localScale;
-				SetDirty(transform, false);
-			}
-		}
-		protected static void LockLocalRotation(Transform transform, Vector3 localEulerAngles)
-		{
-			LockLocalRotation(transform, Quaternion.Euler(localEulerAngles));
-		}
 		internal static void Initialize()
 		{
 			EditorSceneManager.sceneOpened += OnSceneLoaded;
@@ -117,27 +57,6 @@ namespace EthansGameKit.Editor
 					var instance = instances[i];
 					instance.Active = instance.IsTargetScene;
 				}
-			}
-		}
-		static GameObject GetGameObject(Transform parent, Queue<string> pieces, bool create)
-		{
-			while (true)
-			{
-				if (pieces.Count <= 0) return parent.gameObject;
-				var childCount = parent.childCount;
-				var name = pieces.Dequeue();
-				for (var i = 0; i < childCount; ++i)
-				{
-					var child = parent.GetChild(i);
-					if (child.name == name) return GetGameObject(child, pieces, true);
-				}
-				if (create)
-				{
-					var gameObject = new GameObject(name);
-					parent = gameObject.transform;
-					continue;
-				}
-				return null;
 			}
 		}
 		static void OnSceneLoaded(Scene scene, OpenSceneMode _)
