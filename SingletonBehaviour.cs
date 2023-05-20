@@ -1,11 +1,10 @@
-using System;
 using UnityEngine;
 using UnityEngine.Assertions;
 
 namespace EthansGameKit
 {
-	[Obsolete, DefaultExecutionOrder(int.MinValue)]
-	public class FakeSingleton<T> : MonoBehaviour where T : FakeSingleton<T>
+	[DefaultExecutionOrder(int.MinValue)]
+	public class SingletonBehaviour<T> : MonoBehaviour where T : SingletonBehaviour<T>
 	{
 		public static T Instance { get; private set; }
 		protected void OnEnable()
