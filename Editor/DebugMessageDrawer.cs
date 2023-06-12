@@ -155,8 +155,8 @@ namespace EthansGameKit.Editor
 			SceneView.duringSceneGui += OnSceneGUI;
 			EditorSceneManager.sceneOpened -= OnSceneOpened;
 			EditorSceneManager.sceneOpened += OnSceneOpened;
-			ApplicationEvents.OnDrawGizmos -= OnDrawGizmos;
-			ApplicationEvents.OnDrawGizmos += OnDrawGizmos;
+			ApplicationEvents.OnGUI -= OnGUI;
+			ApplicationEvents.OnGUI += OnGUI;
 		}
 		static void OnSceneOpened(Scene scene, OpenSceneMode _)
 		{
@@ -172,7 +172,7 @@ namespace EthansGameKit.Editor
 			Draw(camera, ray);
 			GUI.changed = true;
 		}
-		static void OnDrawGizmos()
+		static void OnGUI()
 		{
 			if (!EditorWindow.focusedWindow) return;
 			if (EditorWindow.focusedWindow.GetType() != gameViewType) return;
