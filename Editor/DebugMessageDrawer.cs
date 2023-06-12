@@ -8,7 +8,7 @@ using UnityEngine.SceneManagement;
 namespace EthansGameKit.Editor
 {
 	[InitializeOnLoad]
-	static class DebugIt
+	static class DebugMessageDrawer
 	{
 		const string indicatorName = "CellIndicator";
 		static Texture2D cachedIcon_warning;
@@ -109,13 +109,13 @@ namespace EthansGameKit.Editor
 				}
 				foreach (var t in cachedIndicator.transform.GetComponentsInChildren<Component>(true))
 				{
-					//t.gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
-					//t.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
+					t.gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
+					t.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 				}
 				return cachedIndicator;
 			}
 		}
-		static DebugIt()
+		static DebugMessageDrawer()
 		{
 			if (Application.isPlaying) return;
 			var assembly = typeof(EditorWindow).Assembly;
@@ -127,17 +127,16 @@ namespace EthansGameKit.Editor
 			if (!Physics.Raycast(ray, out var hit)) return;
 			if (hit.collider)
 			{
-				var messageProvider = hit.collider.GetComponentInParent<IDebugMessageProvider>();
-				if (messageProvider != null)
+				var provider = hit.collider.GetComponentInParent<IDebugMessageProvider>();
+				if (provider != null)
 				{
 					try
 					{
-						messageProvider.GetDebugMessage(hit, out var bounds, out var message);
+						provider.GetDebugMessage(hit, out var matrix, out var message);
 						var indicatorTransform = Indicator.transform;
-						var providerTransform = messageProvider.transform;
-						indicatorTransform.position = providerTransform.TransformPoint(bounds.center);
-						indicatorTransform.rotation = providerTransform.rotation;
-						indicatorTransform.localScale = bounds.size;
+						indicatorTransform.position = matrix.GetPosition();
+						indicatorTransform.rotation = matrix.rotation;
+						indicatorTransform.localScale = matrix.lossyScale;
 						var screenPoint = camera.WorldToScreenPoint(hit.point);
 						var point = camera.ScreenToWorldPoint(screenPoint + new Vector3(20, 0, 0));
 						Handles.Label(point, message, TextStyle);

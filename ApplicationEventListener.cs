@@ -16,6 +16,11 @@ namespace EthansGameKit
 			add => ApplicationEventListener.OnGizmos += value;
 			remove => ApplicationEventListener.OnGizmos -= value;
 		}
+		public static event Action OnGUI
+		{
+			add => ApplicationEventListener.OnGui += value;
+			remove => ApplicationEventListener.OnGui -= value;
+		}
 	}
 
 	class ApplicationEventListener : MonoBehaviour
@@ -33,6 +38,7 @@ namespace EthansGameKit
 		}
 		public static event Action OnScreenSizeChanged;
 		public static event Action OnGizmos;
+		public static event Action OnGui;
 		public ApplicationEventListener Instance
 		{
 			get
@@ -40,6 +46,10 @@ namespace EthansGameKit
 				if (!instance) instance = FindObjectOfType<ApplicationEventListener>();
 				return instance;
 			}
+		}
+		void OnGUI()
+		{
+			OnGui.TryInvoke();
 		}
 		void Update()
 		{
