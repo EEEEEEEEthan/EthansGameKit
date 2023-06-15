@@ -237,6 +237,7 @@ namespace EthansGameKit.DebugUtilities
 					case EventType.TouchEnter:
 					case EventType.TouchLeave:
 					case EventType.TouchStationary:
+						break;
 					default:
 						throw new ArgumentOutOfRangeException();
 				}

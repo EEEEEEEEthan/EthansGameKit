@@ -14,14 +14,15 @@ namespace EthansGameKit.Internal
 				if (rootObject)
 				{
 					root = rootObject.transform;
+					root.gameObject.hideFlags = root.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
 				}
 				else
 				{
 					rootObject = new(nameof(EthansGameKit));
-					DontDestroyOnLoad(rootObject);
 					root = rootObject.transform;
 					root.gameObject.hideFlags = root.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
 				}
+				DontDestroyOnLoad(rootObject);
 				return root;
 			}
 		}

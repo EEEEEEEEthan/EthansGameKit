@@ -10,6 +10,7 @@ namespace EthansGameKit.Editor
 		[CustomEditor(typeof(CodeGenerator), true), CanEditMultipleObjects]
 		public class Editor : UnityEditor.Editor
 		{
+			// ReSharper disable once InconsistentNaming
 			new IEnumerable<CodeGenerator> targets
 			{
 				get

@@ -26,7 +26,6 @@ namespace EthansGameKit
 
 	class ApplicationEventListener : KitInstance<ApplicationEventListener>
 	{
-		static ApplicationEventListener instance;
 		static int screenHeight;
 		static int screenWidth;
 		public static bool Quitting { get; private set; }
