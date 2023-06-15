@@ -9,8 +9,8 @@ namespace EthansGameKit.Collections
 	[Serializable]
 	public abstract class SerializableHashSet<T> : IReadOnlyCollection<T>, ISet<T>, ISerializationCallbackReceiver
 	{
-		T[] backup;
 		readonly HashSet<T> set;
+		T[] backup;
 		public IEqualityComparer<T> Comparer => set.Comparer;
 		public int Count => set.Count;
 		bool ICollection<T>.IsReadOnly => ((ICollection<T>)set).IsReadOnly;
@@ -164,7 +164,7 @@ namespace EthansGameKit.Collections
 	public class SerializableHashSetInt32 : SerializableHashSet<int>
 	{
 	}
-	
+
 	[Serializable]
 	public class SerializableHashSetUInt32 : SerializableHashSet<uint>
 	{

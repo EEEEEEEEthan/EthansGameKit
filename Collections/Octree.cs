@@ -43,8 +43,8 @@ namespace EthansGameKit.Collections
 	/// </remarks>
 	public class Octree<T> : ISerializationCallbackReceiver
 	{
-		OctreeNode<T> root;
 		readonly List<OctreeItem<T>> serializedData = new();
+		OctreeNode<T> root;
 		public IEnumerable<OctreeItem<T>> AllItems => root is null ? Array.Empty<OctreeItem<T>>() : root.AllItems;
 		void ISerializationCallbackReceiver.OnBeforeSerialize()
 		{

@@ -7,9 +7,9 @@ namespace EthansGameKit.CachePools
 	{
 		// ReSharper disable once CollectionNeverQueried.Local
 		static readonly List<T> buffer = new();
-		bool autoReleasing;
 		readonly int keepCount;
 		readonly List<T> list = new();
+		bool autoReleasing;
 		public bool IsEmpty => list.Count <= 0;
 		/// <summary>
 		///     构造方法

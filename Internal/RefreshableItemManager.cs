@@ -8,7 +8,7 @@ namespace EthansGameKit.Internal
 	{
 		internal static readonly HashSet<IRefreshableItem> dirtyItems = new();
 		static IRefreshableItem[] buffer = Array.Empty<IRefreshableItem>();
-		void Update()
+		void LateUpdate()
 		{
 			var count = dirtyItems.Count;
 			if (count <= 0) return;
