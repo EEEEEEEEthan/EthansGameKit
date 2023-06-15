@@ -19,6 +19,7 @@ namespace EthansGameKit.Collections
 		void Add(T element, TValue sortingValue);
 		T Pop(int index = 0);
 		T Pop(out TValue value, int index = 0);
+		bool TryPop(out T key, out TValue value, int index = 0);
 		void TrimExcess();
 	}
 
@@ -38,7 +39,7 @@ namespace EthansGameKit.Collections
 		{
 			return Generate(Comparers.GetDefaultEqualityComparer<TKey>());
 		}
-		static void ClearAndRecycle(ref Heap<TKey, TValue> heap)
+		public static void ClearAndRecycle(ref Heap<TKey, TValue> heap)
 		{
 			if (heap.inPool)
 			{
@@ -93,6 +94,17 @@ namespace EthansGameKit.Collections
 			AdjustUp(index);
 			return result;
 		}
+		public bool TryPop(out TKey key, out TValue value, int index = 0)
+		{
+			if (index >= Count)
+			{
+				key = default;
+				value = default;
+				return false;
+			}
+			key = Pop(out value, index);
+			return true;
+		}
 		public void TrimExcess()
 		{
 			Array.Resize(ref keys, Count);
@@ -137,10 +149,6 @@ namespace EthansGameKit.Collections
 		{
 			for (var i = 0; i < Count; i++)
 				yield return new(keys[i], values[i]);
-		}
-		protected virtual int GetHashCode(TKey obj)
-		{
-			return obj.GetHashCode();
 		}
 		public bool Update(TKey element, TValue sortingValue)
 		{
@@ -211,6 +219,10 @@ namespace EthansGameKit.Collections
 				if (equalityComparer.Equals(keys[i], element))
 					return i;
 			return -1;
+		}
+		protected virtual int GetHashCode(TKey obj)
+		{
+			return obj.GetHashCode();
 		}
 		void Update(int index, TKey key, TValue value)
 		{

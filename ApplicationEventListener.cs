@@ -49,7 +49,7 @@ namespace EthansGameKit
 		}
 		void OnGUI()
 		{
-			OnGui.TryInvoke();
+			OnGui?.TryInvoke();
 		}
 		void Update()
 		{
