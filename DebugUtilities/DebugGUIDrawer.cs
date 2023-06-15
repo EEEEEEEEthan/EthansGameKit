@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using EthansGameKit.Collections;
+using EthansGameKit.Internal;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace EthansGameKit.DebugUtilities
 {
-	class DebugGUIDrawer : MonoBehaviour
+	class DebugGUIDrawer : KitInstance<DebugGUIDrawer>
 	{
 		class Drawer
 		{
@@ -95,7 +96,6 @@ namespace EthansGameKit.DebugUtilities
 			}
 		}
 
-		static DebugGUIDrawer instance;
 		static readonly List<(IDebugGUIProvider provider, Drawer drawer)> drawers = new();
 		static readonly RaycastHit[] raycastBuffer = new RaycastHit[10];
 		static readonly List<RaycastResult> uiRaycastBuffer = new();
@@ -103,21 +103,6 @@ namespace EthansGameKit.DebugUtilities
 		{
 			get => Instance.enabled;
 			set => Instance.enabled = value;
-		}
-		static DebugGUIDrawer Instance
-		{
-			get
-			{
-				if (instance) return instance;
-				instance = FindObjectOfType<DebugGUIDrawer>(true);
-				if (!instance)
-				{
-					var gameObject = new GameObject(nameof(DebugGUIDrawer));
-					instance = gameObject.AddComponent<DebugGUIDrawer>();
-					DontDestroyOnLoad(gameObject);
-				}
-				return instance;
-			}
 		}
 		public static void Hide(IDebugGUIProvider provider)
 		{

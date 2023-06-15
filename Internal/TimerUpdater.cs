@@ -5,19 +5,12 @@ using UnityEngine.SceneManagement;
 
 namespace EthansGameKit.Internal
 {
-	class TimerUpdater : MonoBehaviour
+	class TimerUpdater : KitInstance<TimerUpdater>
 	{
 		public static uint currentId = Timers.invalidId;
 		public static Heap<Timer, double> timers = Heap<Timer, double>.Generate();
 		public static Heap<Timer, double> unscaledTimers = Heap<Timer, double>.Generate();
 		static readonly List<Timer> buffer = new();
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		static void Initialize()
-		{
-			var gameObject = new GameObject(nameof(TimerUpdater));
-			gameObject.AddComponent<TimerUpdater>();
-			DontDestroyOnLoad(gameObject);
-		}
 		static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
 			var copiedTimers = timers;

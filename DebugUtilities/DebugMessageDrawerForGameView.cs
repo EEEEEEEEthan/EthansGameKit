@@ -1,4 +1,5 @@
 ﻿using System;
+using EthansGameKit.Internal;
 using UnityEditor;
 using UnityEngine;
 
@@ -24,28 +25,12 @@ namespace EthansGameKit.DebugUtilities
 		}
 	}
 #endif
-	class DebugMessageDrawerForGameView : MonoBehaviour
+	class DebugMessageDrawerForGameView : KitInstance<DebugMessageDrawerForGameView>
 	{
-		static DebugMessageDrawerForGameView instance;
 		public static bool Enabled
 		{
 			get => Instance.enabled;
 			set => Instance.enabled = value;
-		}
-		static DebugMessageDrawerForGameView Instance
-		{
-			get
-			{
-				if (instance) return instance;
-				instance = FindObjectOfType<DebugMessageDrawerForGameView>(true);
-				if (!instance)
-				{
-					var gameObject = new GameObject(nameof(DebugMessageDrawerForGameView));
-					instance = gameObject.AddComponent<DebugMessageDrawerForGameView>();
-					DontDestroyOnLoad(gameObject);
-				}
-				return instance;
-			}
 		}
 		DebugMessageDrawer drawer;
 		Camera mainCamera;
@@ -155,13 +140,11 @@ namespace EthansGameKit.DebugUtilities
 				lineRenderers[10].SetPositions(new[] { positions[2], positions[6] });
 				lineRenderers[11].SetPositions(new[] { positions[3], positions[7] });
 				cachedIndicator = cube.transform;
-				/*
 				foreach (var t in cachedIndicator.transform.GetComponentsInChildren<Component>(true))
 				{
 					t.gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 					t.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 				}
-				*/
 				return cachedIndicator;
 			}
 		}

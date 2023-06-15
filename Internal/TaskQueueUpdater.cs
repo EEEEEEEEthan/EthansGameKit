@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using EthansGameKit.CachePools;
-using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace EthansGameKit.Internal
@@ -12,7 +11,7 @@ namespace EthansGameKit.Internal
 		public bool crossScene;
 	}
 
-	class TaskQueueUpdater : MonoBehaviour
+	class TaskQueueUpdater : KitInstance<TaskQueueUpdater>
 	{
 		static readonly List<TaskQueueItem>[] delayedLists;
 		static readonly Queue<TaskQueueItem>[] currentQueues;
@@ -30,13 +29,6 @@ namespace EthansGameKit.Internal
 		internal static void InvokeAtFreeFrame(Action callback, TaskQueuePriorities priority, bool crossScene)
 		{
 			delayedLists[(int)priority].Add(new() { callback = callback, crossScene = crossScene });
-		}
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		static void Initialize()
-		{
-			var gameObject = new GameObject(nameof(TaskQueueUpdater));
-			gameObject.AddComponent<TaskQueueUpdater>();
-			DontDestroyOnLoad(gameObject);
 		}
 		static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{

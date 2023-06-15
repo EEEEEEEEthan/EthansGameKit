@@ -4,17 +4,10 @@ using UnityEngine;
 
 namespace EthansGameKit.Internal
 {
-	class RefreshableItemManager : MonoBehaviour
+	class RefreshableItemManager : KitInstance<RefreshableItemManager>
 	{
 		internal static readonly HashSet<IRefreshableItem> dirtyItems = new();
 		static IRefreshableItem[] buffer = Array.Empty<IRefreshableItem>();
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		static void Initialize()
-		{
-			var gameObject = new GameObject(nameof(RefreshableItemManager));
-			gameObject.AddComponent<RefreshableItemManager>();
-			DontDestroyOnLoad(gameObject);
-		}
 		void Update()
 		{
 			var count = dirtyItems.Count;

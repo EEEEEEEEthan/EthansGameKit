@@ -4,14 +4,14 @@ using UnityEngine;
 // ReSharper disable MemberInitializerValueIgnored
 namespace EthansGameKit
 {
-	public interface SmoothedValue<T>
+	public interface ISmoothedValue<T>
 	{
 		public T PreferredValue { get; set; }
 		public T Value { get; set; }
 	}
 
 	[Serializable]
-	public class SmoothedSingle : SmoothedValue<float>
+	public class SmoothedSingle : ISmoothedValue<float>
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
@@ -82,7 +82,7 @@ namespace EthansGameKit
 	}
 
 	[Serializable]
-	public class SmoothedVector3 : SmoothedValue<Vector3>
+	public class SmoothedVector3 : ISmoothedValue<Vector3>
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
@@ -152,7 +152,7 @@ namespace EthansGameKit
 	}
 
 	[Serializable]
-	public class SmoothedQuaternion : SmoothedValue<Quaternion>
+	public class SmoothedQuaternion : ISmoothedValue<Quaternion>
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;

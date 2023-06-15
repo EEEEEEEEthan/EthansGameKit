@@ -82,7 +82,7 @@ namespace EthansGameKit
 		}
 		public void OnCompleted(Action continuation)
 		{
-			this.continuation = continuation;
+			this.continuation += continuation;
 		}
 		public IAwaiter GetAwaiter()
 		{
@@ -96,9 +96,10 @@ namespace EthansGameKit
 		{
 			if (IsCompleted) return;
 			IsCompleted = true;
-			continuation?.Invoke();
+			var action = continuation;
 			continuation = null;
 			GlobalCachePool<Awaitable>.Recycle(this);
+			action?.Invoke();
 		}
 	}
 

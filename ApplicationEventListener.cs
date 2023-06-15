@@ -1,4 +1,5 @@
 using System;
+using EthansGameKit.Internal;
 using UnityEngine;
 
 namespace EthansGameKit
@@ -23,30 +24,15 @@ namespace EthansGameKit
 		}
 	}
 
-	class ApplicationEventListener : MonoBehaviour
+	class ApplicationEventListener : KitInstance<ApplicationEventListener>
 	{
 		static ApplicationEventListener instance;
 		static int screenHeight;
 		static int screenWidth;
 		public static bool Quitting { get; private set; }
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		static void Initialize()
-		{
-			var timerManager = new GameObject(nameof(ApplicationEventListener));
-			DontDestroyOnLoad(timerManager);
-			instance = timerManager.AddComponent<ApplicationEventListener>();
-		}
 		public static event Action OnScreenSizeChanged;
 		public static event Action OnGizmos;
 		public static event Action OnGui;
-		public ApplicationEventListener Instance
-		{
-			get
-			{
-				if (!instance) instance = FindObjectOfType<ApplicationEventListener>();
-				return instance;
-			}
-		}
 		void OnGUI()
 		{
 			OnGui?.TryInvoke();
