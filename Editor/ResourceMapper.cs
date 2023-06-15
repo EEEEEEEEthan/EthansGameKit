@@ -9,6 +9,17 @@ namespace EthansGameKit.Editor
 	[CreateAssetMenu(fileName = "ResourceMapper", menuName = "EthansGameKit/ResourceMapper")]
 	class ResourceMapper : CodeGenerator
 	{
+		[MenuItem("Tools/ResourceMapper.GenerateAll")]
+		static void GenerateAll()
+		{
+			var guids = AssetDatabase.FindAssets("t:ResourceMapper");
+			foreach (var guid in guids)
+			{
+				var path = AssetDatabase.GUIDToAssetPath(guid);
+				var mapper = AssetDatabase.LoadAssetAtPath<ResourceMapper>(path);
+				mapper.Replace();
+			}
+		}
 		[SerializeField] DefaultAsset resourceFolder;
 		protected override string Generate()
 		{
