@@ -95,9 +95,30 @@ namespace EthansGameKit.DebugUtilities
 			}
 		}
 
+		static DebugGUIDrawer instance;
 		static readonly List<(IDebugGUIProvider provider, Drawer drawer)> drawers = new();
 		static readonly RaycastHit[] raycastBuffer = new RaycastHit[10];
 		static readonly List<RaycastResult> uiRaycastBuffer = new();
+		public static bool Enabled
+		{
+			get => Instance.enabled;
+			set => Instance.enabled = value;
+		}
+		static DebugGUIDrawer Instance
+		{
+			get
+			{
+				if (instance) return instance;
+				instance = FindObjectOfType<DebugGUIDrawer>(true);
+				if (!instance)
+				{
+					var gameObject = new GameObject(nameof(DebugGUIDrawer));
+					instance = gameObject.AddComponent<DebugGUIDrawer>();
+					DontDestroyOnLoad(gameObject);
+				}
+				return instance;
+			}
+		}
 		public static void Hide(IDebugGUIProvider provider)
 		{
 			for (var i = 0; i < drawers.Count; ++i)
@@ -122,12 +143,6 @@ namespace EthansGameKit.DebugUtilities
 				}
 			}
 			drawers.Add((provider, new(provider)));
-		}
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		static void Initialize()
-		{
-			var gameObject = new GameObject("DebugGUI");
-			DontDestroyOnLoad(gameObject);
 		}
 		static Heap<GameObject, float> GetTargets()
 		{

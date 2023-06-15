@@ -7,6 +7,11 @@ namespace EthansGameKit.DebugUtilities
 	/// </summary>
 	public interface IDebugMessageProvider
 	{
+		public static bool Enabled
+		{
+			get => DebugMessageDrawerForGameView.Enabled;
+			set => DebugMessageDrawerForGameView.Enabled = value;
+		}
 		/// <summary>
 		///     调试信息
 		/// </summary>
@@ -21,6 +26,11 @@ namespace EthansGameKit.DebugUtilities
 	/// </summary>
 	public interface IDebugGUIProvider
 	{
+		public static bool Enabled
+		{
+			get => DebugGUIDrawer.Enabled;
+			set => DebugGUIDrawer.Enabled = value;
+		}
 		/// <summary>
 		///     GUI
 		/// </summary>

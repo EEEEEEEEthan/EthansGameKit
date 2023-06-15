@@ -11,7 +11,6 @@ namespace EthansGameKit.DebugUtilities
 		static DebugMessageDrawer drawer;
 		static DebugMessageDrawerForSceneView()
 		{
-			if (!Application.isEditor) return;
 			SceneView.duringSceneGui -= OnSceneGUI;
 			SceneView.duringSceneGui += OnSceneGUI;
 		}
@@ -27,12 +26,26 @@ namespace EthansGameKit.DebugUtilities
 #endif
 	class DebugMessageDrawerForGameView : MonoBehaviour
 	{
-		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-		static void Initialize()
+		static DebugMessageDrawerForGameView instance;
+		public static bool Enabled
 		{
-			var gameObject = new GameObject(nameof(DebugMessageDrawerForGameView));
-			DontDestroyOnLoad(gameObject);
-			gameObject.AddComponent<DebugMessageDrawerForGameView>();
+			get => Instance.enabled;
+			set => Instance.enabled = value;
+		}
+		static DebugMessageDrawerForGameView Instance
+		{
+			get
+			{
+				if (instance) return instance;
+				instance = FindObjectOfType<DebugMessageDrawerForGameView>(true);
+				if (!instance)
+				{
+					var gameObject = new GameObject(nameof(DebugMessageDrawerForGameView));
+					instance = gameObject.AddComponent<DebugMessageDrawerForGameView>();
+					DontDestroyOnLoad(gameObject);
+				}
+				return instance;
+			}
 		}
 		DebugMessageDrawer drawer;
 		Camera mainCamera;
@@ -47,7 +60,7 @@ namespace EthansGameKit.DebugUtilities
 		}
 	}
 
-	class DebugMessageDrawer
+	public class DebugMessageDrawer
 	{
 		GUIStyle cachedTextStyle;
 		Material cachedMaterial;
@@ -142,15 +155,17 @@ namespace EthansGameKit.DebugUtilities
 				lineRenderers[10].SetPositions(new[] { positions[2], positions[6] });
 				lineRenderers[11].SetPositions(new[] { positions[3], positions[7] });
 				cachedIndicator = cube.transform;
+				/*
 				foreach (var t in cachedIndicator.transform.GetComponentsInChildren<Component>(true))
 				{
 					t.gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 					t.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 				}
+				*/
 				return cachedIndicator;
 			}
 		}
-		public void DrawGUI(Camera camera, Ray ray)
+		internal void DrawGUI(Camera camera, Ray ray)
 		{
 			GUI.changed = true;
 			var indicatorTransform = Indicator.transform;
@@ -164,7 +179,7 @@ namespace EthansGameKit.DebugUtilities
 					try
 					{
 						provider.GetDebugMessage(hit, out var matrix, out var message);
-						indicatorTransform.gameObject.SetActive(false);
+						indicatorTransform.gameObject.SetActive(true);
 						indicatorTransform.position = matrix.GetPosition();
 						indicatorTransform.rotation = matrix.rotation;
 						indicatorTransform.localScale = matrix.lossyScale;
