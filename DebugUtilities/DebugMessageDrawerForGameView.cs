@@ -9,7 +9,7 @@ namespace EthansGameKit.DebugUtilities
 	[InitializeOnLoad]
 	static class DebugMessageDrawerForSceneView
 	{
-		static DebugMessageDrawer drawer;
+		static readonly DebugMessageDrawer drawer = new();
 		static DebugMessageDrawerForSceneView()
 		{
 			SceneView.duringSceneGui -= OnSceneGUI;
@@ -17,7 +17,6 @@ namespace EthansGameKit.DebugUtilities
 		}
 		static void OnSceneGUI(SceneView sceneView)
 		{
-			drawer ??= new();
 			Handles.BeginGUI();
 			drawer.DrawGUI(sceneView.camera, HandleUtility.GUIPointToWorldRay(Event.current.mousePosition));
 			Handles.EndGUI();
@@ -32,16 +31,13 @@ namespace EthansGameKit.DebugUtilities
 			get => Instance.enabled;
 			set => Instance.enabled = value;
 		}
-		DebugMessageDrawer drawer;
+		readonly DebugMessageDrawer drawer = new();
 		Camera mainCamera;
 		void OnGUI()
 		{
-			drawer ??= new();
 			if (!mainCamera) mainCamera = Camera.main;
 			if (mainCamera)
-			{
 				drawer.DrawGUI(mainCamera, mainCamera.ScreenPointToRay(Input.mousePosition));
-			}
 		}
 	}
 
@@ -151,35 +147,29 @@ namespace EthansGameKit.DebugUtilities
 		internal void DrawGUI(Camera camera, Ray ray)
 		{
 			GUI.changed = true;
-			var indicatorTransform = Indicator.transform;
-			if (!camera) goto FAILED;
-			if (!Physics.Raycast(ray, out var hit)) goto FAILED;
-			if (hit.collider)
+			var indicatorTransform = Indicator;
+			if (!camera || !Physics.Raycast(ray, out var hit) || !hit.collider) goto FAILED;
+			var provider = hit.collider.GetComponentInParent<IDebugMessageProvider>();
+			if (provider == null) goto FAILED;
+			try
 			{
-				var provider = hit.collider.GetComponentInParent<IDebugMessageProvider>();
-				if (provider != null)
-				{
-					try
-					{
-						provider.GetDebugMessage(hit, out var matrix, out var message);
-						indicatorTransform.gameObject.SetActive(true);
-						indicatorTransform.position = matrix.GetPosition();
-						indicatorTransform.rotation = matrix.rotation;
-						indicatorTransform.localScale = matrix.lossyScale;
-						var screenPoint = camera.WorldToScreenPoint(hit.point);
-						var textSize = TextStyle.CalcSize(new(message));
-						var rect = new Rect(screenPoint.x, Screen.height - screenPoint.y - textSize.y, textSize.x, textSize.y);
-						GUILayout.BeginArea(rect);
-						GUILayout.Label(message, TextStyle);
-						GUILayout.EndArea();
-					}
-					catch (Exception e)
-					{
-						Debug.LogException(e);
-					}
-					return;
-				}
+				provider.GetDebugMessage(hit, out var matrix, out var message);
+				indicatorTransform.gameObject.SetActive(true);
+				indicatorTransform.position = matrix.GetPosition();
+				indicatorTransform.rotation = matrix.rotation;
+				indicatorTransform.localScale = matrix.lossyScale;
+				var screenPoint = camera.WorldToScreenPoint(hit.point);
+				var textSize = TextStyle.CalcSize(new(message));
+				var rect = new Rect(screenPoint.x, Screen.height - screenPoint.y - textSize.y, textSize.x, textSize.y);
+				GUILayout.BeginArea(rect);
+				GUILayout.Label(message, TextStyle);
+				GUILayout.EndArea();
 			}
+			catch (Exception e)
+			{
+				Debug.LogException(e);
+			}
+			return;
 		FAILED:
 			indicatorTransform.gameObject.SetActive(false);
 		}
