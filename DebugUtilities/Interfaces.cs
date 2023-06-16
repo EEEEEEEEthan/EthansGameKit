@@ -38,11 +38,11 @@ namespace EthansGameKit.DebugUtilities
 		/// <param name="height"></param>
 		/// <param name="title"></param>
 		void OnDebugGUI(out float width, out float height, out string title);
-		void Show()
+		void ShowDebugGUI()
 		{
 			DebugGUIDrawer.Show(this);
 		}
-		void Hide()
+		void HideDebugGUI()
 		{
 			DebugGUIDrawer.Hide(this);
 		}

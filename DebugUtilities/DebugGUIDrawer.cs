@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using EthansGameKit.Collections;
 using EthansGameKit.Internal;
 using UnityEngine;
@@ -96,6 +97,7 @@ namespace EthansGameKit.DebugUtilities
 			}
 		}
 
+		static Camera mainCamera;
 		static readonly List<(IDebugGUIProvider provider, Drawer drawer)> drawers = new();
 		static readonly RaycastHit[] raycastBuffer = new RaycastHit[10];
 		static readonly List<RaycastResult> uiRaycastBuffer = new();
@@ -103,6 +105,14 @@ namespace EthansGameKit.DebugUtilities
 		{
 			get => Instance.enabled;
 			set => Instance.enabled = value;
+		}
+		static Camera MainCamera
+		{
+			get
+			{
+				if (mainCamera) return mainCamera;
+				return mainCamera = Camera.main;
+			}
 		}
 		public static void Hide(IDebugGUIProvider provider)
 		{
@@ -140,7 +150,7 @@ namespace EthansGameKit.DebugUtilities
 				foreach (var hit in uiRaycastBuffer)
 					heap.Add(hit.gameObject, hit.depth);
 			}
-			var camera = Camera.main;
+			var camera = MainCamera;
 			if (camera)
 			{
 				var ray = camera.ScreenPointToRay(Input.mousePosition);
@@ -157,18 +167,8 @@ namespace EthansGameKit.DebugUtilities
 			foreach (var (provider, drawer) in copied)
 			{
 				drawer.OnGUI();
-				if (!drawer.Released)
-				{
-					for (var i = 0; i < drawers.Count; ++i)
-					{
-						if (drawers[i].provider == provider)
-						{
-							goto EARLY_BREAK;
-						}
-					}
+				if (!drawer.Released && drawers.All(d => d.drawer != drawer))
 					drawers.Add((provider, drawer));
-				EARLY_BREAK: ;
-				}
 			}
 			if (Input.GetMouseButtonDown(1) && Input.GetKey(KeyCode.LeftControl))
 			{
