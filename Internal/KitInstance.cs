@@ -14,13 +14,11 @@ namespace EthansGameKit.Internal
 				if (rootObject)
 				{
 					root = rootObject.transform;
-					root.gameObject.hideFlags = root.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
 				}
 				else
 				{
 					rootObject = new(nameof(EthansGameKit));
 					root = rootObject.transform;
-					root.gameObject.hideFlags = root.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
 				}
 				DontDestroyOnLoad(rootObject);
 				return root;
@@ -39,7 +37,6 @@ namespace EthansGameKit.Internal
 				instance = Root.GetComponent<T>();
 				if (instance) return instance;
 				instance = Root.gameObject.AddComponent<T>();
-				instance.hideFlags = HideFlags.DontSave | HideFlags.NotEditable;
 				return instance;
 			}
 		}
