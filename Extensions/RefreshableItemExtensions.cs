@@ -18,6 +18,7 @@ namespace EthansGameKit
 				}
 				catch (Exception e)
 				{
+					// ReSharper disable once Unity.PerformanceCriticalCodeInvocation
 					Debug.LogException(e);
 				}
 			}

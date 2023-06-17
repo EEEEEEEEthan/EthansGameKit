@@ -38,6 +38,15 @@ namespace EthansGameKit.Collections
 			}
 			serializeData = null;
 		}
+		public TValue this[TKey key]
+		{
+			get => this[key];
+			set
+			{
+				RemoveKey(key);
+				Add(key, value);
+			}
+		}
 		public void Add(TKey key, TValue value)
 		{
 			if (ContainsKey(key)) throw new ArgumentException($"Key {key} already exists");
