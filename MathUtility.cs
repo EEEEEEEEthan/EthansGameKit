@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EthansGameKit.CachePools;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -107,6 +108,82 @@ namespace EthansGameKit
 			}
 		}
 
+		public class RandomSequenceGenerator : IDisposable
+		{
+			public static RandomSequenceGenerator Generate(int length, int seed)
+			{
+				if (!GlobalCachePool<RandomSequenceGenerator>.TryGenerate(out var generator))
+					generator = new();
+				generator.Initialize(length, seed, seed);
+				return generator;
+			}
+			int a, c, m;
+			int seed;
+			public override string ToString()
+			{
+				return $"{GetType().Name}(m:{m},a:{a},c:{c},seed:{seed})";
+			}
+			void IDisposable.Dispose()
+			{
+				GlobalCachePool<RandomSequenceGenerator>.Recycle(this);
+			}
+			public int Next()
+			{
+				return seed = LinearCongruentialGenerator(seed, a, c, m);
+			}
+			void Initialize(int length, int c, int seed)
+			{
+				this.seed = seed;
+				m = length;
+				// c,m互质
+				if (m <= 2)
+				{
+					c = 1;
+				}
+				else
+				{
+					c %= m;
+					c.Clamp(1, m - 1);
+					if (m.CoprimeWith(c))
+					{
+						this.c = c;
+					}
+					else
+					{
+						for (var i = 1; i < m; ++i)
+						{
+							var a = c + 1;
+							if (a.Between(1, m) && a.CoprimeWith(m))
+							{
+								c = a;
+								goto EARLY_BREAK;
+							}
+							var b = c - 1;
+							if (b.Between(1, m) && b.CoprimeWith(m))
+							{
+								c = b;
+								goto EARLY_BREAK;
+							}
+						}
+						c = 1;
+					EARLY_BREAK: ;
+					}
+				}
+				this.c = c;
+				// m的所有质因数能整除a-1; 若m是4的倍数,a-1也是
+				a = 1;
+				foreach (var factor in m.GetPrimeFactors())
+					a *= factor;
+				if (m % 4 == 0)
+				{
+					if (a % 4 != 0) a *= 2;
+					if (a % 4 != 0) a *= 2;
+				}
+				++a;
+				if (a > m) a = 1;
+			}
+		}
+
 		public static void Hermite(float pos0, float weight0, float pos1, float weight1, float progress, out float point, out float weight)
 		{
 			switch (progress)
@@ -199,34 +276,6 @@ namespace EthansGameKit
 			tmp += tmp << mPower;
 			var mask = (1 << mPower) - 1;
 			return (tmp & mask) + c;
-		}
-		public class RandomSequenceGenerator
-		{
-			readonly int a, c, m;
-			int seed;
-
-			public RandomSequenceGenerator(int length, int seed)
-			{
-				this.seed = seed;
-				m = length;
-				// c,m互质
-				c = m <= 2 ? 1 : length.PreviousPrime();
-				// m的所有质因数能整除a-1; 若m是4的倍数,a-1也是
-				a = 1;
-				foreach (var factor in m.GetPrimeFactors())
-					a *= factor;
-				if (m % 4 == 0)
-				{
-					if (a % 4 != 0) a *= 2;
-					if (a % 4 != 0) a *= 2;
-				}
-				++a;
-			}
-
-			public int GetNext()
-			{
-				return seed = LinearCongruentialGenerator(seed, a, c, m);
-			}
 		}
 	}
 }

@@ -54,5 +54,21 @@ namespace EthansGameKit
 		{
 			MathUtility.PrimeCalculator.GetPrimeFactors(@this, collection);
 		}
+		public static bool CoprimeWith(this int @this, int other)
+		{
+			return @this.GreatestCommonDivisorWith(other) == 1;
+		}
+		public static int GreatestCommonDivisorWith(this int a, int b)
+		{
+			if (a < b)
+				(a, b) = (b, a);
+			while (b != 0)
+			{
+				var temp = a % b;
+				a = b;
+				b = temp;
+			}
+			return a;
+		}
 	}
 }
