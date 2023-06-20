@@ -1,9 +1,112 @@
-﻿using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using UnityEngine;
+using Random = UnityEngine.Random;
 
 namespace EthansGameKit
 {
 	public static class MathUtility
 	{
+		public static class PrimeCalculator
+		{
+			static readonly List<int> primes = new() { 2 };
+			public static bool IsPrime(int value)
+			{
+				while (primes[^1] < value)
+					AddNextPrime();
+				return primes.BinarySearch(value) >= 0;
+			}
+			public static int NextPrime(int value)
+			{
+				if (primes[^1] < value)
+				{
+					while (primes[^1] < value)
+						AddNextPrime();
+					return primes[^1];
+				}
+				var index = primes.BinarySearch(value);
+				if (index >= 0)
+				{
+					return primes[index + 1];
+				}
+				return primes[~index];
+			}
+			public static int PreviousPrime(int value)
+			{
+				if (value <= primes[0])
+				{
+					Debug.LogError($"argument out of range {value}");
+					return primes[0];
+				}
+				var index = primes.BinarySearch(value);
+				if (index >= 0)
+				{
+					return primes[index - 1];
+				}
+				return primes[~index - 1];
+			}
+			public static IEnumerable<int> GetPrimeFactors(int value)
+			{
+				if (value.IsPrime())
+				{
+					yield return value;
+					yield break;
+				}
+				while (primes[^1] < value)
+					AddNextPrime();
+				var count = primes.Count;
+				for (var i = 0; i < count; ++i)
+				{
+					var prime = primes[i];
+					if (prime > value)
+						yield break;
+					if (value % prime == 0)
+						yield return prime;
+				}
+			}
+			public static void GetPrimeFactors(int value, ICollection<int> collection)
+			{
+				if (value.IsPrime())
+				{
+					collection.Add(value);
+					return;
+				}
+				while (primes[^1] < value)
+					AddNextPrime();
+				var count = primes.Count;
+				for (var i = 0; i < count; ++i)
+				{
+					var prime = primes[i];
+					if (prime > value)
+						return;
+					if (value % prime == 0)
+					{
+						collection.Add(prime);
+						return;
+					}
+				}
+			}
+			static void AddNextPrime()
+			{
+				for (var value = primes[^1] + 1;; ++value)
+				{
+					var sqrtValue = (int)Math.Sqrt(value);
+					var primeCount = primes.Count;
+					for (var i = 0; i < primeCount; ++i)
+					{
+						var knownPrime = primes[i];
+						if (knownPrime > sqrtValue)
+						{
+							primes.Add(value);
+							return;
+						}
+						if (value % knownPrime == 0)
+							break;
+					}
+				}
+			}
+		}
+
 		public static void Hermite(float pos0, float weight0, float pos1, float weight1, float progress, out float point, out float weight)
 		{
 			switch (progress)
@@ -96,6 +199,34 @@ namespace EthansGameKit
 			tmp += tmp << mPower;
 			var mask = (1 << mPower) - 1;
 			return (tmp & mask) + c;
+		}
+		public class RandomSequenceGenerator
+		{
+			readonly int a, c, m;
+			int seed;
+
+			public RandomSequenceGenerator(int length, int seed)
+			{
+				this.seed = seed;
+				m = length;
+				// c,m互质
+				c = m <= 2 ? 1 : length.PreviousPrime();
+				// m的所有质因数能整除a-1; 若m是4的倍数,a-1也是
+				a = 1;
+				foreach (var factor in m.GetPrimeFactors())
+					a *= factor;
+				if (m % 4 == 0)
+				{
+					if (a % 4 != 0) a *= 2;
+					if (a % 4 != 0) a *= 2;
+				}
+				++a;
+			}
+
+			public int GetNext()
+			{
+				return seed = LinearCongruentialGenerator(seed, a, c, m);
+			}
 		}
 	}
 }

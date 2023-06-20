@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 namespace EthansGameKit
@@ -32,6 +33,26 @@ namespace EthansGameKit
 		public static int Clamp(this int @this, int min, int max)
 		{
 			return Mathf.Clamp(@this, min, max);
+		}
+		public static bool IsPrime(this int @this)
+		{
+			return MathUtility.PrimeCalculator.IsPrime(@this);
+		}
+		public static int NextPrime(this int @this)
+		{
+			return MathUtility.PrimeCalculator.NextPrime(@this);
+		}
+		public static int PreviousPrime(this int @this)
+		{
+			return MathUtility.PrimeCalculator.PreviousPrime(@this);
+		}
+		public static IEnumerable<int> GetPrimeFactors(this int @this)
+		{
+			return MathUtility.PrimeCalculator.GetPrimeFactors(@this);
+		}
+		public static void GetPrimeFactors(this int @this, ICollection<int> collection)
+		{
+			MathUtility.PrimeCalculator.GetPrimeFactors(@this, collection);
 		}
 	}
 }
