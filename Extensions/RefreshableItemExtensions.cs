@@ -1,6 +1,4 @@
-﻿using System;
-using EthansGameKit.Internal;
-using UnityEngine;
+﻿using EthansGameKit.Internal;
 
 // ReSharper disable once CheckNamespace
 namespace EthansGameKit
@@ -9,23 +7,7 @@ namespace EthansGameKit
 	{
 		public static void Refresh(this IRefreshableItem @this, bool immediate = false)
 		{
-			if (immediate)
-			{
-				RefreshableItemManager.dirtyItems.Remove(@this);
-				try
-				{
-					@this.OnRefresh();
-				}
-				catch (Exception e)
-				{
-					// ReSharper disable once Unity.PerformanceCriticalCodeInvocation
-					Debug.LogException(e);
-				}
-			}
-			else
-			{
-				RefreshableItemManager.dirtyItems.Add(@this);
-			}
+			RefreshableItemManager.Refresh(@this, immediate);
 		}
 	}
 }

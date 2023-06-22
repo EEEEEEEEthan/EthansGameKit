@@ -6,8 +6,40 @@ namespace EthansGameKit.Internal
 {
 	class RefreshableItemManager : KitInstance<RefreshableItemManager>
 	{
-		internal static readonly HashSet<IRefreshableItem> dirtyItems = new();
+		static readonly HashSet<IRefreshableItem> dirtyItems = new();
 		static IRefreshableItem[] buffer = Array.Empty<IRefreshableItem>();
+		static readonly HashSet<IRefreshableItem> refreshing = new();
+		public static void Refresh(IRefreshableItem item, bool immediate)
+		{
+			if (immediate)
+			{
+				dirtyItems.Remove(item);
+				RefreshImmediate(item);
+			}
+			else
+			{
+				dirtyItems.Add(item);
+			}
+		}
+		static void RefreshImmediate(IRefreshableItem item)
+		{
+			if (refreshing.Add(item))
+			{
+				try
+				{
+					item.OnRefresh();
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+				}
+				refreshing.Remove(item);
+			}
+			else
+			{
+				Debug.LogWarning("refreshing!", item as UnityEngine.Object);
+			}
+		}
 		void LateUpdate()
 		{
 			var count = dirtyItems.Count;
@@ -17,17 +49,8 @@ namespace EthansGameKit.Internal
 			dirtyItems.CopyTo(buffer);
 			dirtyItems.Clear();
 			for (var i = 0; i < count; i++)
-			{
-				var item = buffer[i];
-				try
-				{
-					item.OnRefresh();
-				}
-				catch (Exception e)
-				{
-					Debug.LogException(e);
-				}
-			}
+				RefreshImmediate(buffer[i]);
+			Array.Clear(buffer, 0, count);
 		}
 	}
 }
