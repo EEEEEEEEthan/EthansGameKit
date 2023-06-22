@@ -37,23 +37,23 @@ namespace EthansGameKit
 		}
 		public static bool IsPrime(this uint @this)
 		{
-			return PrimeCalculator.IsPrime(@this);
+			return Prime.IsPrime(@this);
 		}
 		public static uint NextPrime(this uint @this)
 		{
-			return PrimeCalculator.NextPrime(@this);
+			return Prime.NextPrime(@this);
 		}
 		public static uint PreviousPrime(this uint @this)
 		{
-			return PrimeCalculator.PreviousPrime(@this);
+			return Prime.PreviousPrime(@this);
 		}
 		public static IEnumerable<uint> GetPrimeFactors(this uint @this)
 		{
-			return PrimeCalculator.GetPrimeFactors(@this);
+			return Prime.GetPrimeFactors(@this);
 		}
 		public static void GetPrimeFactors(this uint @this, ICollection<uint> collection)
 		{
-			PrimeCalculator.GetPrimeFactors(@this, collection);
+			Prime.GetPrimeFactors(@this, collection);
 		}
 		public static bool CoprimeWith(this uint @this, uint other)
 		{

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace EthansGameKit.MathUtilities
 {
-	public static class PrimeCalculator
+	public static class Prime
 	{
 		static readonly List<uint> primes = new() { 2 };
 		public static bool IsPrime(uint value)

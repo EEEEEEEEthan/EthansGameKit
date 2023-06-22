@@ -38,15 +38,15 @@ namespace EthansGameKit
 		}
 		public static bool IsPrime(this int @this)
 		{
-			return @this > 0 && PrimeCalculator.IsPrime((uint)@this);
+			return @this > 0 && Prime.IsPrime((uint)@this);
 		}
 		public static int NextPrime(this int @this)
 		{
-			return (int)PrimeCalculator.NextPrime((uint)@this.Clamp(0, int.MaxValue));
+			return (int)Prime.NextPrime((uint)@this.Clamp(0, int.MaxValue));
 		}
 		public static int PreviousPrime(this int @this)
 		{
-			return (int)PrimeCalculator.PreviousPrime((uint)@this.Clamp(0, int.MaxValue));
+			return (int)Prime.PreviousPrime((uint)@this.Clamp(0, int.MaxValue));
 		}
 		public static IEnumerable<uint> GetPrimeFactors(this int @this)
 		{
@@ -55,7 +55,7 @@ namespace EthansGameKit
 				Debug.LogError($"argument out of range: {@this}");
 				return Array.Empty<uint>();
 			}
-			return PrimeCalculator.GetPrimeFactors((uint)@this);
+			return Prime.GetPrimeFactors((uint)@this);
 		}
 		public static void GetPrimeFactors(this int @this, ICollection<uint> collection)
 		{
@@ -64,7 +64,7 @@ namespace EthansGameKit
 				Debug.LogError($"argument out of range: {@this}");
 				return;
 			}
-			PrimeCalculator.GetPrimeFactors((uint)@this, collection);
+			Prime.GetPrimeFactors((uint)@this, collection);
 		}
 		public static bool CoprimeWith(this int @this, int other)
 		{
