@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using EthansGameKit.MathUtilities;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
@@ -36,29 +38,39 @@ namespace EthansGameKit
 		}
 		public static bool IsPrime(this int @this)
 		{
-			return MathUtility.PrimeCalculator.IsPrime(@this);
+			return @this > 0 && PrimeCalculator.IsPrime((uint)@this);
 		}
 		public static int NextPrime(this int @this)
 		{
-			return MathUtility.PrimeCalculator.NextPrime(@this);
+			return (int)PrimeCalculator.NextPrime((uint)@this.Clamp(0, int.MaxValue));
 		}
 		public static int PreviousPrime(this int @this)
 		{
-			return MathUtility.PrimeCalculator.PreviousPrime(@this);
+			return (int)PrimeCalculator.PreviousPrime((uint)@this.Clamp(0, int.MaxValue));
 		}
-		public static IEnumerable<int> GetPrimeFactors(this int @this)
+		public static IEnumerable<uint> GetPrimeFactors(this int @this)
 		{
-			return MathUtility.PrimeCalculator.GetPrimeFactors(@this);
+			if (@this <= 0)
+			{
+				Debug.LogError($"argument out of range: {@this}");
+				return Array.Empty<uint>();
+			}
+			return PrimeCalculator.GetPrimeFactors((uint)@this);
 		}
-		public static void GetPrimeFactors(this int @this, ICollection<int> collection)
+		public static void GetPrimeFactors(this int @this, ICollection<uint> collection)
 		{
-			MathUtility.PrimeCalculator.GetPrimeFactors(@this, collection);
+			if (@this <= 0)
+			{
+				Debug.LogError($"argument out of range: {@this}");
+				return;
+			}
+			PrimeCalculator.GetPrimeFactors((uint)@this, collection);
 		}
 		public static bool CoprimeWith(this int @this, int other)
 		{
 			return @this.GreatestCommonDivisorWith(other) == 1;
 		}
-		public static int GreatestCommonDivisorWith(this int a, int b)
+		static int GreatestCommonDivisorWith(this int a, int b)
 		{
 			if (a < b)
 				(a, b) = (b, a);
