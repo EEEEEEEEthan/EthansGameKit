@@ -26,11 +26,7 @@ namespace EthansGameKit
 					return primes[^1];
 				}
 				var index = primes.BinarySearch(value);
-				if (index >= 0)
-				{
-					return primes[index + 1];
-				}
-				return primes[~index];
+				return index >= 0 ? primes[index + 1] : primes[~index];
 			}
 			public static int PreviousPrime(int value)
 			{
@@ -40,11 +36,7 @@ namespace EthansGameKit
 					return primes[0];
 				}
 				var index = primes.BinarySearch(value);
-				if (index >= 0)
-				{
-					return primes[index - 1];
-				}
-				return primes[~index - 1];
+				return index >= 0 ? primes[index - 1] : primes[~index - 1];
 			}
 			public static IEnumerable<int> GetPrimeFactors(int value)
 			{
