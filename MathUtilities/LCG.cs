@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using UnityEngine;
 
 namespace EthansGameKit.MathUtilities
 {
@@ -12,10 +13,9 @@ namespace EthansGameKit.MathUtilities
 			var result = Next(trueSeed, 1664525, 1013904223, uint.MaxValue);
 			return (int)(result % delta) + min;
 		}
-		public static float Next(float seed, float min, float max)
+		public static float Next(uint seed, float min, float max)
 		{
-			var trueSeed = (uint)(uint.MaxValue * (double)seed);
-			var result = Next(trueSeed, 1664525, 1013904223, uint.MaxValue);
+			var result = Next(seed, 1664525, 1013904223, uint.MaxValue);
 			return (float)(result / (double)uint.MaxValue * (max - min) + min);
 		}
 		static uint Next(uint seed, uint a, uint c, uint m)
