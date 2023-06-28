@@ -21,6 +21,13 @@ namespace EthansGameKit
 			@this.RemoveAt(lastIndex);
 			return item;
 		}
+		public static T Pop<T>(this IList<T> @this)
+		{
+			var index = @this.Count - 1;
+			var result = @this[index];
+			@this.RemoveAt(index);
+			return result;
+		}
 		/// <summary>
 		///     不考虑顺序移除一个元素(将元素和末尾互换再移除)
 		/// </summary>
@@ -37,6 +44,16 @@ namespace EthansGameKit
 				return false;
 			}
 			item = @this.Pop(index);
+			return true;
+		}
+		public static bool TryPop<T>(this IList<T> @this, out T item)
+		{
+			if (@this.Count <= 0)
+			{
+				item = default;
+				return false;
+			}
+			item = @this.Pop();
 			return true;
 		}
 		public static T RandomPop<T>(this IList<T> @this)
