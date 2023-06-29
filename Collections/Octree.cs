@@ -10,6 +10,10 @@ namespace EthansGameKit.Collections
 	class OctreeDefines
 	{
 		protected internal static readonly Plane[] planes = new Plane[6];
+		protected internal static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
+		protected internal static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
+		protected internal static readonly Color editor_invisiableleafColor = new(0, 1, 0, 0.25f);
+		protected internal static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
 		protected internal static void RecalculatePlanes(Camera camera, Matrix4x4 worldToLocal, float expansion)
 		{
 			GeometryUtility.CalculateFrustumPlanes(camera, planes);
@@ -24,12 +28,6 @@ namespace EthansGameKit.Collections
 				planes[i] = new(normal, point);
 			}
 		}
-#if UNITY_EDITOR
-		protected internal static readonly Color editor_invisiableBranchColor = new(1, 1, 1, 0.05f);
-		protected internal static readonly Color editor_visiableBranchColor = new(1, 1, 1, 0.1f);
-		protected internal static readonly Color editor_invisiableleafColor = new(0, 1, 0, 0.25f);
-		protected internal static readonly Color editor_visiableleafColor = new(0, 1, 0, 0.5f);
-#endif
 	}
 
 	/// <summary>
@@ -86,16 +84,14 @@ namespace EthansGameKit.Collections
 		}
 		public void DrawGizmos(Camera camera, Matrix4x4 worldToLocal, float expansion)
 		{
-#if UNITY_EDITOR
+			if (!Application.isEditor) return;
 			OctreeDefines.RecalculatePlanes(camera, worldToLocal, expansion);
-			root?.Editor_DrawGizmos(OctreeDefines.planes);
-#endif
+			root?.DrawGizmos(OctreeDefines.planes);
 		}
 		public void DrawGizmos()
 		{
-#if UNITY_EDITOR
-			root?.Editor_DrawGizmos();
-#endif
+			if (!Application.isEditor) return;
+			root?.DrawGizmos();
 		}
 		internal void Update(OctreeItem<T> octreeItem, float newX, float newY, float newZ)
 		{

@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace EthansGameKit.DebugUtilities
 {
-#if UNITY_EDITOR
 	[InitializeOnLoad]
 	static class DebugMessageDrawerForSceneView
 	{
@@ -23,7 +22,7 @@ namespace EthansGameKit.DebugUtilities
 			GUI.changed = true;
 		}
 	}
-#endif
+
 	class DebugMessageDrawerForGameView : KitInstance<DebugMessageDrawerForGameView>
 	{
 		public static bool Enabled

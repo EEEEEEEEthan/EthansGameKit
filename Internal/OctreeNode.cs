@@ -361,9 +361,9 @@ namespace EthansGameKit.Internal
 			child.zMid = (child.zMin + child.zMax) * 0.5f;
 			return child;
 		}
-#if UNITY_EDITOR
-		public void Editor_DrawGizmos(Plane[] planes)
+		public void DrawGizmos(Plane[] planes)
 		{
+			if (!Application.isEditor) return;
 			var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
 			Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
 				? IsBranch ? OctreeDefines.editor_visiableBranchColor : OctreeDefines.editor_visiableleafColor
@@ -378,11 +378,12 @@ namespace EthansGameKit.Internal
 			for (var i = 0; i < 8; i++)
 			{
 				var child = children[i];
-				child?.Editor_DrawGizmos(planes);
+				child?.DrawGizmos(planes);
 			}
 		}
-		public void Editor_DrawGizmos()
+		public void DrawGizmos()
 		{
+			if (!Application.isEditor) return;
 			Gizmos.color = IsBranch
 				? OctreeDefines.editor_invisiableBranchColor
 				: OctreeDefines.editor_invisiableleafColor;
@@ -394,9 +395,8 @@ namespace EthansGameKit.Internal
 			for (var i = 0; i < 8; i++)
 			{
 				var child = children[i];
-				child?.Editor_DrawGizmos();
+				child?.DrawGizmos();
 			}
 		}
-#endif
 	}
 }

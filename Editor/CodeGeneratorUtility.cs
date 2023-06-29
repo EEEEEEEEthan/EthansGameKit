@@ -1,20 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
 
-namespace EthansGameKit
+namespace EthansGameKit.Editor
 {
 	public static class CodeGeneratorUtility
 	{
 		public static void Replace(TextAsset script, string startMark, string endMark, string replace)
 		{
-#if UNITY_EDITOR
 			var newCode = Replace(script.text, startMark, endMark, replace);
-			System.IO.File.WriteAllText(UnityEditor.AssetDatabase.GetAssetPath(script), newCode);
-			UnityEditor.AssetDatabase.Refresh();
-#endif
+			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
+			AssetDatabase.Refresh();
 		}
-		public static string Replace(string code, string startMark, string endMark, string replace)
+		static string Replace(string code, string startMark, string endMark, string replace)
 		{
 			var oldCodeLines = code.Split(Environment.NewLine);
 			var startIndex = -1;
