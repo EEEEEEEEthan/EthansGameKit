@@ -37,7 +37,10 @@ namespace EthansGameKit.DebugUtilities
 		{
 			if (!mainCamera) mainCamera = Camera.main;
 			if (mainCamera)
+			{
 				drawer.DrawGUI(mainCamera, mainCamera.ScreenPointToRay(Input.mousePosition));
+				GUI.changed = true;
+			}
 		}
 	}
 
@@ -151,24 +154,27 @@ namespace EthansGameKit.DebugUtilities
 			if (!camera || !Physics.Raycast(ray, out var hit) || !hit.collider) goto FAILED;
 			var provider = hit.collider.GetComponentInParent<IDebugMessageProvider>();
 			if (provider == null) goto FAILED;
+			var message = default(string);
+			var matrix = Matrix4x4.identity;
 			try
 			{
-				provider.GetDebugMessage(hit, out var matrix, out var message);
-				indicatorTransform.gameObject.SetActive(true);
-				indicatorTransform.position = matrix.GetPosition();
-				indicatorTransform.rotation = matrix.rotation;
-				indicatorTransform.localScale = matrix.lossyScale;
-				var screenPoint = camera.WorldToScreenPoint(hit.point);
-				var textSize = TextStyle.CalcSize(new(message));
-				var rect = new Rect(screenPoint.x, Screen.height - screenPoint.y - textSize.y, textSize.x, textSize.y);
-				GUILayout.BeginArea(rect);
-				GUILayout.Label(message, TextStyle);
-				GUILayout.EndArea();
+				provider.GetDebugMessage(hit, out matrix, out message);
 			}
 			catch (Exception e)
 			{
 				Debug.LogException(e);
 			}
+			if (message.IsNullOrEmpty()) goto FAILED;
+			indicatorTransform.gameObject.SetActive(true);
+			indicatorTransform.position = matrix.GetPosition();
+			indicatorTransform.rotation = matrix.rotation;
+			indicatorTransform.localScale = matrix.lossyScale;
+			var screenPoint = camera.WorldToScreenPoint(hit.point);
+			var textSize = TextStyle.CalcSize(new(message));
+			var rect = new Rect(screenPoint.x, Screen.height - screenPoint.y - textSize.y, textSize.x, textSize.y);
+			GUILayout.BeginArea(rect);
+			GUILayout.Label(message, TextStyle);
+			GUILayout.EndArea();
 			return;
 		FAILED:
 			indicatorTransform.gameObject.SetActive(false);
