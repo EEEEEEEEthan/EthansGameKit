@@ -23,7 +23,6 @@ namespace EthansGameKit.Collections
 		void TrimExcess();
 	}
 
-	[Serializable]
 	public class Heap<TKey, TValue> : IHeap<TKey, TValue>, IDisposable where TValue : IComparable<TValue>
 	{
 		static int[] finder = Array.Empty<int>();
