@@ -37,7 +37,7 @@ namespace EthansGameKit.Editor
 		{
 			var startMark = $"#region {regionName}";
 			var endMark = $"#endregion {regionName}";
-			var newCode = CodeGeneratorUtility.Replace(script.text, startMark, endMark, Generate());
+			var newCode = CodeGeneratorUtility.Replace(script.text, startMark, endMark, Generate(), 2);
 			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}

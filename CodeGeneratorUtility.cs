@@ -6,12 +6,11 @@ namespace EthansGameKit
 {
 	public static class CodeGeneratorUtility
 	{
-		public static string Replace(string code, string startMark, string endMark, string replace)
+		public static string Replace(string code, string startMark, string endMark, string replace, int ident)
 		{
 			var oldCodeLines = code.Split(Environment.NewLine);
 			var startIndex = -1;
 			var endIndex = -1;
-			var ident = "";
 			for (var i = 0; i < oldCodeLines.Length; i++)
 			{
 				if (startIndex < 0)
@@ -20,7 +19,6 @@ namespace EthansGameKit
 					if (idx > 0)
 					{
 						startIndex = i + 1;
-						ident = oldCodeLines[i][..idx];
 					}
 				}
 				if (oldCodeLines[i].Contains(endMark))
@@ -34,7 +32,11 @@ namespace EthansGameKit
 				var newLines = new List<string>();
 				var lines = replace.Split("\n");
 				foreach (var t in lines)
-					newLines.Add($"{ident}{t.Trim()}");
+				{
+					var trimed = t.TrimEnd();
+					if (trimed.IsNullOrEmpty()) continue;
+					newLines.Add($"{new string('\t', ident)}{trimed}");
+				}
 				var newCodeLines = new string[oldCodeLines.Length - (endIndex - startIndex - 1) + newLines.Count];
 				Array.Copy(oldCodeLines, 0, newCodeLines, 0, startIndex);
 				newLines.CopyTo(newCodeLines, startIndex);
