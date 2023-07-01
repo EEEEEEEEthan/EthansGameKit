@@ -1,19 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using UnityEditor;
 using UnityEngine;
 
-namespace EthansGameKit.Editor
+namespace EthansGameKit
 {
 	public static class CodeGeneratorUtility
 	{
-		public static void Replace(TextAsset script, string startMark, string endMark, string replace)
-		{
-			var newCode = Replace(script.text, startMark, endMark, replace);
-			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
-			AssetDatabase.Refresh();
-		}
-		static string Replace(string code, string startMark, string endMark, string replace)
+		public static string Replace(string code, string startMark, string endMark, string replace)
 		{
 			var oldCodeLines = code.Split(Environment.NewLine);
 			var startIndex = -1;
@@ -39,9 +32,9 @@ namespace EthansGameKit.Editor
 			if (startIndex != -1 && endIndex != -1)
 			{
 				var newLines = new List<string>();
-				var lines = replace.Split(Environment.NewLine);
+				var lines = replace.Split("\n");
 				foreach (var t in lines)
-					newLines.Add($"{ident}{t}");
+					newLines.Add($"{ident}{t.Trim()}");
 				var newCodeLines = new string[oldCodeLines.Length - (endIndex - startIndex - 1) + newLines.Count];
 				Array.Copy(oldCodeLines, 0, newCodeLines, 0, startIndex);
 				newLines.CopyTo(newCodeLines, startIndex);
