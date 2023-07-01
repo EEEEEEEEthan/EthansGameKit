@@ -6,8 +6,7 @@ namespace EthansGameKit.Editor
 	[InitializeOnLoad]
 	public class GameViewPicker
 	{
-		public static readonly KeyCode hotKey = KeyCode.F1;
-		static readonly string key = $"{nameof(GameViewPicker)}.Key";
+		public static KeyCode hotKey = KeyCode.F1;
 		static GameViewPicker()
 		{
 			ApplicationEvents.OnGUI += OnGUI;
