@@ -33,6 +33,14 @@ namespace EthansGameKit
 		{
 			return Mathf.Clamp(@this, min, max);
 		}
+		public static float ClampMin(this float @this, float min)
+		{
+			return Mathf.Clamp(@this, min, float.MaxValue);
+		}
+		public static float ClampMax(this float @this, float max)
+		{
+			return Mathf.Clamp(@this, float.MinValue, max);
+		}
 		public static float InverseLerp(this float @this, float min, float max)
 		{
 			return InverseLerp(@this, min, max, true);
