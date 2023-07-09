@@ -10,5 +10,15 @@ namespace EthansGameKit
 		{
 			StackPool<T>.ClearAndRecycle(ref @this);
 		}
+		public static void Reverse<T>(this Stack<T> @this)
+		{
+			var list = ListPool<T>.Generate();
+			while (@this.TryPop(out var element))
+				list.Add(element);
+			var count = list.Count;
+			for (var i = 0; i < count; ++i)
+				@this.Push(list[i]);
+			list.ClearAndRecycle();
+		}
 	}
 }
