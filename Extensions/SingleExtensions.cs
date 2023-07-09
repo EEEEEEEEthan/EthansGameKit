@@ -77,5 +77,13 @@ namespace EthansGameKit
 		{
 			return Mathf.RoundToInt(@this);
 		}
+		public static float DistanceTo(this float @this, float other)
+		{
+			return Mathf.Abs(@this - other);
+		}
+		public static bool CloseTo(this float @this, float other, float tolerance = float.Epsilon)
+		{
+			return @this.DistanceTo(other) <= tolerance;
+		}
 	}
 }
