@@ -88,10 +88,6 @@ namespace EthansGameKit
 		{
 			return this;
 		}
-		public void Dispose()
-		{
-			GlobalCachePool<Awaitable>.Recycle(this);
-		}
 		public void Set()
 		{
 			if (IsCompleted) return;
