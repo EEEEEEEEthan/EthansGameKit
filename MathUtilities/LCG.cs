@@ -9,13 +9,13 @@ namespace EthansGameKit.MathUtilities
 		{
 			var trueSeed = (uint)((long)seed - minIncluded);
 			var delta = (uint)((long)maxExcluded - minIncluded);
-			var result = Next(trueSeed, 1664525, 1013904223, uint.MaxValue);
+			var result = Next(trueSeed, 1103515245, 12345, uint.MaxValue);
 			return (int)(result % delta) + minIncluded;
 		}
 		public static float Next(uint seed, float min, float max)
 		{
-			var result = Next(seed, 1664525, 1013904223, uint.MaxValue);
-			return (float)(result / (double)uint.MaxValue * (max - min) + min);
+			var result = (double)Next(seed, 1103515245, 12345, uint.MaxValue);
+			return (float)(result * (max - min) / uint.MaxValue + min);
 		}
 		public static void GetSequenceFactors(uint seed, out uint a, out uint c, uint m)
 		{

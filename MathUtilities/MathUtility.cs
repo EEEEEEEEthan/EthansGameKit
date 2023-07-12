@@ -1,10 +1,24 @@
 ﻿using UnityEngine;
-using Random = UnityEngine.Random;
 
 namespace EthansGameKit.MathUtilities
 {
 	public static class MathUtility
 	{
+		public static float Hermite(float pos0, float weight0, float pos1, float weight1, float progress)
+		{
+			switch (progress)
+			{
+				case <= 0:
+					return pos0;
+				case >= 1:
+					return pos1;
+			}
+			// ReSharper disable once InlineTemporaryVariable
+			var t1 = progress;
+			var t2 = t1 * t1;
+			var t3 = t2 * t1;
+			return pos0 * (2 * t3 - 3 * t2 + 1) + weight0 * (t3 - 2 * t2 + t1) + pos1 * (-2 * t3 + 3 * t2) + weight1 * (t3 - t2);
+		}
 		public static void Hermite(float pos0, float weight0, float pos1, float weight1, float progress, out float point, out float weight)
 		{
 			switch (progress)
@@ -85,7 +99,7 @@ namespace EthansGameKit.MathUtilities
 		/// <param name="mean">正态分布的均值</param>
 		/// <param name="stdDev">正态分布的标准差</param>
 		/// <returns>指定取值 x 的正态分布概率密度函数的值</returns>
-		public static double NormalProbabilityDensityFunction(float x, float mean, float stdDev)
+		public static float NormalProbabilityDensityFunction(float x, float mean, float stdDev)
 		{
 			var a = 1 / (stdDev * Mathf.Sqrt(2 * Mathf.PI));
 			var b = -Mathf.Pow(x - mean, 2) / (2 * Mathf.Pow(stdDev, 2));
