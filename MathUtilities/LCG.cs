@@ -1,32 +1,27 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using EthansGameKit.CachePools;
 
 namespace EthansGameKit.MathUtilities
 {
 	public static class Lcg
 	{
 		static int currentIntValue;
-		public static int Next(int seed, int min, int max)
+		public static int Next(int seed, int minIncluded, int maxExcluded)
 		{
-			var trueSeed = (uint)((long)seed - min);
-			var delta = (uint)((long)max - min);
+			var trueSeed = (uint)((long)seed - minIncluded);
+			var delta = (uint)((long)maxExcluded - minIncluded);
 			var result = Next(trueSeed, 1664525, 1013904223, uint.MaxValue);
-			return (int)(result % delta) + min;
+			return (int)(result % delta) + minIncluded;
 		}
 		public static float Next(uint seed, float min, float max)
 		{
 			var result = Next(seed, 1664525, 1013904223, uint.MaxValue);
 			return (float)(result / (double)uint.MaxValue * (max - min) + min);
 		}
-		static uint Next(uint seed, uint a, uint c, uint m)
+		public static void GetFactors(uint length, uint seed, out uint a, out uint c, out uint m)
 		{
-			return (a * seed + c) % m;
-		}
-		static IEnumerator<uint> GetSequence(uint length, uint seed)
-		{
-			var c = seed;
+			c = seed;
 			// ReSharper disable once InlineTemporaryVariable
-			var m = length;
+			m = length;
 			// c,m互质
 			if (m <= 2)
 			{
@@ -58,9 +53,12 @@ namespace EthansGameKit.MathUtilities
 				}
 			}
 			// m的所有质因数能整除a-1; 若m是4的倍数,a-1也是
-			var a = 1u;
-			foreach (var factor in m.GetPrimeFactors())
-				a *= factor;
+			a = 1u;
+			var primeFactors = ListPool<uint>.Generate();
+			m.GetPrimeFactors(primeFactors);
+			for (var i = primeFactors.Count; i-- > 0;)
+				a *= primeFactors[i];
+			primeFactors.ClearAndRecycle();
 			if (m % 4 == 0)
 			{
 				if (a % 4 != 0) a *= 2;
@@ -68,10 +66,10 @@ namespace EthansGameKit.MathUtilities
 			}
 			++a;
 			if (a > m) a = 1;
-			for (var i = 0; i < m; ++i)
-			{
-				yield return seed = Next(seed, a, c, m);
-			}
+		}
+		public static uint Next(uint seed, uint a, uint c, uint m)
+		{
+			return (a * seed + c) % m;
 		}
 	}
 }
