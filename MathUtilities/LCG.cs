@@ -17,11 +17,9 @@ namespace EthansGameKit.MathUtilities
 			var result = Next(seed, 1664525, 1013904223, uint.MaxValue);
 			return (float)(result / (double)uint.MaxValue * (max - min) + min);
 		}
-		public static void GetFactors(uint length, uint seed, out uint a, out uint c, out uint m)
+		public static void GetSequenceFactors(uint seed, out uint a, out uint c, uint m)
 		{
 			c = seed;
-			// ReSharper disable once InlineTemporaryVariable
-			m = length;
 			// c,m互质
 			if (m <= 2)
 			{
