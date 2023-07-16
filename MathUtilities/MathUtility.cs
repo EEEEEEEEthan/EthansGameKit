@@ -82,28 +82,13 @@ namespace EthansGameKit.MathUtilities
 		/// <summary>
 		///     正态分布随机数
 		/// </summary>
-		/// <param name="mean">正态分布的平均值</param>
-		/// <param name="stdDev">标准差</param>
 		/// <returns>符合正态分布的随机数,值域是[float.MinValue, float.MaxValue]</returns>
-		public static float RandomNormal(float mean, float stdDev = 1)
+		public static float RandomNormal()
 		{
 			var u1 = Random.value;
 			var u2 = Random.value;
 			var z = Mathf.Sqrt(-2f * Mathf.Log(u1)) * Mathf.Cos(2f * Mathf.PI * u2);
-			return mean + stdDev * z;
-		}
-		/// <summary>
-		///     计算正态分布概率密度函数的值
-		/// </summary>
-		/// <param name="x">随机变量的取值</param>
-		/// <param name="mean">正态分布的均值</param>
-		/// <param name="stdDev">正态分布的标准差</param>
-		/// <returns>指定取值 x 的正态分布概率密度函数的值</returns>
-		public static float NormalProbabilityDensityFunction(float x, float mean, float stdDev)
-		{
-			var a = 1 / (stdDev * Mathf.Sqrt(2 * Mathf.PI));
-			var b = -Mathf.Pow(x - mean, 2) / (2 * Mathf.Pow(stdDev, 2));
-			return a * Mathf.Exp(b);
+			return z;
 		}
 	}
 }

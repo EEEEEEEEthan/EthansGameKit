@@ -85,5 +85,9 @@ namespace EthansGameKit
 		{
 			return @this.DistanceTo(other) <= tolerance;
 		}
+		public static float Abs(this float @this)
+		{
+			return Mathf.Abs(@this);
+		}
 	}
 }
