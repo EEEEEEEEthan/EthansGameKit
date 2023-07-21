@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.Collections
@@ -12,11 +13,56 @@ namespace EthansGameKit.Collections
 	}
 
 	[Serializable]
-	public class BitCollection : IReadOnlyBitCollection
+	public class BitCollection : IReadOnlyBitCollection, IDisposable
 	{
+		public static BitCollection Generate()
+		{
+			if (!GlobalCachePool<BitCollection>.TryGenerate(out var bitCollection))
+				bitCollection = new();
+			return bitCollection;
+		}
+		public static BitCollection operator &(BitCollection a, BitCollection b)
+		{
+			var result = a.Copy;
+			result.And(b);
+			return result;
+		}
+		public static BitCollection operator |(BitCollection a, BitCollection b)
+		{
+			var result = a.Copy;
+			result.Or(b);
+			return result;
+		}
+		public static BitCollection operator ^(BitCollection a, BitCollection b)
+		{
+			var result = a.Copy;
+			result.Xor(b);
+			return result;
+		}
+		public static bool operator ==(BitCollection a, BitCollection b)
+		{
+			if (ReferenceEquals(a, b)) return true;
+			if (a is null) return b is not null;
+			return a.Equals(b);
+		}
+		public static bool operator !=(BitCollection a, BitCollection b)
+		{
+			return !(a == b);
+		}
 		[SerializeField] ulong[] bits = Array.Empty<ulong>();
 		[NonSerialized] int arrayLength = -1;
 		public IReadOnlyList<ulong> RawData => bits;
+		public BitCollection Copy
+		{
+			get
+			{
+				var copy = Generate();
+				copy.bits = new ulong[bits.Length];
+				Array.Copy(bits, copy.bits, bits.Length);
+				copy.arrayLength = arrayLength;
+				return copy;
+			}
+		}
 		public IEnumerable<int> Values
 		{
 			get
@@ -54,6 +100,16 @@ namespace EthansGameKit.Collections
 				return arrayLength;
 			}
 		}
+		BitCollection()
+		{
+		}
+		public override bool Equals(object obj)
+		{
+			if (ReferenceEquals(null, obj)) return false;
+			if (ReferenceEquals(this, obj)) return true;
+			if (obj.GetType() != GetType()) return false;
+			return Equals((BitCollection)obj);
+		}
 		public bool Get(int index)
 		{
 			if (index < 0) return false;
@@ -61,6 +117,11 @@ namespace EthansGameKit.Collections
 			var bitIndex = index & 0b_0011_1111;
 			if (arrayIndex >= bits.Length) return false;
 			return (bits[arrayIndex] & (1UL << bitIndex)) != 0;
+		}
+		void IDisposable.Dispose()
+		{
+			Clear();
+			GlobalCachePool<BitCollection>.Recycle(this);
 		}
 		public void And(IReadOnlyBitCollection other)
 		{
@@ -120,6 +181,18 @@ namespace EthansGameKit.Collections
 		public void Clear()
 		{
 			Array.Clear(bits, 0, bits.Length);
+		}
+		protected bool Equals(BitCollection other)
+		{
+			if (ReferenceEquals(this, other)) return true;
+			other.Trim();
+			Trim();
+			if (arrayLength != other.arrayLength)
+				return false;
+			for (var i = arrayLength; i-- > 0;)
+				if (bits[i] != other.bits[i])
+					return false;
+			return true;
 		}
 	}
 }
