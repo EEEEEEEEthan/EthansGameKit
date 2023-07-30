@@ -1,98 +1,14 @@
 ﻿// ReSharper disable once CheckNamespace
 
-using System.Collections;
 using System.Collections.Generic;
 using EthansGameKit.CachePools;
+using EthansGameKit.Internal;
 using UnityEngine;
 
 namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
-		/// <summary>
-		///     节点迭代器.foreach结束后会自动回收至内存池,从而减少GC.
-		/// </summary>
-		/// <remarks>
-		///     不保证Hierarchy变化后能正常工作.
-		/// </remarks>
-		class DfsTransformEnumerator : IEnumerator<Transform>, IEnumerable<Transform>
-		{
-			public static DfsTransformEnumerator Generate(
-				Transform root,
-				bool includeSelf,
-				bool includeInactive)
-			{
-				if (!GlobalCachePool<DfsTransformEnumerator>.TryGenerate(out var generator))
-					generator = new();
-				generator.root = root;
-				generator.started = false;
-				generator.includeSelf = includeSelf;
-				generator.includeInactive = includeInactive;
-				return generator;
-			}
-			readonly Stack<Transform> stack = new();
-			bool started;
-			bool includeInactive;
-			bool includeSelf;
-			bool recursive;
-			Transform root;
-			public Transform Current { get; private set; }
-			object IEnumerator.Current => Current;
-			public bool MoveNext()
-			{
-				if (started)
-				{
-					if (stack.Count == 0)
-						return false;
-					var top = stack.Pop();
-					if (includeInactive)
-					{
-						for (var i = top.childCount - 1; i >= 0; i--)
-						{
-							var child = top.GetChild(i);
-							if (child.gameObject.activeSelf)
-								stack.Push(child);
-						}
-					}
-					else
-					{
-						for (var i = top.childCount - 1; i >= 0; i--)
-						{
-							var child = top.GetChild(i);
-							stack.Push(child);
-						}
-					}
-					return true;
-				}
-				started = true;
-				stack.Push(root);
-				if (includeSelf)
-				{
-					Current = root;
-					return true;
-				}
-				return MoveNext();
-			}
-			public void Reset()
-			{
-				stack.Clear();
-				started = false;
-			}
-			public void Dispose()
-			{
-				Reset();
-				GlobalCachePool<DfsTransformEnumerator>.Recycle(this);
-			}
-			IEnumerator<Transform> IEnumerable<Transform>.GetEnumerator()
-			{
-				return this;
-			}
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return this;
-			}
-		}
-
 		public static Transform Find(this Transform @this, string path, bool includeInactive)
 		{
 			if (!includeInactive)
@@ -127,7 +43,7 @@ namespace EthansGameKit
 		/// <returns></returns>
 		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeInactive)
 		{
-			return DfsTransformEnumerator.Generate(@this, false, includeInactive);
+			return DfsTransformAccessor.Generate(@this, false, includeInactive);
 		}
 		/// <summary>
 		///     所有子节点
@@ -144,7 +60,7 @@ namespace EthansGameKit
 			bool includeInactive,
 			bool includeSelf)
 		{
-			return DfsTransformEnumerator.Generate(@this, includeSelf, includeInactive);
+			return DfsTransformAccessor.Generate(@this, includeSelf, includeInactive);
 		}
 		/// <summary>
 		///     获取@this相对于parent的路径(路径将不会包含parent.name).若@this不是parent的子节点,返回false
