@@ -32,7 +32,7 @@ namespace EthansGameKit
 			}
 			return true;
 		}
-		public static int Clamp(this int @this, int min, int max)
+		public static int Clamped(this int @this, int min, int max)
 		{
 			return Mathf.Clamp(@this, min, max);
 		}
@@ -42,11 +42,11 @@ namespace EthansGameKit
 		}
 		public static int NextPrime(this int @this)
 		{
-			return (int)Prime.NextPrime((uint)@this.Clamp(0, int.MaxValue));
+			return (int)Prime.NextPrime((uint)@this.Clamped(0, int.MaxValue));
 		}
 		public static int PreviousPrime(this int @this)
 		{
-			return (int)Prime.PreviousPrime((uint)@this.Clamp(0, int.MaxValue));
+			return (int)Prime.PreviousPrime((uint)@this.Clamped(0, int.MaxValue));
 		}
 		public static IEnumerable<uint> GetPrimeFactors(this int @this)
 		{

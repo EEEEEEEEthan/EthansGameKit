@@ -29,7 +29,7 @@ namespace EthansGameKit
 			}
 			return true;
 		}
-		public static float Clamp(this float @this, float min, float max)
+		public static float Clamped(this float @this, float min, float max)
 		{
 			return Mathf.Clamp(@this, min, max);
 		}
@@ -61,7 +61,7 @@ namespace EthansGameKit
 			}
 			return clamp switch
 			{
-				true => value.Clamp(0, 1),
+				true => value.Clamped(0, 1),
 				_ => value,
 			};
 		}

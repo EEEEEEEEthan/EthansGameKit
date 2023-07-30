@@ -30,7 +30,7 @@ namespace EthansGameKit
 			}
 			return true;
 		}
-		public static uint Clamp(this uint @this, uint min, uint max)
+		public static uint Clamped(this uint @this, uint min, uint max)
 		{
 			if (@this < min) return min;
 			return @this > max ? max : @this;

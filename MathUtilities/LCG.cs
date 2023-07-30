@@ -28,7 +28,7 @@ namespace EthansGameKit.MathUtilities
 			else
 			{
 				c %= m;
-				c.Clamp(1, m - 1);
+				c.Clamped(1, m - 1);
 				if (!m.CoprimeWith(c))
 				{
 					for (var i = 1; i < m; ++i)
