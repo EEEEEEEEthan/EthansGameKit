@@ -9,83 +9,63 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
-        /// <summary>
-        ///     节点迭代器.foreach结束后会自动回收至内存池,从而减少GC.
-        /// </summary>
-        /// <remarks>
-        ///     不保证Hierarchy变化后能正常工作.
-        /// </remarks>
-        class DfsTransformEnumerator : IEnumerator<Transform>, IEnumerable<Transform>
+		/// <summary>
+		///     节点迭代器.foreach结束后会自动回收至内存池,从而减少GC.
+		/// </summary>
+		/// <remarks>
+		///     不保证Hierarchy变化后能正常工作.
+		/// </remarks>
+		class DfsTransformEnumerator : IEnumerator<Transform>, IEnumerable<Transform>
 		{
 			public static DfsTransformEnumerator Generate(
 				Transform root,
 				bool includeSelf,
-				bool includeInactive,
-				bool recursive)
+				bool includeInactive)
 			{
 				if (!GlobalCachePool<DfsTransformEnumerator>.TryGenerate(out var generator))
 					generator = new();
 				generator.root = root;
-				generator.childIndex = -1;
+				generator.started = false;
 				generator.includeSelf = includeSelf;
 				generator.includeInactive = includeInactive;
-				generator.recursive = recursive;
 				return generator;
 			}
-			int childIndex;
+			readonly Stack<Transform> stack = new();
+			bool started;
 			bool includeInactive;
 			bool includeSelf;
 			bool recursive;
 			Transform root;
-			DfsTransformEnumerator subEnumerator;
 			public Transform Current { get; private set; }
 			object IEnumerator.Current => Current;
 			public bool MoveNext()
 			{
-				if (childIndex < 0)
+				if (started)
 				{
-					if (includeSelf)
-					{
-						if (includeInactive || root.gameObject.activeInHierarchy)
-						{
-							Current = root;
-							childIndex = 0;
-							return true;
-						}
+					if (stack.Count == 0)
 						return false;
-					}
-					childIndex = 0;
-				}
-				if (subEnumerator != null)
-				{
-					if (subEnumerator.MoveNext())
+					var top = stack.Pop();
+					for (var i = top.childCount - 1; i >= 0; i--)
 					{
-						Current = subEnumerator.Current;
-						return true;
+						var child = top.GetChild(i);
+						if (!includeInactive || child.gameObject.activeSelf)
+							stack.Push(child);
 					}
-					subEnumerator.Dispose();
-					subEnumerator = null;
+					return true;
 				}
-				while (childIndex < root.childCount)
+				started = true;
+				stack.Push(root);
+				if (includeSelf)
 				{
-					var child = root.GetChild(childIndex);
-					if (includeInactive || child.gameObject.activeSelf)
-					{
-						Current = child;
-						childIndex++;
-						if (recursive) subEnumerator = Generate(child, false, includeInactive, true);
-						return true;
-					}
-					childIndex++;
+					Current = root;
+					return true;
 				}
-				return false;
+				return MoveNext();
 			}
 			public void Reset()
 			{
-				childIndex = 0;
-				root = null;
-				subEnumerator = null;
-				Current = null;
+				stack.Clear();
+				started = false;
 			}
 			public void Dispose()
 			{
@@ -125,47 +105,44 @@ namespace EthansGameKit
 		{
 			return child = @this.Find(path, includeInactive);
 		}
-        /// <summary>
-        ///     所有子节点,不包括自己
-        /// </summary>
-        /// <remarks>
-        ///     不保证Hierarchy变化后能正常工作.
-        /// </remarks>
-        /// <param name="this"></param>
-        /// <param name="includeInactive"></param>
-        /// <param name="recursive"></param>
-        /// <returns></returns>
-        public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeInactive, bool recursive)
+		/// <summary>
+		///     所有子节点,不包括自己
+		/// </summary>
+		/// <remarks>
+		///     不保证Hierarchy变化后能正常工作.
+		/// </remarks>
+		/// <param name="this"></param>
+		/// <param name="includeInactive"></param>
+		/// <returns></returns>
+		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeInactive)
 		{
-			return DfsTransformEnumerator.Generate(@this, false, includeInactive, recursive);
+			return DfsTransformEnumerator.Generate(@this, false, includeInactive);
 		}
-        /// <summary>
-        ///     所有子节点
-        /// </summary>
-        /// <remarks>
-        ///     不保证Hierarchy变化后能正常工作.
-        /// </remarks>
-        /// <param name="this"></param>
-        /// <param name="includeInactive"></param>
-        /// <param name="recursive"></param>
-        /// <param name="includeSelf"></param>
-        /// <returns></returns>
-        public static IEnumerable<Transform> IterChildren(
+		/// <summary>
+		///     所有子节点
+		/// </summary>
+		/// <remarks>
+		///     不保证Hierarchy变化后能正常工作.
+		/// </remarks>
+		/// <param name="this"></param>
+		/// <param name="includeInactive"></param>
+		/// <param name="includeSelf"></param>
+		/// <returns></returns>
+		public static IEnumerable<Transform> IterChildren(
 			this Transform @this,
 			bool includeInactive,
-			bool recursive,
 			bool includeSelf)
 		{
-			return DfsTransformEnumerator.Generate(@this, includeSelf, includeInactive, recursive);
+			return DfsTransformEnumerator.Generate(@this, includeSelf, includeInactive);
 		}
-        /// <summary>
-        ///     获取@this相对于parent的路径(路径将不会包含parent.name).若@this不是parent的子节点,返回false
-        /// </summary>
-        /// <param name="this"></param>
-        /// <param name="parent"></param>
-        /// <param name="path"></param>
-        /// <returns></returns>
-        public static bool TryGetHierarchyPath(this Transform @this, Transform parent, out string path)
+		/// <summary>
+		///     获取@this相对于parent的路径(路径将不会包含parent.name).若@this不是parent的子节点,返回false
+		/// </summary>
+		/// <param name="this"></param>
+		/// <param name="parent"></param>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public static bool TryGetHierarchyPath(this Transform @this, Transform parent, out string path)
 		{
 			path = null;
 			if (@this == parent) return false;
