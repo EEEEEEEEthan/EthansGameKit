@@ -45,11 +45,22 @@ namespace EthansGameKit
 					if (stack.Count == 0)
 						return false;
 					var top = stack.Pop();
-					for (var i = top.childCount - 1; i >= 0; i--)
+					if (includeInactive)
 					{
-						var child = top.GetChild(i);
-						if (!includeInactive || child.gameObject.activeSelf)
+						for (var i = top.childCount - 1; i >= 0; i--)
+						{
+							var child = top.GetChild(i);
+							if (child.gameObject.activeSelf)
+								stack.Push(child);
+						}
+					}
+					else
+					{
+						for (var i = top.childCount - 1; i >= 0; i--)
+						{
+							var child = top.GetChild(i);
 							stack.Push(child);
+						}
 					}
 					return true;
 				}
