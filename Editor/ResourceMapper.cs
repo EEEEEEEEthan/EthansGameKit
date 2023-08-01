@@ -52,10 +52,11 @@ namespace EthansGameKit.Editor
 				var propertyName = $"{fileNameWithoutExtension}_{type.Name}";
 				builder.AppendLine($"{strIdent2}public static ITimedCache<{type.FullName}> {propertyName} {{ get; }} = new ResourceCache<{type.FullName}>(\"{fileUnderResource}\");");
 				allAssets.Add(propertyName);
-				if (asset is Texture2D)
+				var assets = Resources.LoadAll(fileUnderResource);
+				if (assets.Length > 1)
 				{
-					var subPropertyName = $"{fileNameWithoutExtension}_Sprites";
-					builder.AppendLine($"{strIdent2}public static ITimedCache<UnityEngine.Sprite[]> {subPropertyName} {{ get; }} = new ResourceGroupCache<UnityEngine.Sprite>(\"{fileUnderResource}\");");
+					var subPropertyName = $"{fileNameWithoutExtension}_AllAssets";
+					builder.AppendLine($"{strIdent2}public static ITimedCache<UnityEngine.Object[]> {subPropertyName} {{ get; }} = new ResourceGroupCache<UnityEngine.Object>(\"{fileUnderResource}\");");
 					allAssets.Add(subPropertyName);
 				}
 			}
