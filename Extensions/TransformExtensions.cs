@@ -39,36 +39,12 @@ namespace EthansGameKit
 		///     不保证Hierarchy变化后能正常工作.
 		/// </remarks>
 		/// <param name="this"></param>
-		/// <param name="includeInactive"></param>
-		/// <returns></returns>
-		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeInactive)
-		{
-			return DfsTransformAccessor.Generate(@this, false, includeInactive);
-		}
-		/// <summary>
-		///     所有子节点
-		/// </summary>
-		/// <remarks>
-		///     不保证Hierarchy变化后能正常工作.
-		/// </remarks>
-		/// <param name="this"></param>
-		/// <param name="includeInactive"></param>
 		/// <param name="includeSelf"></param>
 		/// <returns></returns>
-		public static IEnumerable<Transform> IterChildren(
-			this Transform @this,
-			bool includeInactive,
-			bool includeSelf)
+		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf)
 		{
-			return DfsTransformAccessor.Generate(@this, includeSelf, includeInactive);
+			return DfsTransformAccessor.Generate(@this, includeSelf);
 		}
-		/// <summary>
-		///     获取@this相对于parent的路径(路径将不会包含parent.name).若@this不是parent的子节点,返回false
-		/// </summary>
-		/// <param name="this"></param>
-		/// <param name="parent"></param>
-		/// <param name="path"></param>
-		/// <returns></returns>
 		public static bool TryGetHierarchyPath(this Transform @this, Transform parent, out string path)
 		{
 			path = null;
