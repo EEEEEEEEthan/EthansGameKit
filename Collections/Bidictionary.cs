@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.Collections
 {
 	[Serializable]
-	public class Bidictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable
+	public class Bidictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable, IDisposable
 	{
 		[Serializable]
 		struct Data
@@ -15,9 +16,26 @@ namespace EthansGameKit.Collections
 			[SerializeField] public TValue value;
 		}
 
+		public static Bidictionary<TKey, TValue> Generate()
+		{
+			return GlobalCachePool<Bidictionary<TKey, TValue>>.TryGenerate(out var result)
+				? result
+				: new();
+		}
 		readonly Dictionary<TKey, TValue> key2Value = new();
 		readonly Dictionary<TValue, TKey> value2Key = new();
 		[SerializeField] Data[] serializeData;
+		public int Count => key2Value.Count;
+		Bidictionary()
+		{
+		}
+		void IDisposable.Dispose()
+		{
+			key2Value.Clear();
+			value2Key.Clear();
+			serializeData = null;
+			GlobalCachePool<Bidictionary<TKey, TValue>>.Recycle(this);
+		}
 		IEnumerator IEnumerable.GetEnumerator()
 		{
 			return key2Value.GetEnumerator();
@@ -40,7 +58,7 @@ namespace EthansGameKit.Collections
 		}
 		public TValue this[TKey key]
 		{
-			get => this[key];
+			get => key2Value[key];
 			set
 			{
 				RemoveKey(key);

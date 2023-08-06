@@ -183,9 +183,10 @@ namespace EthansGameKit.Collections
 		}
 		public int Find(TKey element, TValue sortingValue)
 		{
-			if (Count <= 0) return -1;
-			if (finder.Length <= Count)
-				finder = new int[Count];
+			var count = Count;
+			if (count <= 0) return -1;
+			if (finder.Length <= count)
+				finder = new int[count];
 			finder[0] = 0;
 			var start = 0;
 			var end = 1;
@@ -203,10 +204,10 @@ namespace EthansGameKit.Collections
 						continue;
 				}
 				var leftIndex = (currentIndex << 1) | 1;
-				if (leftIndex < Count)
+				if (leftIndex < count)
 					finder[end++] = leftIndex;
 				var rightIndex = leftIndex + 1;
-				if (rightIndex < Count)
+				if (rightIndex < count)
 					finder[end++] = rightIndex;
 				++start;
 			}
@@ -214,7 +215,8 @@ namespace EthansGameKit.Collections
 		}
 		public int Find(TKey element)
 		{
-			for (var i = 0; i < Count; i++)
+			var count = Count;
+			for (var i = 0; i < count; i++)
 				if (equalityComparer.Equals(keys[i], element))
 					return i;
 			return -1;

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using EthansGameKit.CachePools;
+using UnityEngine;
 using UnityEngine.SceneManagement;
 
 namespace EthansGameKit.Internal
@@ -28,6 +29,8 @@ namespace EthansGameKit.Internal
 		}
 		internal static void InvokeAtFreeFrame(Action callback, TaskQueuePriorities priority, bool crossScene)
 		{
+			if (delayedLists.Length > 100)
+				Debug.LogWarning($"too busy! queue length = {delayedLists.Length}");
 			delayedLists[(int)priority].Add(new() { callback = callback, crossScene = crossScene });
 		}
 		static void OnSceneLoaded(Scene scene, LoadSceneMode mode)

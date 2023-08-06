@@ -70,5 +70,13 @@ namespace EthansGameKit
 			@this.Pop(index);
 			return true;
 		}
+		public static void Shuffle<T>(this IList<T> @this)
+		{
+			for (var i = @this.Count; i-- > 0;)
+			{
+				var index = Random.Range(0, i + 1);
+				(@this[i], @this[index]) = (@this[index], @this[i]);
+			}
+		}
 	}
 }
