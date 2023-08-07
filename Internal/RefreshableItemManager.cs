@@ -11,7 +11,7 @@ namespace EthansGameKit.Internal
 		static readonly HashSet<IRefreshableItem> refreshing = new();
 		public static void Refresh(IRefreshableItem item, bool immediate)
 		{
-			if (immediate)
+			if (immediate || !Application.isPlaying)
 			{
 				dirtyItems.Remove(item);
 				RefreshImmediate(item);

@@ -7,7 +7,9 @@ namespace EthansGameKit
 	{
 		public static void Destroy(this Object @this)
 		{
-			@this.name = "__ToBeDestroyed__";
+			if (!@this) return;
+			if (@this is not GameObject)
+				@this.name = "__ToBeDestroyed__";
 #if UNITY_EDITOR
 			if (!Application.isPlaying)
 			{
