@@ -5,17 +5,14 @@ namespace EthansGameKit.MathUtilities
 	public static class Lcg
 	{
 		static int currentIntValue;
-		public static int Next(int seed, int minIncluded, int maxExcluded)
+		public static uint Next(uint seed)
 		{
-			var trueSeed = (uint)((long)seed - minIncluded);
-			var delta = (uint)((long)maxExcluded - minIncluded);
-			var result = Next(trueSeed, 1103515245, 12345, uint.MaxValue);
-			return (int)(result % delta) + minIncluded;
+			return Next(seed, 1103515245, 12345, uint.MaxValue);
 		}
-		public static float Next(uint seed, float min, float max)
+		public static int Next(int seed)
 		{
-			var result = (double)Next(seed, 1103515245, 12345, uint.MaxValue);
-			return (float)(result * (max - min) / uint.MaxValue + min);
+			var trueSeed = (uint)seed;
+			return (int)Next(trueSeed);
 		}
 		public static void GetSequenceFactors(uint seed, out uint a, out uint c, uint m)
 		{

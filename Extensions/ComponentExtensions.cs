@@ -20,12 +20,20 @@ namespace EthansGameKit
 			isNew = true;
 			return @this.gameObject.AddComponent<T>();
 		}
+		public static T GetOrAddComponent<T>(this Component @this) where T : Component
+		{
+			return @this.GetOrAddComponent<T>(out _);
+		}
 		public static T GetOrAddComponent<T>(this Component @this, string path, out bool isNew) where T : Component
 		{
 			var transform = @this.transform.FindOrAdd(path, out var isNewGameObject);
 			var component = transform.GetOrAddComponent<T>(out var isNewComponent);
 			isNew = isNewGameObject || isNewComponent;
 			return component;
+		}
+		public static T GetOrAddComponent<T>(this Component @this, string path) where T : Component
+		{
+			return @this.GetOrAddComponent<T>(path, out _);
 		}
 	}
 }
