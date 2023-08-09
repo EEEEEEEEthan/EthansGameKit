@@ -170,7 +170,7 @@ namespace EthansGameKit.DebugUtilities
 			indicatorTransform.localScale = matrix.lossyScale;
 			var screenPoint = camera.WorldToScreenPoint(hit.point);
 			var textSize = TextStyle.CalcSize(new(message)) + new Vector2(TextStyle.padding.horizontal, TextStyle.padding.vertical);
-			var rect = new Rect(screenPoint.x, Screen.height - screenPoint.y - textSize.y * 1.5f, textSize.x, textSize.y);
+			var rect = new Rect(screenPoint.x, Screen.height - screenPoint.y - textSize.y, textSize.x, textSize.y);
 			GUILayout.BeginArea(rect);
 			GUILayout.Label(message, TextStyle);
 			GUILayout.EndArea();
