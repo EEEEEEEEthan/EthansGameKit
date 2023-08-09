@@ -14,7 +14,7 @@ namespace EthansGameKit.Editor
 		static void OnGUI()
 		{
 			var @event = Event.current;
-			if (@event.type != EventType.KeyDown && @event.keyCode != hotKey) return;
+			if (@event.type != EventType.KeyDown || @event.keyCode != hotKey) return;
 			var mousePosition = @event.mousePosition;
 			var mainCamera = Camera.main;
 			if (!mainCamera) return;
