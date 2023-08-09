@@ -1,0 +1,9 @@
+{
+	"name": "com.ethan.gamekit",
+	"displayName": "Ethan's Game Kit",
+	"description": "Ethan's Game Kit",
+	"version": "1.0.0",
+	"unity": "2022.3.1f1c1",
+	"license": "MIT",
+	"dependencies": {}
+}
