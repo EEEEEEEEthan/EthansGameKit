@@ -17,12 +17,121 @@ namespace EthansGameKit.Components
 				Update();
 			}
 		}
+		public Vector3 PreferredPosition
+		{
+			get => position.PreferredValue;
+			set
+			{
+				position.PreferredValue = value;
+				Update();
+			}
+		}
+		public Vector3 CurrentPosition
+		{
+			get => position.Value;
+			set
+			{
+				position.Value = value;
+				Update();
+			}
+		}
+		public float MaxSpeed
+		{
+			get => position.MaxSpeed;
+			set
+			{
+				position.MaxSpeed = value;
+				Update();
+			}
+		}
+		public Vector3 Velocity
+		{
+			get => position.Velocity;
+			set
+			{
+				_ = position.Value;
+				position.Velocity = value;
+			}
+		}
+		public float PositionSmoothTime
+		{
+			get => position.SmoothTime;
+			set
+			{
+				position.SmoothTime = value;
+				Update();
+			}
+		}
+		public bool UseScaledTime
+		{
+			get => position.UseScaledTime;
+			set
+			{
+				position.UseScaledTime = value;
+				rotation.UseScaledTime = value;
+				Update();
+			}
+		}
+		public Transform Space
+		{
+			get => space;
+			set
+			{
+				space = value;
+				Update();
+			}
+		}
 		public SmoothedQuaternion Rotation
 		{
 			get => rotation;
 			set
 			{
 				rotation = value;
+				Update();
+			}
+		}
+		public Quaternion PreferredRotation
+		{
+			get => rotation.PreferredValue;
+			set
+			{
+				rotation.PreferredValue = value;
+				Update();
+			}
+		}
+		public Quaternion CurrentRotation
+		{
+			get => rotation.Value;
+			set
+			{
+				rotation.Value = value;
+				Update();
+			}
+		}
+		public float MaxAngularSpeed
+		{
+			get => rotation.MaxSpeed;
+			set
+			{
+				rotation.MaxSpeed = value;
+				Update();
+			}
+		}
+		public Vector3 AngularVelocity
+		{
+			get => rotation.Velocity;
+			set
+			{
+				_ = rotation.Value;
+				rotation.Velocity = value;
+			}
+		}
+		public float RotationSmoothTime
+		{
+			get => rotation.SmoothTime;
+			set
+			{
+				rotation.SmoothTime = value;
 				Update();
 			}
 		}
