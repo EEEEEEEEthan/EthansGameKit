@@ -11,38 +11,22 @@ namespace EthansGameKit.Components
 		public SmoothedVector3 Position
 		{
 			get => position;
-			set
-			{
-				position = value;
-				Update();
-			}
+			set => position = value;
 		}
 		public Vector3 PreferredPosition
 		{
 			get => position.PreferredValue;
-			set
-			{
-				position.PreferredValue = value;
-				Update();
-			}
+			set => position.PreferredValue = value;
 		}
 		public Vector3 CurrentPosition
 		{
 			get => position.Value;
-			set
-			{
-				position.Value = value;
-				Update();
-			}
+			set => position.Value = value;
 		}
 		public float MaxSpeed
 		{
 			get => position.MaxSpeed;
-			set
-			{
-				position.MaxSpeed = value;
-				Update();
-			}
+			set => position.MaxSpeed = value;
 		}
 		public Vector3 Velocity
 		{
@@ -56,11 +40,7 @@ namespace EthansGameKit.Components
 		public float PositionSmoothTime
 		{
 			get => position.SmoothTime;
-			set
-			{
-				position.SmoothTime = value;
-				Update();
-			}
+			set => position.SmoothTime = value;
 		}
 		public bool UseScaledTime
 		{
@@ -69,53 +49,32 @@ namespace EthansGameKit.Components
 			{
 				position.UseScaledTime = value;
 				rotation.UseScaledTime = value;
-				Update();
 			}
 		}
 		public Transform Space
 		{
 			get => space;
-			set
-			{
-				space = value;
-				Update();
-			}
+			set => space = value;
 		}
 		public SmoothedQuaternion Rotation
 		{
 			get => rotation;
-			set
-			{
-				rotation = value;
-				Update();
-			}
+			set => rotation = value;
 		}
 		public Quaternion PreferredRotation
 		{
 			get => rotation.PreferredValue;
-			set
-			{
-				rotation.PreferredValue = value;
-				Update();
-			}
+			set => rotation.PreferredValue = value;
 		}
 		public Quaternion CurrentRotation
 		{
 			get => rotation.Value;
-			set
-			{
-				rotation.Value = value;
-				Update();
-			}
+			set => rotation.Value = value;
 		}
 		public float MaxAngularSpeed
 		{
 			get => rotation.MaxSpeed;
-			set
-			{
-				rotation.MaxSpeed = value;
-				Update();
-			}
+			set => rotation.MaxSpeed = value;
 		}
 		public Vector3 AngularVelocity
 		{
@@ -129,13 +88,9 @@ namespace EthansGameKit.Components
 		public float RotationSmoothTime
 		{
 			get => rotation.SmoothTime;
-			set
-			{
-				rotation.SmoothTime = value;
-				Update();
-			}
+			set => rotation.SmoothTime = value;
 		}
-		void Update()
+		public void Update()
 		{
 			var transform = this.transform;
 			transform.position = space ? space.TransformPoint(position.Value) : position.Value;
