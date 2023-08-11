@@ -32,39 +32,39 @@ namespace EthansGameKit.Components
 		{
 			this.position.PreferredValue = position;
 		}
-		public void RotateTowards(Quaternion rotation)
+		public void RotateTo(Quaternion rotation)
 		{
 			this.rotation.PreferredValue = rotation;
 		}
-		public void RotateTowards(Vector3 forward)
+		public void RotateTo(Vector3 forward)
 		{
-			RotateTowards(Quaternion.LookRotation(forward));
+			RotateTo(Quaternion.LookRotation(forward));
 		}
-		public void RotateTowards(Vector3 forward, Vector3 up)
+		public void RotateTo(Vector3 forward, Vector3 up)
 		{
-			RotateTowards(Quaternion.LookRotation(forward, up));
+			RotateTo(Quaternion.LookRotation(forward, up));
 		}
 		public void Rotate(Vector3 axis, float angles)
 		{
-			RotateTowards(Quaternion.AngleAxis(angles, axis));
+			RotateTo(rotation.PreferredValue * Quaternion.AngleAxis(angles, axis));
 		}
 		public void LookAt(Vector3 position)
 		{
-			RotateTowards(Quaternion.LookRotation(position - this.position.PreferredValue));
+			RotateTo(Quaternion.LookRotation(position - this.position.PreferredValue));
 		}
 		public void LookAt(Vector3 position, Quaternion rotation)
 		{
-			RotateTowards(rotation);
+			RotateTo(rotation);
 			LookAt(position);
 		}
 		public void LookAt(Vector3 position, Vector3 forward)
 		{
-			RotateTowards(forward);
+			RotateTo(forward);
 			LookAt(position);
 		}
 		public void LookAt(Vector3 position, Vector3 forward, Vector3 up)
 		{
-			RotateTowards(forward, up);
+			RotateTo(forward, up);
 			LookAt(position);
 		}
 		public void LookAt(Vector3 position, float distance)
@@ -73,17 +73,17 @@ namespace EthansGameKit.Components
 		}
 		public void LookAt(Vector3 position, Quaternion rotation, float distance)
 		{
-			RotateTowards(rotation);
+			RotateTo(rotation);
 			LookAt(position, distance);
 		}
 		public void LookAt(Vector3 position, Vector3 forward, float distance)
 		{
-			RotateTowards(forward);
+			RotateTo(forward);
 			LookAt(position, distance);
 		}
 		public void LookAt(Vector3 position, Vector3 forward, Vector3 up, float distance)
 		{
-			RotateTowards(forward, up);
+			RotateTo(forward, up);
 			LookAt(position, distance);
 		}
 	}
