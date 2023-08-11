@@ -5,7 +5,7 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
-		public static bool Contains(BoxCollider @this, Vector3 position)
+		public static bool Contains(this BoxCollider @this, Vector3 position)
 		{
 			if (!@this) return false;
 			return @this.ClosestPoint(position) == position;
