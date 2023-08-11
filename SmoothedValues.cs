@@ -62,7 +62,7 @@ namespace EthansGameKit
 			set
 			{
 				_ = Value;
-				velocity = 0;
+				this.value = value;
 			}
 		}
 		public float Velocity
@@ -82,6 +82,16 @@ namespace EthansGameKit
 				_ = Value;
 				useScaledTime = value;
 			}
+		}
+		public SmoothedSingle(bool useScaledTime, float smoothTime)
+		{
+			this.useScaledTime = useScaledTime;
+			this.smoothTime = smoothTime;
+			preferredValue = 0;
+			maxSpeed = float.MaxValue;
+			value = 0;
+			velocity = 0;
+			lastTime = 0;
 		}
 	}
 
@@ -154,9 +164,19 @@ namespace EthansGameKit
 			}
 			set
 			{
-				preferredValue = this.value = value;
-				velocity = default;
+				_ = Value;
+				this.value = value;
 			}
+		}
+		public SmoothedVector3(bool useScaledTime, float smoothTime)
+		{
+			this.useScaledTime = useScaledTime;
+			this.smoothTime = smoothTime;
+			preferredValue = default;
+			maxSpeed = float.MaxValue;
+			value = default;
+			velocity = default;
+			lastTime = 0;
 		}
 	}
 
@@ -234,9 +254,19 @@ namespace EthansGameKit
 			}
 			set
 			{
-				preferredValue = this.value = value;
-				velocity = default;
+				_ = Value;
+				this.value = value;
 			}
+		}
+		public SmoothedQuaternion(bool useScaledTime, float smoothTime)
+		{
+			this.useScaledTime = useScaledTime;
+			this.smoothTime = smoothTime;
+			preferredValue = default;
+			maxSpeed = float.MaxValue;
+			value = default;
+			velocity = default;
+			lastTime = 0;
 		}
 	}
 }
