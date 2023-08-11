@@ -6,16 +6,8 @@ namespace EthansGameKit.Components
 	[DisallowMultipleComponent]
 	public class SmoothedTransform : MonoBehaviour
 	{
-		[SerializeField] public SmoothedVector3 position = new()
-		{
-			MaxSpeed = float.MaxValue,
-			SmoothTime = 0.1f,
-		};
-		[SerializeField] public SmoothedQuaternion rotation = new()
-		{
-			MaxSpeed = float.MaxValue,
-			SmoothTime = 0.1f,
-		};
+		[SerializeField] public SmoothedVector3 position = new(false, 0.1f);
+		[SerializeField] public SmoothedQuaternion rotation = new(false, 0.1f);
 		Vector3 lastPosition;
 		Quaternion lastRotation;
 		public void Update()
