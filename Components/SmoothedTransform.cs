@@ -44,6 +44,10 @@ namespace EthansGameKit.Components
 		{
 			RotateTowards(Quaternion.LookRotation(forward, up));
 		}
+		public void Rotate(Vector3 axis, float angle)
+		{
+			RotateTowards(Quaternion.AngleAxis(axis.magnitude, axis));
+		}
 		public void LookAt(Vector3 position)
 		{
 			RotateTowards(Quaternion.LookRotation(position - this.position.PreferredValue));
