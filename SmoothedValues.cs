@@ -51,6 +51,7 @@ namespace EthansGameKit
 		{
 			get
 			{
+				if (!Application.isPlaying) return value;
 				var currentTime = useScaledTime ? Time.time : Time.unscaledTime;
 				var deltaTime = currentTime - lastTime;
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -143,6 +144,7 @@ namespace EthansGameKit
 		{
 			get
 			{
+				if (!Application.isPlaying) return value;
 				var currentTime = useScaledTime ? Time.time : Time.unscaledTime;
 				var deltaTime = currentTime - lastTime;
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
@@ -217,6 +219,7 @@ namespace EthansGameKit
 		{
 			get
 			{
+				if (!Application.isPlaying) return value;
 				var currentTime = useScaledTime ? Time.time : Time.unscaledTime;
 				var deltaTime = currentTime - lastTime;
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
