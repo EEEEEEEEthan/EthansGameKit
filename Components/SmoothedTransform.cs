@@ -6,35 +6,41 @@ namespace EthansGameKit.Components
 	[DisallowMultipleComponent]
 	public class SmoothedTransform : MonoBehaviour
 	{
-		[SerializeField] public SmoothedVector3 position = new(false, 0.1f);
-		[SerializeField] public SmoothedQuaternion rotation = new(false, 0.1f);
+		[SerializeField] public SmoothedVector3 localPosition = new(false, 0.1f, float.MaxValue);
+		[SerializeField] public SmoothedQuaternion localRotation = new(false, 0.1f, float.MaxValue);
 		Vector3 lastPosition;
 		Quaternion lastRotation;
+		public void Reset()
+		{
+			var transform = this.transform;
+			localPosition.PreferredValue = localPosition.Value = transform.localPosition;
+			localRotation.PreferredValue = localRotation.Value = transform.localRotation;
+		}
 		public void Update()
 		{
 			var transform = this.transform;
 			if (lastPosition != transform.localPosition)
-				position.Value = transform.localPosition;
+				localPosition.Value = transform.localPosition;
 			else
-				transform.localPosition = position.Value;
+				transform.localPosition = localPosition.Value;
 			lastPosition = transform.localPosition;
 			if (lastRotation != transform.rotation)
-				rotation.Value = transform.localRotation;
+				localRotation.Value = transform.localRotation;
 			else
-				transform.localRotation = rotation.Value;
+				transform.localRotation = localRotation.Value;
 			lastRotation = transform.localRotation;
 		}
 		public void Shift(Vector3 offset)
 		{
-			position.PreferredValue += offset;
+			localPosition.PreferredValue += offset;
 		}
 		public void MoveTo(Vector3 position)
 		{
-			this.position.PreferredValue = position;
+			localPosition.PreferredValue = position;
 		}
 		public void RotateTo(Quaternion rotation)
 		{
-			this.rotation.PreferredValue = rotation;
+			localRotation.PreferredValue = rotation;
 		}
 		public void RotateTo(Vector3 forward)
 		{
@@ -46,11 +52,11 @@ namespace EthansGameKit.Components
 		}
 		public void Rotate(Vector3 axis, float angles)
 		{
-			RotateTo(rotation.PreferredValue * Quaternion.AngleAxis(angles, axis));
+			RotateTo(localRotation.PreferredValue * Quaternion.AngleAxis(angles, axis));
 		}
 		public void LookAt(Vector3 position)
 		{
-			RotateTo(Quaternion.LookRotation(position - this.position.PreferredValue));
+			RotateTo(Quaternion.LookRotation(position - localPosition.PreferredValue));
 		}
 		public void LookAt(Vector3 position, Quaternion rotation)
 		{
@@ -69,7 +75,7 @@ namespace EthansGameKit.Components
 		}
 		public void LookAt(Vector3 position, float distance)
 		{
-			MoveTo(position - rotation.PreferredValue.Forward() * distance);
+			MoveTo(position - localRotation.PreferredValue.Forward() * distance);
 		}
 		public void LookAt(Vector3 position, Quaternion rotation, float distance)
 		{
