@@ -18,6 +18,12 @@ namespace EthansGameKit.Components
 		}
 		public void Update()
 		{
+			if (!Application.isPlaying)
+			{
+				localPosition.Value = localPosition.PreferredValue;
+				localRotation.Value = localRotation.PreferredValue;
+				return;
+			}
 			var transform = this.transform;
 			if (lastPosition != transform.localPosition)
 				localPosition.Value = transform.localPosition;
