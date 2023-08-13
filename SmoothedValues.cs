@@ -83,12 +83,12 @@ namespace EthansGameKit
 				useScaledTime = value;
 			}
 		}
-		public SmoothedSingle(bool useScaledTime, float smoothTime)
+		public SmoothedSingle(bool useScaledTime, float smoothTime, float maxSpeed)
 		{
 			this.useScaledTime = useScaledTime;
 			this.smoothTime = smoothTime;
 			preferredValue = 0;
-			maxSpeed = float.MaxValue;
+			this.maxSpeed = maxSpeed;
 			value = 0;
 			velocity = 0;
 			lastTime = 0;
@@ -210,9 +210,22 @@ namespace EthansGameKit
 		}
 		public Quaternion PreferredValue
 		{
-			get => preferredValue;
+			get
+			{
+				if (preferredValue == default)
+				{
+					Debug.LogWarning($"invalid value: {preferredValue}");
+					return preferredValue = Quaternion.identity;
+				}
+				return preferredValue;
+			}
 			set
 			{
+				if (value == default)
+				{
+					Debug.LogError($"invalid value: {value}");
+					return;
+				}
 				_ = Value;
 				preferredValue = value;
 			}
