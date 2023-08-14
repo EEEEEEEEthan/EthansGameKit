@@ -3,9 +3,9 @@
 namespace EthansGameKit.Components
 {
 	[RequireComponent(typeof(Camera))]
-	class SmoothedCamera : SmoothedTransform
+	class SmoothedCamera : MonoBehaviour
 	{
-		[SerializeField] SmoothedSingle fieldOfView = new(false, 0.1f, float.MaxValue);
+		[SerializeField] SmoothedSingle fieldOfView = new();
 		Camera targetCamera;
 		float lastFieldOfView;
 		void OnEnable()
@@ -16,9 +16,8 @@ namespace EthansGameKit.Components
 		{
 			targetCamera = null;
 		}
-		new void Update()
+		void Update()
 		{
-			base.Update();
 			if (!Application.isPlaying)
 			{
 				fieldOfView.Value = targetCamera.fieldOfView;

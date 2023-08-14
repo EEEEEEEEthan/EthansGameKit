@@ -4,20 +4,14 @@ using UnityEngine;
 // ReSharper disable MemberInitializerValueIgnored
 namespace EthansGameKit
 {
-	public interface ISmoothedValue<T>
-	{
-		public T PreferredValue { get; set; }
-		public T Value { get; set; }
-	}
-
 	[Serializable]
-	public struct SmoothedSingle : ISmoothedValue<float>
+	public class SmoothedSingle
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed = float.MaxValue;
 		[SerializeField] float preferredValue;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
 		[SerializeField] float value;
 		[SerializeField, HideInInspector] float velocity;
 		public float SmoothTime
@@ -57,6 +51,7 @@ namespace EthansGameKit
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (lastTime == currentTime) return value;
 				lastTime = currentTime;
+				if (smoothTime <= 0) return value = preferredValue;
 				return value = Mathf.SmoothDamp(value, preferredValue, ref velocity, smoothTime, maxSpeed, deltaTime);
 			}
 			set
@@ -83,25 +78,15 @@ namespace EthansGameKit
 				useScaledTime = value;
 			}
 		}
-		public SmoothedSingle(bool useScaledTime, float smoothTime, float maxSpeed)
-		{
-			this.useScaledTime = useScaledTime;
-			this.smoothTime = smoothTime;
-			preferredValue = 0;
-			this.maxSpeed = maxSpeed;
-			value = 0;
-			velocity = 0;
-			lastTime = 0;
-		}
 	}
 
 	[Serializable]
-	public struct SmoothedVector3 : ISmoothedValue<Vector3>
+	public class SmoothedVector3
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed = float.MaxValue;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
 		[SerializeField] Vector3 preferredValue;
 		[SerializeField] Vector3 value;
 		[SerializeField, HideInInspector] Vector3 velocity;
@@ -160,6 +145,7 @@ namespace EthansGameKit
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (lastTime == currentTime) return value;
 				lastTime = currentTime;
+				if (smoothTime <= 0) return value = preferredValue;
 				return value = Vector3.SmoothDamp(value, preferredValue, ref velocity, smoothTime, maxSpeed, deltaTime);
 			}
 			set
@@ -168,25 +154,15 @@ namespace EthansGameKit
 				this.value = value;
 			}
 		}
-		public SmoothedVector3(bool useScaledTime, float smoothTime, float maxSpeed)
-		{
-			this.useScaledTime = useScaledTime;
-			this.smoothTime = smoothTime;
-			preferredValue = default;
-			this.maxSpeed = maxSpeed;
-			value = default;
-			velocity = default;
-			lastTime = 0;
-		}
 	}
 
 	[Serializable]
-	public struct SmoothedQuaternion : ISmoothedValue<Quaternion>
+	public class SmoothedQuaternion
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed = float.MaxValue;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
 		[SerializeField] Quaternion preferredValue;
 		[SerializeField] Quaternion value;
 		[SerializeField, HideInInspector] Vector3 velocity;
@@ -258,6 +234,7 @@ namespace EthansGameKit
 				// ReSharper disable once CompareOfFloatsByEqualityOperator
 				if (lastTime == currentTime) return value;
 				lastTime = currentTime;
+				if (smoothTime <= 0) return value = preferredValue;
 				var angles = value.eulerAngles;
 				var preferredAngles = preferredValue.eulerAngles;
 				var x = Mathf.SmoothDampAngle(angles.x, preferredAngles.x, ref velocity.x, smoothTime, maxSpeed, deltaTime);
@@ -270,16 +247,6 @@ namespace EthansGameKit
 				_ = Value;
 				this.value = value;
 			}
-		}
-		public SmoothedQuaternion(bool useScaledTime, float smoothTime, float maxSpeed)
-		{
-			this.useScaledTime = useScaledTime;
-			this.smoothTime = smoothTime;
-			preferredValue = default;
-			this.maxSpeed = maxSpeed;
-			value = default;
-			velocity = default;
-			lastTime = 0;
 		}
 	}
 }

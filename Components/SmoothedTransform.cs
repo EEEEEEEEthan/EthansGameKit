@@ -6,12 +6,15 @@ namespace EthansGameKit.Components
 	[DisallowMultipleComponent]
 	public class SmoothedTransform : MonoBehaviour
 	{
-		[SerializeField] SmoothedVector3 localPosition = new(false, 0.1f, float.MaxValue);
-		[SerializeField] SmoothedQuaternion localRotation = new(false, 0.1f, float.MaxValue);
-		[SerializeField] SmoothedVector3 localScale = new(false, 0.1f, float.MaxValue);
+		[SerializeField] SmoothedVector3 localPosition = new();
+		[SerializeField] SmoothedQuaternion localRotation = new();
+		[SerializeField] SmoothedVector3 localScale = new();
 		Vector3 lastPosition;
 		Quaternion lastRotation;
 		Vector3 lastScale;
+		public SmoothedVector3 LocalPosition => localPosition;
+		public SmoothedQuaternion LocalRotation => localRotation;
+		public SmoothedVector3 LocalScale => localScale;
 		public void Reset()
 		{
 			var transform = this.transform;
@@ -19,16 +22,23 @@ namespace EthansGameKit.Components
 			localRotation.PreferredValue = localRotation.Value = transform.localRotation;
 			localScale.PreferredValue = localScale.Value = transform.localScale;
 		}
+		void OnDrawGizmos()
+		{
+			if (transform.parent)
+				Gizmos.matrix = transform.parent.localToWorldMatrix;
+			Gizmos.DrawSphere(localPosition.PreferredValue, 0.1f);
+			Gizmos.DrawLine(localPosition.PreferredValue, transform.localPosition);
+		}
 		public virtual void Update()
 		{
+			var transform = this.transform;
 			if (!Application.isPlaying)
 			{
-				localPosition.Value = localPosition.PreferredValue;
-				localRotation.Value = localRotation.PreferredValue;
-				localScale.Value = localScale.PreferredValue;
+				localPosition.Value = transform.localPosition;
+				localRotation.Value = transform.localRotation;
+				localScale.Value = transform.localScale;
 				return;
 			}
-			var transform = this.transform;
 			if (lastPosition != transform.localPosition)
 				localPosition.Value = transform.localPosition;
 			else
