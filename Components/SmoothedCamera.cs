@@ -1,5 +1,4 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EthansGameKit.Components
 {
@@ -34,10 +33,12 @@ namespace EthansGameKit.Components
 				fieldOfView.Value = TargetCamera.fieldOfView;
 			else
 				TargetCamera.fieldOfView = fieldOfView.Value;
+			lastFieldOfView = TargetCamera.fieldOfView;
 			if (lastOrthographicSize != TargetCamera.orthographicSize)
 				orthographicSize.Value = TargetCamera.orthographicSize;
 			else
 				TargetCamera.orthographicSize = orthographicSize.Value;
+			lastOrthographicSize = TargetCamera.orthographicSize;
 		}
 	}
 }
