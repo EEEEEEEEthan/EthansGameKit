@@ -82,7 +82,7 @@ namespace EthansGameKit.DebugUtilities
 				if (!shader) shader = Shader.Find("Standard");
 				cachedMaterial = new(shader)
 				{
-					color = Color.black,
+					color = Color.white,
 				};
 				return cachedMaterial;
 			}
