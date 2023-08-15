@@ -77,7 +77,10 @@ namespace EthansGameKit.DebugUtilities
 			get
 			{
 				if (cachedMaterial) return cachedMaterial;
-				cachedMaterial = new(Shader.Find("Standard"))
+				var shader = Shader.Find("HDRP/Unlit");
+				if (!shader) shader = Shader.Find("Universal Render Pipeline/Unlit");
+				if (!shader) shader = Shader.Find("Standard");
+				cachedMaterial = new(shader)
 				{
 					color = Color.black,
 				};
