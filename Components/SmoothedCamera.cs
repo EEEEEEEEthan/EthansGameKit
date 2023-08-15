@@ -7,34 +7,34 @@ namespace EthansGameKit.Components
 	{
 		[SerializeField] SmoothedSingle fieldOfView = new();
 		[SerializeField] SmoothedSingle orthographicSize = new();
-		Camera targetCamera;
 		float lastFieldOfView;
 		float lastOrthographicSize;
+		public Camera TargetCamera { get; private set; }
 		public SmoothedSingle FieldOfView => fieldOfView;
 		public SmoothedSingle OrthographicSize => orthographicSize;
 		void OnEnable()
 		{
-			targetCamera = GetComponent<Camera>();
+			TargetCamera = GetComponent<Camera>();
 		}
 		void OnDisable()
 		{
-			targetCamera = null;
+			TargetCamera = null;
 		}
 		void Update()
 		{
 			if (!Application.isPlaying)
 			{
-				fieldOfView.Value = targetCamera.fieldOfView;
+				fieldOfView.Value = TargetCamera.fieldOfView;
 				return;
 			}
-			if (lastFieldOfView != targetCamera.fieldOfView)
-				fieldOfView.Value = targetCamera.fieldOfView;
+			if (lastFieldOfView != TargetCamera.fieldOfView)
+				fieldOfView.Value = TargetCamera.fieldOfView;
 			else
-				targetCamera.fieldOfView = fieldOfView.Value;
-			if (lastOrthographicSize != targetCamera.orthographicSize)
-				orthographicSize.Value = targetCamera.orthographicSize;
+				TargetCamera.fieldOfView = fieldOfView.Value;
+			if (lastOrthographicSize != TargetCamera.orthographicSize)
+				orthographicSize.Value = TargetCamera.orthographicSize;
 			else
-				targetCamera.orthographicSize = orthographicSize.Value;
+				TargetCamera.orthographicSize = orthographicSize.Value;
 		}
 	}
 }
