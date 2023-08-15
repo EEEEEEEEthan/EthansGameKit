@@ -6,8 +6,12 @@ namespace EthansGameKit.Components
 	class SmoothedCamera : MonoBehaviour
 	{
 		[SerializeField] SmoothedSingle fieldOfView = new();
+		[SerializeField] SmoothedSingle orthographicSize = new();
 		Camera targetCamera;
 		float lastFieldOfView;
+		float lastOrthographicSize;
+		public SmoothedSingle FieldOfView => fieldOfView;
+		public SmoothedSingle OrthographicSize => orthographicSize;
 		void OnEnable()
 		{
 			targetCamera = GetComponent<Camera>();
@@ -27,7 +31,10 @@ namespace EthansGameKit.Components
 				fieldOfView.Value = targetCamera.fieldOfView;
 			else
 				targetCamera.fieldOfView = fieldOfView.Value;
-			lastFieldOfView = targetCamera.fieldOfView;
+			if (lastOrthographicSize != targetCamera.orthographicSize)
+				orthographicSize.Value = targetCamera.orthographicSize;
+			else
+				targetCamera.orthographicSize = orthographicSize.Value;
 		}
 	}
 }
