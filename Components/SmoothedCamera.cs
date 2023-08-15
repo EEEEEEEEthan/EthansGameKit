@@ -16,6 +16,12 @@ namespace EthansGameKit.Components
 		public SmoothedSingle FieldOfView => fieldOfView;
 		public SmoothedSingle OrthographicSize => orthographicSize;
 		public SmoothedSingle FocusDistance => focusDistance;
+		void Reset()
+		{
+			fieldOfView.PreferredValue = fieldOfView.Value = TargetCamera.fieldOfView;
+			orthographicSize.PreferredValue = orthographicSize.Value = TargetCamera.orthographicSize;
+			focusDistance.PreferredValue = focusDistance.Value = TargetCamera.focusDistance;
+		}
 		void OnEnable()
 		{
 			TargetCamera = GetComponent<Camera>();
