@@ -3,7 +3,7 @@
 namespace EthansGameKit.Components
 {
 	[RequireComponent(typeof(Camera))]
-	class SmoothedCamera : MonoBehaviour
+	public class SmoothedCamera : MonoBehaviour
 	{
 		[SerializeField] SmoothedSingle fieldOfView = new();
 		[SerializeField] SmoothedSingle orthographicSize = new();
