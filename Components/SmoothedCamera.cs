@@ -2,6 +2,7 @@
 
 namespace EthansGameKit.Components
 {
+	[ExecuteAlways]
 	[RequireComponent(typeof(Camera))]
 	public class SmoothedCamera : MonoBehaviour
 	{
@@ -25,6 +26,7 @@ namespace EthansGameKit.Components
 			if (!Application.isPlaying)
 			{
 				fieldOfView.Value = TargetCamera.fieldOfView;
+				orthographicSize.Value = TargetCamera.orthographicSize;
 				return;
 			}
 			if (lastFieldOfView != TargetCamera.fieldOfView)
