@@ -1,0 +1,13 @@
+{
+	"name": "com.ethan.gamekit",
+	"displayName": "Ethan's Game Kit",
+	"description": "Ethan的开发工具套件",
+	"version": "1.0.5",
+	"unity": "2022.3",
+	"license": "MIT",
+	"dependencies": {},
+	"author":
+	{
+		"name": "Ethan"
+	}
+}
