@@ -23,7 +23,7 @@ namespace EthansGameKit
 		}
 	}
 
-	class ApplicationEventListener : MonoBehaviour, ISingleton<ApplicationEventListener>
+	class ApplicationEventListener : Singleton<ApplicationEventListener>
 	{
 		static int screenHeight;
 		static int screenWidth;

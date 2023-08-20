@@ -22,12 +22,12 @@ namespace EthansGameKit.DebugUtilities
 		}
 	}
 
-	class DebugMessageDrawerForGameView : MonoBehaviour, ISingleton<DebugMessageDrawerForGameView>
+	class DebugMessageDrawerForGameView : Singleton<DebugMessageDrawerForGameView>
 	{
 		public static bool Enabled
 		{
-			get => ISingleton<DebugMessageDrawerForGameView>.Instance.enabled;
-			set => ISingleton<DebugMessageDrawerForGameView>.Instance.enabled = value;
+			get => Instance.enabled;
+			set => Instance.enabled = value;
 		}
 		readonly DebugMessageDrawer drawer = new();
 		Camera mainCamera;

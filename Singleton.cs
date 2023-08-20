@@ -3,9 +3,9 @@ using UnityEngine;
 
 namespace EthansGameKit
 {
-	interface ISingleton<T> where T : MonoBehaviour, ISingleton<T>
+	class Singleton<T> : MonoBehaviour where T : Singleton<T>
 	{
-		private static T instance;
+		static T instance;
 		public static T Instance
 		{
 			get

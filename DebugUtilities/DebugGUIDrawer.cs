@@ -2,13 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using EthansGameKit.Collections;
-using EthansGameKit.Internal;
 using UnityEngine;
 using UnityEngine.EventSystems;
 
 namespace EthansGameKit.DebugUtilities
 {
-	class DebugGUIDrawer : MonoBehaviour, ISingleton<DebugGUIDrawer>
+	class DebugGUIDrawer : Singleton<DebugGUIDrawer>
 	{
 		class Drawer
 		{
@@ -103,8 +102,8 @@ namespace EthansGameKit.DebugUtilities
 		static readonly List<RaycastResult> uiRaycastBuffer = new();
 		public static bool Enabled
 		{
-			get => ISingleton<DebugGUIDrawer>.Instance.enabled;
-			set => ISingleton<DebugGUIDrawer>.Instance.enabled = value;
+			get => Instance.enabled;
+			set => Instance.enabled = value;
 		}
 		static Camera MainCamera
 		{

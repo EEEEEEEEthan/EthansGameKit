@@ -39,5 +39,6 @@ namespace EthansGameKit.Internal
 				Instance.instances.Remove(key);
 		}
 		[SerializeField] ObjectDictionary instances = new();
+		[SerializeField] bool dontDestroyOnLoad = true;
 	}
 }
