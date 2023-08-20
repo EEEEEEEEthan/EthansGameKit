@@ -1,5 +1,4 @@
 using System;
-using EthansGameKit.Internal;
 using UnityEngine;
 
 namespace EthansGameKit
@@ -24,7 +23,7 @@ namespace EthansGameKit
 		}
 	}
 
-	class ApplicationEventListener : KitInstance<ApplicationEventListener>
+	class ApplicationEventListener : MonoBehaviour, ISingleton<ApplicationEventListener>
 	{
 		static int screenHeight;
 		static int screenWidth;

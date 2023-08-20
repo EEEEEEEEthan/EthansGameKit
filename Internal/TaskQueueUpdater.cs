@@ -12,7 +12,7 @@ namespace EthansGameKit.Internal
 		public bool crossScene;
 	}
 
-	class TaskQueueUpdater : KitInstance<TaskQueueUpdater>
+	class TaskQueueUpdater : MonoBehaviour, ISingleton<TaskQueueUpdater>
 	{
 		static readonly List<TaskQueueItem>[] delayedLists;
 		static readonly Queue<TaskQueueItem>[] currentQueues;

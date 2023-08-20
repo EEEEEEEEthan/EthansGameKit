@@ -8,7 +8,7 @@ using UnityEngine.EventSystems;
 
 namespace EthansGameKit.DebugUtilities
 {
-	class DebugGUIDrawer : KitInstance<DebugGUIDrawer>
+	class DebugGUIDrawer : MonoBehaviour, ISingleton<DebugGUIDrawer>
 	{
 		class Drawer
 		{
@@ -103,8 +103,8 @@ namespace EthansGameKit.DebugUtilities
 		static readonly List<RaycastResult> uiRaycastBuffer = new();
 		public static bool Enabled
 		{
-			get => Instance.enabled;
-			set => Instance.enabled = value;
+			get => ISingleton<DebugGUIDrawer>.Instance.enabled;
+			set => ISingleton<DebugGUIDrawer>.Instance.enabled = value;
 		}
 		static Camera MainCamera
 		{

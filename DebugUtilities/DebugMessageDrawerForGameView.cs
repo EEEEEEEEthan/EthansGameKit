@@ -1,5 +1,4 @@
 ﻿using System;
-using EthansGameKit.Internal;
 using UnityEditor;
 using UnityEngine;
 
@@ -23,12 +22,12 @@ namespace EthansGameKit.DebugUtilities
 		}
 	}
 
-	class DebugMessageDrawerForGameView : KitInstance<DebugMessageDrawerForGameView>
+	class DebugMessageDrawerForGameView : MonoBehaviour, ISingleton<DebugMessageDrawerForGameView>
 	{
 		public static bool Enabled
 		{
-			get => Instance.enabled;
-			set => Instance.enabled = value;
+			get => ISingleton<DebugMessageDrawerForGameView>.Instance.enabled;
+			set => ISingleton<DebugMessageDrawerForGameView>.Instance.enabled = value;
 		}
 		readonly DebugMessageDrawer drawer = new();
 		Camera mainCamera;

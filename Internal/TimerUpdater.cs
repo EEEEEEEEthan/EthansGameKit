@@ -5,7 +5,7 @@ using UnityEngine.SceneManagement;
 
 namespace EthansGameKit.Internal
 {
-	class TimerUpdater : KitInstance<TimerUpdater>
+	class TimerUpdater : MonoBehaviour, ISingleton<TimerUpdater>
 	{
 		public static uint currentId = Timers.invalidId;
 		public static Heap<Timer, double> timers = Heap<Timer, double>.Generate();
