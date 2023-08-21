@@ -19,12 +19,12 @@ namespace EthansGameKit
 				SingletonReferencer.Set(value);
 			}
 		}
-		protected void Awake()
+		protected void OnEnable()
 		{
 			Instance = this as T;
 			Debug.Log($"instance awaken: {this}", this);
 		}
-		protected void OnDestroy()
+		protected void OnDisable()
 		{
 			Instance = null;
 			Debug.Log($"instance destroyed: {this}");
