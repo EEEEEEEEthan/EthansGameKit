@@ -3,7 +3,7 @@ using UnityEngine;
 
 namespace EthansGameKit
 {
-	class Singleton<T> : MonoBehaviour where T : Singleton<T>
+	public class Singleton<T> : MonoBehaviour where T : Singleton<T>
 	{
 		static T instance;
 		public static T Instance
