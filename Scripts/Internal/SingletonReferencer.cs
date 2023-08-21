@@ -2,13 +2,14 @@
 using EthansGameKit.Collections;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Object = UnityEngine.Object;
 
 namespace EthansGameKit.Internal
 {
 	class SingletonReferencer : MonoBehaviour
 	{
 		[Serializable]
-		class ObjectDictionary : SerializableDictionary<string, MonoBehaviour>
+		class ObjectDictionary : SerializableDictionary<string, Object>
 		{
 		}
 
@@ -22,14 +23,14 @@ namespace EthansGameKit.Internal
 				return instance = Root.Instance.GetComponent<SingletonReferencer>();
 			}
 		}
-		public static T Get<T>() where T : MonoBehaviour
+		public static T Get<T>() where T : Object
 		{
 			var key = typeof(T).FullName;
 			Assert.IsNotNull(key);
 			Instance.instances.TryGetValue(key, out var result);
 			return result as T;
 		}
-		public static void Set<T>(T value) where T : MonoBehaviour
+		public static void Set<T>(T value) where T : Object
 		{
 			if (!Instance) return;
 			var key = typeof(T).FullName;
@@ -40,6 +41,5 @@ namespace EthansGameKit.Internal
 				Instance.instances.Remove(key);
 		}
 		[SerializeField] ObjectDictionary instances = new();
-		[SerializeField] bool dontDestroyOnLoad = true;
 	}
 }
