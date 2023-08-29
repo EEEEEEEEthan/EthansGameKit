@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace EthansGameKit.Internal
 {
-	public class Root : MonoBehaviour
+	[DefaultExecutionOrder(defaultExecutionOrder)]
+	class Root : MonoBehaviour
 	{
+		public const int defaultExecutionOrder = int.MinValue;
 		static Root instance;
 		static bool iKnowWhereTheInstanceIs;
 		public static Root Instance

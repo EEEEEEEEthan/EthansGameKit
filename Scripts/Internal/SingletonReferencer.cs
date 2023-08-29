@@ -15,6 +15,7 @@ namespace EthansGameKit.Internal
 
 		static Transform root;
 		static SingletonReferencer instance;
+		public static bool Initialized => Instance;
 		static SingletonReferencer Instance
 		{
 			get
