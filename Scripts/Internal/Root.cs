@@ -24,7 +24,8 @@ namespace EthansGameKit.Internal
 			Debug.Log($"{nameof(EthansGameKit)}.{nameof(Initialize)}");
 			var gameObject = new GameObject(nameof(EthansGameKit));
 			DontDestroyOnLoad(gameObject);
-			gameObject.AddComponent<Root>();
+			iKnowWhereTheInstanceIs = true;
+			instance = gameObject.AddComponent<Root>();
 			gameObject.AddComponent<SingletonReferencer>();
 			gameObject.AddComponent<ApplicationEventListener>();
 			gameObject.AddComponent<TimerUpdater>();
