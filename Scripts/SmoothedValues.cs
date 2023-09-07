@@ -161,11 +161,9 @@ namespace EthansGameKit
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed = float.MaxValue;
 		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
 		[SerializeField] Quaternion preferredValue;
 		[SerializeField] Quaternion value;
-		[SerializeField, HideInInspector] Vector3 velocity;
 		public bool UseScaledTime
 		{
 			get => useScaledTime;
@@ -206,24 +204,6 @@ namespace EthansGameKit
 				preferredValue = value;
 			}
 		}
-		public float MaxSpeed
-		{
-			get => maxSpeed;
-			set
-			{
-				_ = Value;
-				maxSpeed = value;
-			}
-		}
-		public Vector3 Velocity
-		{
-			get => velocity;
-			set
-			{
-				_ = Value;
-				velocity = value;
-			}
-		}
 		public Quaternion Value
 		{
 			get
@@ -235,17 +215,27 @@ namespace EthansGameKit
 				if (lastTime == currentTime) return value;
 				lastTime = currentTime;
 				if (smoothTime <= 0) return value = preferredValue;
-				var angles = value.eulerAngles;
-				var preferredAngles = preferredValue.eulerAngles;
-				var x = Mathf.SmoothDampAngle(angles.x, preferredAngles.x, ref velocity.x, smoothTime, maxSpeed, deltaTime);
-				var y = Mathf.SmoothDampAngle(angles.y, preferredAngles.y, ref velocity.y, smoothTime, maxSpeed, deltaTime);
-				var z = Mathf.SmoothDampAngle(angles.z, preferredAngles.z, ref velocity.z, smoothTime, maxSpeed, deltaTime);
-				return value = Quaternion.Euler(x, y, z);
+				return value = Quaternion.Slerp(value, preferredValue, deltaTime / smoothTime);
 			}
 			set
 			{
 				_ = Value;
 				this.value = value;
+			}
+		}
+
+		void GetAngles(ref float currentX, ref float preferredX)
+		{
+			preferredX -= (preferredX / 360).FloorToInt() * 360;
+			currentX -= (currentX / 360).FloorToInt() * 360;
+			switch (preferredX - currentX)
+			{
+				case > 180:
+					currentX += 360;
+					break;
+				case < -180:
+					currentX -= 360;
+					break;
 			}
 		}
 	}

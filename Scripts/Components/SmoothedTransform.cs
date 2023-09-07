@@ -3,7 +3,7 @@ using UnityEngine;
 namespace EthansGameKit.Components
 {
 	[ExecuteAlways]
-	[DisallowMultipleComponent]
+	[DisallowMultipleComponent] 
 	public class SmoothedTransform : MonoBehaviour
 	{
 		[SerializeField] SmoothedVector3 localPosition = new();
