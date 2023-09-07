@@ -1,4 +1,5 @@
 ﻿using System;
+using EthansGameKit.Internal;
 using UnityEditor;
 using UnityEngine;
 

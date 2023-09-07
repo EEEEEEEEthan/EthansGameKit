@@ -3,8 +3,10 @@ using UnityEngine;
 
 namespace EthansGameKit.Internal
 {
-	public class Root : MonoBehaviour
+	[DefaultExecutionOrder(defaultExecutionOrder)]
+	class Root : MonoBehaviour
 	{
+		public const int defaultExecutionOrder = int.MinValue;
 		static Root instance;
 		static bool iKnowWhereTheInstanceIs;
 		public static Root Instance
@@ -22,7 +24,8 @@ namespace EthansGameKit.Internal
 			Debug.Log($"{nameof(EthansGameKit)}.{nameof(Initialize)}");
 			var gameObject = new GameObject(nameof(EthansGameKit));
 			DontDestroyOnLoad(gameObject);
-			gameObject.AddComponent<Root>();
+			iKnowWhereTheInstanceIs = true;
+			instance = gameObject.AddComponent<Root>();
 			gameObject.AddComponent<SingletonReferencer>();
 			gameObject.AddComponent<ApplicationEventListener>();
 			gameObject.AddComponent<TimerUpdater>();

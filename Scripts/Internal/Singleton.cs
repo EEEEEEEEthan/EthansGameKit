@@ -1,12 +1,11 @@
-﻿using EthansGameKit.Internal;
-using UnityEngine;
+﻿using UnityEngine;
 
-namespace EthansGameKit
+namespace EthansGameKit.Internal
 {
-	public class Singleton<T> : MonoBehaviour where T : Singleton<T>
+	class Singleton<T> : MonoBehaviour where T : Singleton<T>
 	{
 		static T instance;
-		public static T Instance
+		protected static T Instance
 		{
 			get
 			{
