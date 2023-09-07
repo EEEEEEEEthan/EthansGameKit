@@ -168,7 +168,7 @@ namespace ChatGPTUtility.Editor
 			});
 			//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
 			//API.SendRequest("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", messages.ToArray(), callback);
-			API.SendRequest("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", messages.ToArray(), callback);
+			API.SendRequest("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", messages.ToArray(), callback);
 
 			void callback(string response)
 			{
