@@ -22,12 +22,10 @@ namespace EthansGameKit.Internal
 		protected virtual void OnEnable()
 		{
 			Instance = this as T;
-			Debug.Log($"instance awaken: {this}", this);
 		}
 		protected virtual void OnDisable()
 		{
 			Instance = null;
-			Debug.Log($"instance destroyed: {this}");
 		}
 	}
 }

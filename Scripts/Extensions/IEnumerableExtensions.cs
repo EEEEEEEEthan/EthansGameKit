@@ -20,6 +20,63 @@ namespace EthansGameKit
 				output = output + seperator + enumerator.Current;
 			return output;
 		}
+		public static IEnumerable<T> PickMax<T>(this IEnumerable<T> @this, Func<T, float> weightGetter, int pickCount)
+		{
+			if (@this is null)
+				yield break;
+			if (pickCount <= 0) yield break;
+			using var heap = Heap<T, float>.Generate();
+			foreach (var item in @this)
+			{
+				var weight = float.MaxValue;
+				try
+				{
+					weight = weightGetter(item);
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+					continue;
+				}
+				heap.Add(item, weight);
+				while (heap.Count > pickCount)
+				{
+					heap.Pop();
+				}
+			}
+			while (heap.Count > 0)
+				yield return heap.Pop();
+		}
+		public static bool TryPickMax<T>(this IEnumerable<T> @this, Func<T, float> weightGetter, out T result)
+		{
+			var got = false;
+			var max = float.MinValue;
+			result = default;
+			foreach (var item in @this)
+			{
+				float weight;
+				try
+				{
+					weight = weightGetter(item);
+				}
+				catch (Exception e)
+				{
+					Debug.LogException(e);
+					continue;
+				}
+				if (weight > max || !got)
+				{
+					got = true;
+					max = weight;
+					result = item;
+				}
+			}
+			return got;
+		}
+		public static T PickMax<T>(this IEnumerable<T> @this, Func<T, float> weightGetter)
+		{
+			return @this.TryPickMax(weightGetter, out var value) ? value : default;
+		}
 		public static T RandomPick<T>(this IEnumerable<T> @this)
 		{
 			return @this.TryRandomPick(out var value) ? value : default;
