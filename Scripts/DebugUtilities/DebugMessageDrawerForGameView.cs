@@ -1,27 +1,28 @@
 ﻿using System;
 using EthansGameKit.Internal;
-using UnityEditor;
 using UnityEngine;
 
 namespace EthansGameKit.DebugUtilities
 {
-	[InitializeOnLoad]
+#if UNITY_EDITOR
+	[UnityEditor.InitializeOnLoad]
 	static class DebugMessageDrawerForSceneView
 	{
 		static readonly DebugMessageDrawer drawer = new();
 		static DebugMessageDrawerForSceneView()
 		{
-			SceneView.duringSceneGui -= OnSceneGUI;
-			SceneView.duringSceneGui += OnSceneGUI;
+			UnityEditor.SceneView.duringSceneGui -= OnSceneGUI;
+			UnityEditor.SceneView.duringSceneGui += OnSceneGUI;
 		}
-		static void OnSceneGUI(SceneView sceneView)
+		static void OnSceneGUI(UnityEditor.SceneView sceneView)
 		{
-			Handles.BeginGUI();
-			drawer.DrawGUI(sceneView.camera, HandleUtility.GUIPointToWorldRay(Event.current.mousePosition));
-			Handles.EndGUI();
+			UnityEditor.Handles.BeginGUI();
+			drawer.DrawGUI(sceneView.camera, UnityEditor.HandleUtility.GUIPointToWorldRay(Event.current.mousePosition));
+			UnityEditor.Handles.EndGUI();
 			GUI.changed = true;
 		}
 	}
+#endif
 
 	class DebugMessageDrawerForGameView : Singleton<DebugMessageDrawerForGameView>
 	{
