@@ -24,12 +24,14 @@ namespace EthansGameKit.Internal
 				if (item.Key.crossScene)
 					unscaledTimers.Add(item.Key, item.Value);
 		}
-		void OnEnable()
+		protected override void  OnEnable()
 		{
+			base.OnEnable();
 			SceneManager.sceneLoaded += OnSceneLoaded;
 		}
-		void OnDisable()
+		protected override void  OnDisable()
 		{
+			base.OnDisable();
 			SceneManager.sceneLoaded -= OnSceneLoaded;
 		}
 		void Update()

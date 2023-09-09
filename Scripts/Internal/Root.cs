@@ -26,7 +26,7 @@ namespace EthansGameKit.Internal
 			DontDestroyOnLoad(gameObject);
 			iKnowWhereTheInstanceIs = true;
 			instance = gameObject.AddComponent<Root>();
-			gameObject.AddComponent<SingletonReferencer>();
+			gameObject.AddComponent<GlobalObjectContainer>();
 			gameObject.AddComponent<ApplicationEventListener>();
 			gameObject.AddComponent<TimerUpdater>();
 			gameObject.AddComponent<TaskQueueUpdater>();

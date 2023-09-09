@@ -10,20 +10,21 @@ namespace EthansGameKit.Internal
 			get
 			{
 				if (instance) return instance;
-				return instance = SingletonReferencer.Get<T>();
+				instance = GlobalObjectContainer.internalObjects[typeof(T).FullName] as T;
+				return instance;
 			}
 			private set
 			{
 				instance = value;
-				SingletonReferencer.Set(value);
+				GlobalObjectContainer.internalObjects[typeof(T).FullName] = value;
 			}
 		}
-		protected void OnEnable()
+		protected virtual void OnEnable()
 		{
 			Instance = this as T;
 			Debug.Log($"instance awaken: {this}", this);
 		}
-		protected void OnDisable()
+		protected virtual void OnDisable()
 		{
 			Instance = null;
 			Debug.Log($"instance destroyed: {this}");
