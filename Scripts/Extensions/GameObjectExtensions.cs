@@ -25,21 +25,27 @@ namespace EthansGameKit
 			component = @this.GetComponentInChildren<T>(false);
 			return component != null;
 		}
-		public static T GetOrAddComponent<T>(this GameObject @this, bool withUndo = false) where T : Component
+		public static T GetOrAddComponent<T>(this GameObject @this) where T : Component
 		{
+			var component = @this.GetComponent<T>();
+			if (!component) component = @this.AddComponent<T>();
+			return component;
+		}
+		public static T Editor_GetOrAddComponentWithUndo<T>(this GameObject @this) where T : Component
+		{
+			if (!Application.isEditor)
+			{
+				Debug.LogError($"use {nameof(GetOrAddComponent)} in non-editor mode");
+				return @this.GetOrAddComponent<T>();
+			}
 			var component = @this.GetComponent<T>();
 			if (!component)
 			{
-				#if UNITY_EDITOR
-				if (withUndo)
-				{
-					UnityEditor.Undo.RecordObject(@this, $"Add Component {typeof(T).Name}");
-					component = @this.AddComponent<T>();
-					UnityEditor.EditorUtility.SetDirty(@this);
-				}
-				else
-				#endif
-				component = @this.AddComponent<T>();
+#if UNITY_EDITOR
+				UnityEditor.Undo.RecordObject(@this, $"Add Component {typeof(T).Name}");
+				@this.AddComponent<T>();
+				UnityEditor.EditorUtility.SetDirty(@this);
+#endif
 			}
 			return component;
 		}
