@@ -3,23 +3,25 @@ using EthansGameKit.Collections;
 
 namespace EthansGameKit.Pathfinding
 {
+	[Serializable]
 	public abstract class PathfindingSpace
 	{
 		public abstract class Pathfinder
 		{
 			readonly Heap<int, float> openList = Heap<int, float>.Generate();
 			readonly PathfindingSpace pathfindingSpace;
-			StepInfo[] stepBuffer = Array.Empty<StepInfo>();
-			protected Pathfinder(PathfindingSpace pathfindingSpace)
+			readonly StepInfo[] stepBuffer;
+			protected Pathfinder(PathfindingSpace pathfindingSpace, int maxLinkPerNode)
 			{
 				this.pathfindingSpace = pathfindingSpace;
+				stepBuffer = new StepInfo[maxLinkPerNode];
 			}
 			public bool Next()
 			{
 				if (openList.Count <= 0) return false;
 				var nodeId = openList.Pop();
 				TryGetFromInfo(nodeId, out var fromNodeId, out var costBeforeStepHere);
-				var count = pathfindingSpace.GetLinks(nodeId, ref stepBuffer);
+				var count = pathfindingSpace.GetLinks(nodeId, stepBuffer);
 				for (var i = 0; i < count; ++i)
 				{
 					var stepInfo = stepBuffer[i];
@@ -37,6 +39,6 @@ namespace EthansGameKit.Pathfinding
 			protected abstract void SetFromInfo(int fromNodeId, int toNodeId, float totalCost);
 		}
 
-		protected abstract int GetLinks(int fromNodeId, ref StepInfo[] toAndCost);
+		protected abstract int GetLinks(int fromNodeId, StepInfo[] toAndCost);
 	}
 }
