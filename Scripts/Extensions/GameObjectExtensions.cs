@@ -37,6 +37,7 @@ namespace EthansGameKit
 					component = @this.AddComponent<T>();
 					UnityEditor.EditorUtility.SetDirty(@this);
 				}
+				else
 				#endif
 				component = @this.AddComponent<T>();
 			}
