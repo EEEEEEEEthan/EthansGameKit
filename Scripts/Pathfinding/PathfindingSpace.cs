@@ -37,9 +37,6 @@ namespace EthansGameKit.Pathfinding
 			protected abstract void SetFromInfo(int fromNodeId, int toNodeId, float totalCost);
 		}
 
-		public abstract Pathfinder GeneratePathfinder();
-		public abstract void SetLink(int fromNodeId, int toNodeId, float cost);
-		public abstract void RemoveLink(int fromNodeId, int toNodeId);
 		protected abstract int GetLinks(int fromNodeId, ref StepInfo[] toAndCost);
 	}
 }

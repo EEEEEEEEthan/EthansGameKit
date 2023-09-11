@@ -1,0 +1,58 @@
+using System;
+using UnityEngine;
+
+	#ROOTNAMESPACEBEGIN#
+[Serializable]
+public struct #SCRIPTNAME# : IEquatable<#SCRIPTNAME#>
+{
+	public static explicit operator int(#SCRIPTNAME# v)
+	{
+		return v.value;
+	}
+	public static explicit operator #SCRIPTNAME#(int v)
+	{
+		return new(v);
+	}
+	public static bool operator ==(#SCRIPTNAME# a, #SCRIPTNAME# b)
+	{
+		return a.value == b.value;
+	}
+	public static bool operator !=(#SCRIPTNAME# a, #SCRIPTNAME# b)
+	{
+		return a.value != b.value;
+	}
+	public static #SCRIPTNAME# operator |(#SCRIPTNAME# a, #SCRIPTNAME# b)
+	{
+		return new((int)(a.value | b.value));
+	}
+	public static #SCRIPTNAME# operator &(#SCRIPTNAME# a, #SCRIPTNAME# b)
+	{
+		return new((int)(a.value & b.value));
+	}
+	public static #SCRIPTNAME# operator ~(#SCRIPTNAME# a)
+	{
+		return new((int)~a.value);
+	}
+	public static implicit operator bool(#SCRIPTNAME# v)
+	{
+		return v.value != 0;
+	}
+	[SerializeField] int value;
+	#SCRIPTNAME#(int value)
+	{
+		this.value = value;
+	}
+	public override bool Equals(object obj)
+	{
+		return obj is #SCRIPTNAME# other && Equals(other);
+	}
+	public override int GetHashCode()
+	{
+		return value.GetHashCode();
+	}
+	public bool Equals(#SCRIPTNAME# other)
+	{
+		return value == other.value;
+	}
+}
+#ROOTNAMESPACEEND#

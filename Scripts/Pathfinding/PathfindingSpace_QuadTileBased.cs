@@ -1,3 +1,6 @@
+using System;
+using UnityEngine;
+
 namespace EthansGameKit.Pathfinding
 {
 	class PathfindingSpace_QuadTileBased : PathfindingSpace
@@ -35,28 +38,37 @@ namespace EthansGameKit.Pathfinding
 		readonly int width;
 		readonly int widthPower;
 		readonly int count;
-		
+		readonly int zMask;
 		public PathfindingSpace_QuadTileBased(int widthPower)
 		{
 			this.widthPower = widthPower;
 			width = 1 << widthPower;
 			count = width << widthPower;
-		}
-		public override Pathfinder GeneratePathfinder()
-		{
-			return new ImpPathfinder(this);
-		}
-		public override void SetLink(int fromNodeId, int toNodeId, float cost)
-		{
-			throw new System.NotImplementedException();
-		}
-		public override void RemoveLink(int fromNodeId, int toNodeId)
-		{
-			throw new System.NotImplementedException();
+			zMask = width - 1;
 		}
 		protected override int GetLinks(int fromNodeId, ref StepInfo[] toAndCost)
 		{
-			throw new System.NotImplementedException();
+			throw new NotImplementedException();
+		}
+		public bool Contains(int x, int z)
+		{
+			return (uint)x < (uint)width && (uint)z < (uint)width;
+		}
+		public bool Contains(int index)
+		{
+			return (uint)index < (uint)count;
+		}
+		public int GetNodeIndex(int x, int z)
+		{
+			return (x << widthPower) | z;
+		}
+		public void GetNodePosition(int index, out int x, out int z)
+		{
+			x = index >> widthPower;
+			z = index & zMask;
+		}
+		public void AddLink(int fromNode, int direction, float cost)
+		{
 		}
 	}
 }

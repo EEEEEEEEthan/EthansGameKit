@@ -7,7 +7,7 @@ namespace EthansGameKit.Editor
 {
 	class AssetPacker : EditorWindow
 	{
-		[MenuItem("Tools/Ethan's Game Kit/Asset Packer")]
+		[MenuItem("Tools/" + PackageDefines.name + "/Asset Packer")]
 		static void ShowWindow()
 		{
 			var window = GetWindow<AssetPacker>();
