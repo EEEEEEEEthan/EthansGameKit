@@ -1,9 +1,26 @@
-﻿using UnityEngine;
+﻿using EthansGameKit.MathUtilities;
+using UnityEngine;
 
 namespace EthansGameKit
 {
 	public static class GizmosEx
 	{
+		public static void DrawTransformLink(Transform from, Transform to)
+		{
+			var fromPosition = from.position;
+			var toPosition = to.position;
+			var last = fromPosition;
+			var distance = Vector3.Distance(fromPosition, toPosition);
+			var weight0 = from.forward * distance;
+			var weight1 = to.forward * distance;
+			var split = (Mathf.Log(distance + 1) * 60).RoundToInt();
+			for (var i = 1; i <= split; i++)
+			{
+				MathUtility.Hermite(fromPosition, weight0, toPosition, weight1, (float)i / split, out var pos, out _);
+				Gizmos.DrawLine(last, pos);
+				last = pos;
+			}
+		}
 		public static void DrawCircle(Vector3 center, Vector3 normal, float radius)
 		{
 			var matrix = Gizmos.matrix;
