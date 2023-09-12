@@ -2,12 +2,18 @@
 
 using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using UnityEngine;
 
 namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
+		public static bool IsMatch(this string @this, string pattern, out Match match)
+		{
+			match = Regex.Match(@this, pattern);
+			return match.Success;
+		}
 		public static bool IsNullOrEmpty(this string @this)
 		{
 			return string.IsNullOrEmpty(@this);
