@@ -49,7 +49,7 @@ namespace EthansGameKit
 					if (trimed.IsNullOrEmpty()) continue;
 					newLines.Add($"{new string('\t', ident)}{trimed}");
 				}
-				var newCodeLines = new string[oldCodeLines.Length - (endIndex - startIndex - 1) + newLines.Count];
+				var newCodeLines = new string[oldCodeLines.Length - (endIndex - startIndex - 1) + newLines.Count - 1];
 				Array.Copy(oldCodeLines, 0, newCodeLines, 0, startIndex);
 				newLines.CopyTo(newCodeLines, startIndex);
 				Array.Copy(oldCodeLines, endIndex, newCodeLines, startIndex + newLines.Count, oldCodeLines.Length - endIndex);

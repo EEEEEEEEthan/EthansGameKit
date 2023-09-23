@@ -28,6 +28,13 @@ namespace EthansGameKit.Editor
 						target.Replace();
 					}
 				}
+				if (GUILayout.Button("Clear"))
+				{
+					foreach (var target in targets)
+					{
+						target.Clear();
+					}
+				}
 			}
 		}
 
@@ -38,6 +45,14 @@ namespace EthansGameKit.Editor
 			var startMark = $"#region {regionName}";
 			var endMark = $"#endregion {regionName}";
 			var newCode = script.text.Replace(startMark, endMark, Generate(), 2);
+			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
+			AssetDatabase.Refresh();
+		}
+		void Clear()
+		{
+			var startMark = $"#region {regionName}";
+			var endMark = $"#endregion {regionName}";
+			var newCode = script.text.Replace(startMark, endMark, "", 2);
 			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}
