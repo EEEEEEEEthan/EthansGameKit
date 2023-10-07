@@ -14,6 +14,11 @@ namespace EthansGameKit
 			match = Regex.Match(@this, pattern);
 			return match.Success;
 		}
+		public static bool IsMatch(this string @this, string pattern)
+		{
+			var match = Regex.Match(@this, pattern);
+			return match.Success;
+		}
 		public static bool IsNullOrEmpty(this string @this)
 		{
 			return string.IsNullOrEmpty(@this);

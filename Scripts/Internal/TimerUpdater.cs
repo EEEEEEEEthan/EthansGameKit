@@ -11,6 +11,14 @@ namespace EthansGameKit.Internal
 		public static Heap<Timer, double> timers = Heap<Timer, double>.Generate();
 		public static Heap<Timer, double> unscaledTimers = Heap<Timer, double>.Generate();
 		static readonly List<Timer> buffer = new();
+		[UnityEditor.InitializeOnLoadMethod]
+		static void EditorInitialize()
+		{
+			Debug.Log("initialize Timers for Editor");
+			UnityEditor.EditorApplication.update -= FrameUpdate;
+			if (!Application.isPlaying)
+				UnityEditor.EditorApplication.update += FrameUpdate;
+		}
 		static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
 		{
 			var copiedTimers = timers;
@@ -24,17 +32,7 @@ namespace EthansGameKit.Internal
 				if (item.Key.crossScene)
 					unscaledTimers.Add(item.Key, item.Value);
 		}
-		protected override void  OnEnable()
-		{
-			base.OnEnable();
-			SceneManager.sceneLoaded += OnSceneLoaded;
-		}
-		protected override void  OnDisable()
-		{
-			base.OnDisable();
-			SceneManager.sceneLoaded -= OnSceneLoaded;
-		}
-		void Update()
+		static void FrameUpdate()
 		{
 			// 直接pop and invoke可能会导致回调里等待0秒无限递归.所以先收集再统一调用
 			// collect scaled timers
@@ -54,6 +52,20 @@ namespace EthansGameKit.Internal
 			for (var i = 0; i < length; ++i)
 				buffer[i].callback.TryInvoke();
 			buffer.Clear();
+		}
+		protected override void OnEnable()
+		{
+			base.OnEnable();
+			SceneManager.sceneLoaded += OnSceneLoaded;
+		}
+		protected override void OnDisable()
+		{
+			base.OnDisable();
+			SceneManager.sceneLoaded -= OnSceneLoaded;
+		}
+		void Update()
+		{
+			FrameUpdate();
 		}
 	}
 }
