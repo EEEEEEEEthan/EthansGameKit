@@ -1,6 +1,6 @@
-namespace EthansGameKit.Editor
+namespace EthansGameKit
 {
-	static class PackageDefines
+	public static class PackageDefines
 	{
 		public const string packageName = "Ethan's Game Kit";
 	}

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 29361473cff04af8be655ed96a698a90
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - asset: {fileID: 11400000, guid: 250387d2a8c15884193ac1a5dede6862, type: 2}
+  - surfaceMaterial: {fileID: 2100000, guid: 50df8f8d48089ea488289211d48d2e6c, type: 2}
+  - sideMaterial: {fileID: 2100000, guid: 50df8f8d48089ea488289211d48d2e6c, type: 2}
+  - bevelMaterial: {fileID: 2100000, guid: 50df8f8d48089ea488289211d48d2e6c, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
