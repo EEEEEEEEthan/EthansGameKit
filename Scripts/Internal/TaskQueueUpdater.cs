@@ -95,7 +95,7 @@ namespace EthansGameKit.Internal
 			base.OnEnable();
 			SceneManager.sceneLoaded += OnSceneLoaded;
 		}
-		protected override void  OnDisable()
+		protected override void OnDisable()
 		{
 			base.OnDisable();
 			SceneManager.sceneLoaded -= OnSceneLoaded;

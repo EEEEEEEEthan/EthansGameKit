@@ -1,5 +1,3 @@
-using UnityEngine;
-
 namespace EthansGameKit.Editor
 {
 	class SpriteToMesh

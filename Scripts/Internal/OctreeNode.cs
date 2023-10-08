@@ -286,6 +286,43 @@ namespace EthansGameKit.Internal
 			Remove(octreeItem, x0, y0, z0);
 			Insert(octreeItem, x1, y1, z1);
 		}
+		public void DrawGizmos(Plane[] planes)
+		{
+			if (!Application.isEditor) return;
+			var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
+			Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
+				? IsBranch ? OctreeDefines.editor_visiableBranchColor : OctreeDefines.editor_visiableleafColor
+				: IsBranch
+					? OctreeDefines.editor_invisiableBranchColor
+					: OctreeDefines.editor_invisiableleafColor;
+			Gizmos.DrawWireCube(
+				new(xMid, yMid, zMid),
+				new(xMax - xMin, yMax - yMin, zMax - zMin)
+			);
+			if (!IsBranch) return;
+			for (var i = 0; i < 8; i++)
+			{
+				var child = children[i];
+				child?.DrawGizmos(planes);
+			}
+		}
+		public void DrawGizmos()
+		{
+			if (!Application.isEditor) return;
+			Gizmos.color = IsBranch
+				? OctreeDefines.editor_invisiableBranchColor
+				: OctreeDefines.editor_invisiableleafColor;
+			Gizmos.DrawWireCube(
+				new(xMid, yMid, zMid),
+				new(xMax - xMin, yMax - yMin, zMax - zMin)
+			);
+			if (!IsBranch) return;
+			for (var i = 0; i < 8; i++)
+			{
+				var child = children[i];
+				child?.DrawGizmos();
+			}
+		}
 		void TryShorten()
 		{
 			if (!TryGetTheOnlyChild(out var theOnlyChild)) return;
@@ -360,43 +397,6 @@ namespace EthansGameKit.Internal
 			child.yMid = (child.yMin + child.yMax) * 0.5f;
 			child.zMid = (child.zMin + child.zMax) * 0.5f;
 			return child;
-		}
-		public void DrawGizmos(Plane[] planes)
-		{
-			if (!Application.isEditor) return;
-			var bounds = new Bounds(new(xMid, yMid, zMid), new(xMax - xMin, yMax - yMin, zMax - zMin));
-			Gizmos.color = GeometryUtility.TestPlanesAABB(planes, bounds)
-				? IsBranch ? OctreeDefines.editor_visiableBranchColor : OctreeDefines.editor_visiableleafColor
-				: IsBranch
-					? OctreeDefines.editor_invisiableBranchColor
-					: OctreeDefines.editor_invisiableleafColor;
-			Gizmos.DrawWireCube(
-				new(xMid, yMid, zMid),
-				new(xMax - xMin, yMax - yMin, zMax - zMin)
-			);
-			if (!IsBranch) return;
-			for (var i = 0; i < 8; i++)
-			{
-				var child = children[i];
-				child?.DrawGizmos(planes);
-			}
-		}
-		public void DrawGizmos()
-		{
-			if (!Application.isEditor) return;
-			Gizmos.color = IsBranch
-				? OctreeDefines.editor_invisiableBranchColor
-				: OctreeDefines.editor_invisiableleafColor;
-			Gizmos.DrawWireCube(
-				new(xMid, yMid, zMid),
-				new(xMax - xMin, yMax - yMin, zMax - zMin)
-			);
-			if (!IsBranch) return;
-			for (var i = 0; i < 8; i++)
-			{
-				var child = children[i];
-				child?.DrawGizmos();
-			}
 		}
 	}
 }

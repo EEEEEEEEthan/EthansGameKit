@@ -2,8 +2,7 @@
 
 namespace EthansGameKit.Components
 {
-	[ExecuteAlways]
-	[RequireComponent(typeof(Camera))]
+	[ExecuteAlways, RequireComponent(typeof(Camera))]
 	public class SmoothedCamera : MonoBehaviour
 	{
 		[SerializeField] SmoothedSingle fieldOfView = new();

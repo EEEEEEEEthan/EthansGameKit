@@ -36,15 +36,15 @@ namespace EthansGameKit.VText
 			[StructLayout(LayoutKind.Sequential)]
 			struct GlyphInfo
 			{
-				public float sizeX;
-				public float sizeY;
-				public float advanceX;
-				public float advanceY;
-				public float horizBearingX;
-				public float horizBearingY;
-				public float vertBearingX;
-				public float vertBearingY;
-				public int numContours;
+				public readonly float sizeX;
+				public readonly float sizeY;
+				public readonly float advanceX;
+				public readonly float advanceY;
+				public readonly float horizBearingX;
+				public readonly float horizBearingY;
+				public readonly float vertBearingX;
+				public readonly float vertBearingY;
+				public readonly int numContours;
 			}
 
 			class BaseAttributes

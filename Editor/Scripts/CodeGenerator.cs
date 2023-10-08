@@ -48,6 +48,7 @@ namespace EthansGameKit.Editor
 			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}
+		protected abstract string Generate();
 		void Clear()
 		{
 			var startMark = $"#region {regionName}";
@@ -56,6 +57,5 @@ namespace EthansGameKit.Editor
 			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}
-		protected abstract string Generate();
 	}
 }

@@ -1,13 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.Assertions;
-using Object = UnityEngine.Object;
 
 namespace EthansGameKit.Internal
 {
 	/// <summary>
-	/// 全局的对象容器，可以在editor hot reload后保留引用
+	///     全局的对象容器，可以在editor hot reload后保留引用
 	/// </summary>
 	class GlobalObjectContainer : MonoBehaviour, ISerializationCallbackReceiver
 	{
@@ -22,14 +19,14 @@ namespace EthansGameKit.Internal
 		{
 			serializedKeys.Clear();
 			serializedValues.Clear();
-			foreach(var (key, obj) in objects)
+			foreach (var (key, obj) in objects)
 			{
 				serializedKeys.Add(key);
 				serializedValues.Add(obj);
 			}
 			serializedInternalKeys.Clear();
 			serializedInternalValues.Clear();
-			foreach(var (key, obj) in internalObjects)
+			foreach (var (key, obj) in internalObjects)
 			{
 				serializedInternalKeys.Add(key);
 				serializedInternalValues.Add(obj);

@@ -9,9 +9,11 @@ namespace EthansGameKit
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed = float.MaxValue;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)]
+		float maxSpeed = float.MaxValue;
 		[SerializeField] float preferredValue;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)]
+		float smoothTime = 0.1f;
 		[SerializeField] float value;
 		[SerializeField, HideInInspector] float velocity;
 		public float SmoothTime
@@ -85,8 +87,10 @@ namespace EthansGameKit
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float maxSpeed = float.MaxValue;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)]
+		float maxSpeed = float.MaxValue;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)]
+		float smoothTime = 0.1f;
 		[SerializeField] Vector3 preferredValue;
 		[SerializeField] Vector3 value;
 		[SerializeField, HideInInspector] Vector3 velocity;
@@ -161,7 +165,8 @@ namespace EthansGameKit
 	{
 		[SerializeField] bool useScaledTime;
 		[SerializeField, HideInInspector] float lastTime;
-		[SerializeField, Range(float.Epsilon, float.MaxValue)] float smoothTime = 0.1f;
+		[SerializeField, Range(float.Epsilon, float.MaxValue)]
+		float smoothTime = 0.1f;
 		[SerializeField] Quaternion preferredValue;
 		[SerializeField] Quaternion value;
 		public bool UseScaledTime
@@ -223,7 +228,6 @@ namespace EthansGameKit
 				this.value = value;
 			}
 		}
-
 		void GetAngles(ref float currentX, ref float preferredX)
 		{
 			preferredX -= (preferredX / 360).FloorToInt() * 360;
