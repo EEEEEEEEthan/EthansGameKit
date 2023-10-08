@@ -29,6 +29,7 @@ namespace EthansGameKit
 			}
 		}
 #endif
+		// todo: 避免资源引用
 		[SerializeField] Text3DAsset asset;
 		[SerializeField] Material surfaceMaterial;
 		[SerializeField] Material sideMaterial;
@@ -45,6 +46,7 @@ namespace EthansGameKit
 			}
 			var materials = new[] { surfaceMaterial, sideMaterial, bevelMaterial };
 			Vector3 position = default;
+			;
 			foreach (var c in text)
 			{
 				switch (c)

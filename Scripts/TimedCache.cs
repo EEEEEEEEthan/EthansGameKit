@@ -140,9 +140,11 @@ namespace EthansGameKit
 		}
 	}
 
-	public sealed class ResourceCache<T> : AbsTimedCache<T> where T : Object
+	[Obsolete("有bug")]
+	[Serializable]
+	public class ResourceCache<T> : AbsTimedCache<T> where T : Object
 	{
-		readonly string resourcePath;
+		[SerializeField] string resourcePath;
 		public ResourceCache(string resourcePath)
 		{
 			this.resourcePath = resourcePath;
@@ -165,6 +167,16 @@ namespace EthansGameKit
 		}
 	}
 
+	[Obsolete("有bug")]
+	[Serializable]
+	public sealed class ResourceCache : ResourceCache<Object>
+	{
+		public ResourceCache(string resourcePath) : base(resourcePath)
+		{
+		}
+	}
+
+	[Obsolete("有bug")]
 	public sealed class ResourceGroupCache<T> : AbsTimedCache<T[]> where T : Object
 	{
 		readonly string resourcePath;
