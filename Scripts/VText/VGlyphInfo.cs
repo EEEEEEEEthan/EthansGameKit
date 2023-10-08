@@ -24,15 +24,17 @@ namespace EthansGameKit.VText
 			[StructLayout(LayoutKind.Sequential)]
 			struct GlyphInfo
 			{
-				readonly float sizeX;
-				readonly float sizeY;
-				readonly float advanceX;
-				readonly float advanceY;
-				readonly float horizBearingX;
-				readonly float horizBearingY;
-				readonly float vertBearingX;
-				readonly float vertBearingY;
+				// ReSharper disable MemberCanBePrivate.Local
+				public readonly float sizeX;
+				public readonly float sizeY;
+				public readonly float advanceX;
+				public readonly float advanceY;
+				public readonly float horizBearingX;
+				public readonly float horizBearingY;
+				public readonly float vertBearingX;
+				public readonly float vertBearingY;
 				public readonly int numContours;
+				// ReSharper restore MemberCanBePrivate.Local
 			}
 
 			class BaseAttributes
@@ -623,166 +625,161 @@ namespace EthansGameKit.VText
 			public void GetMesh(Mesh mesh, Vector2 shift, Vector2 size, VTextParameter parameter)
 			{
 				mesh.Clear();
-				if (true)
+				mesh.name = "c_" + id;
+				mesh.subMeshCount = 3;
+				if (System.IntPtr.Zero != fh)
 				{
-					mesh.name = "c_" + id;
-					mesh.subMeshCount = 3;
-					if (System.IntPtr.Zero != fh)
+					var buffer = System.IntPtr.Zero;
+					var vsize = GetGlyphVertices(ref buffer, fh, id);
+					// Debug.Log(vsize + " **** glyph vertices **** " + _id);
+					if (vsize > 0)
 					{
-						var buffer = System.IntPtr.Zero;
-						var vsize = GetGlyphVertices(ref buffer, fh, id);
-						// Debug.Log(vsize + " **** glyph vertices **** " + _id);
-						if (vsize > 0)
+						var res = new float[vsize * 2];
+						// fetch xy float array
+						Marshal.Copy(buffer, res, 0, vsize * 2);
+						var ibuffer = System.IntPtr.Zero;
+						// fetch indices
+						var isize = GetGlyphTriangleIndices(ref ibuffer, fh, id);
+						// Debug.Log(isize + " **** glyph indices **** " + _id);
+						if (isize > 0)
 						{
-							var res = new float[vsize * 2];
-							// fetch xy float array
-							Marshal.Copy(buffer, res, 0, vsize * 2);
-							var ibuffer = System.IntPtr.Zero;
-							// fetch indices
-							var isize = GetGlyphTriangleIndices(ref ibuffer, fh, id);
-							// Debug.Log(isize + " **** glyph indices **** " + _id);
-							if (isize > 0)
+							var tisize = parameter.Backface ? isize * 2 : isize;
+							var tvsize = parameter.Backface ? vsize * 2 : vsize;
+							var ri = new int[isize];
+							Marshal.Copy(ibuffer, ri, 0, isize);
+							var indices = new int[tisize];
+							if (parameter.Backface)
 							{
-								var tisize = parameter.Backface ? isize * 2 : isize;
-								var tvsize = parameter.Backface ? vsize * 2 : vsize;
-								var ri = new int[isize];
-								Marshal.Copy(ibuffer, ri, 0, isize);
-								var indices = new int[tisize];
-								if (parameter.Backface)
+								for (var k = 0; k < isize - 2; k += 3)
 								{
-									for (var k = 0; k < isize - 2; k += 3)
-									{
-										// front face change ccw to cw
-										// back face ccw is cw
-										var idx = ri[k + 2];
-										indices[k + 0] = idx; // front
-										indices[isize + k + 2] = idx + vsize; // back
-										idx = ri[k + 1];
-										indices[k + 1] = idx;
-										indices[isize + k + 1] = idx + vsize; // back
-										idx = ri[k + 0];
-										indices[k + 2] = idx;
-										indices[isize + k + 0] = idx + vsize; // back
-									}
+									// front face change ccw to cw
+									// back face ccw is cw
+									var idx = ri[k + 2];
+									indices[k + 0] = idx; // front
+									indices[isize + k + 2] = idx + vsize; // back
+									idx = ri[k + 1];
+									indices[k + 1] = idx;
+									indices[isize + k + 1] = idx + vsize; // back
+									idx = ri[k + 0];
+									indices[k + 2] = idx;
+									indices[isize + k + 0] = idx + vsize; // back
 								}
-								else
+							}
+							else
+							{
+								// only front faces
+								// change ccw to cw
+								for (var k = 0; k < isize - 2; k += 3)
 								{
-									// only front faces
-									// change ccw to cw
-									for (var k = 0; k < isize - 2; k += 3)
-									{
-										var idx = ri[k + 2];
-										indices[k] = idx;
-										idx = ri[k + 1];
-										indices[k + 1] = idx;
-										idx = ri[k + 0];
-										indices[k + 2] = idx;
-										// Debug.Log(k + "] " + indices[k] + " " + indices[k+1] + " " + indices[k+2]);
-									}
+									var idx = ri[k + 2];
+									indices[k] = idx;
+									idx = ri[k + 1];
+									indices[k + 1] = idx;
+									idx = ri[k + 0];
+									indices[k + 2] = idx;
+									// Debug.Log(k + "] " + indices[k] + " " + indices[k+1] + " " + indices[k+2]);
 								}
-								var tvertices = new Vector3[tvsize];
-								var tuv = new Vector2[tvsize];
-								var tnormals = new Vector3[tvsize];
-								var ttangents = new Vector4[tvsize];
-								var faceNormal = new Vector3(0f, 0f, -1f);
-								var faceTangent = new Vector4(1f, 0f, 0f, 1f);
-								// copy front vertex attributes
+							}
+							var tvertices = new Vector3[tvsize];
+							var tuv = new Vector2[tvsize];
+							var tnormals = new Vector3[tvsize];
+							var ttangents = new Vector4[tvsize];
+							var faceNormal = new Vector3(0f, 0f, -1f);
+							var faceTangent = new Vector4(1f, 0f, 0f, 1f);
+							// copy front vertex attributes
+							for (var k = 0; k < vsize; k++)
+							{
+								var x = res[k * 2];
+								var y = res[k * 2 + 1];
+								tvertices[k] = new(x, y, 0f);
+								// Debug.Log(k + "] " + x + " " + y + " : " + tvertices[k].ToString("0.00000000"));
+								tuv[k] = new(0.5f * (x + shift.x) / size.x, 0.5f * (y + shift.y) / size.y);
+								tnormals[k] = faceNormal;
+								ttangents[k] = faceTangent;
+							}
+							if (parameter.Backface)
+							{
+								// create backface vertex attributes
+								faceNormal = new(0f, 0f, 1f);
 								for (var k = 0; k < vsize; k++)
 								{
 									var x = res[k * 2];
 									var y = res[k * 2 + 1];
-									tvertices[k] = new(x, y, 0f);
-									// Debug.Log(k + "] " + x + " " + y + " : " + tvertices[k].ToString("0.00000000"));
-									tuv[k] = new(0.5f * (x + shift.x) / size.x, 0.5f * (y + shift.y) / size.y);
-									tnormals[k] = faceNormal;
-									ttangents[k] = faceTangent;
+									var offset = vsize + k;
+									tvertices[offset] = new(x, y, parameter.Depth + parameter.Bevel * 2f);
+									tuv[offset] = new(0.5f * (x + shift.x) / size.x, 0.5f + 0.5f * (y + shift.y) / size.y);
+									tnormals[offset] = faceNormal;
+									ttangents[offset] = faceTangent;
 								}
-								if (parameter.Backface)
+							}
+							mesh.vertices = tvertices;
+							mesh.uv = tuv;
+							mesh.normals = tnormals;
+							mesh.tangents = parameter.GenerateTangents ? ttangents : null;
+							if (numContours > 0)
+							{
+								if (parameter.Is3D)
 								{
-									// create backface vertex attributes
-									faceNormal = new(0f, 0f, 1f);
-									for (var k = 0; k < vsize; k++)
+									// Debug.Log(_numContours + " contours -> depth " + vtext.parameter.Depth + " bevel  " + vtext.parameter.Bevel);
+									var odd = false;
+									var reverse = false;
+									contours = new Vector3[numContours][];
+									for (var j = 0; j < numContours; j++)
 									{
-										var x = res[k * 2];
-										var y = res[k * 2 + 1];
-										var offset = vsize + k;
-										tvertices[offset] = new(x, y, parameter.Depth + parameter.Bevel * 2f);
-										tuv[offset] = new(0.5f * (x + shift.x) / size.x, 0.5f + 0.5f * (y + shift.y) / size.y);
-										tnormals[offset] = faceNormal;
-										ttangents[offset] = faceTangent;
-									}
-								}
-								mesh.vertices = tvertices;
-								mesh.uv = tuv;
-								mesh.normals = tnormals;
-								mesh.tangents = parameter.GenerateTangents ? ttangents : null;
-								if (numContours > 0)
-								{
-									if (parameter.Is3D)
-									{
-										// Debug.Log(_numContours + " contours -> depth " + vtext.parameter.Depth + " bevel  " + vtext.parameter.Bevel);
-										var odd = false;
-										var reverse = false;
-										contours = new Vector3[numContours][];
-										for (var j = 0; j < numContours; j++)
+										var cbuf = System.IntPtr.Zero;
+										var csize = GetGlyphContour(ref cbuf, fh, id, j, ref odd, ref reverse);
+										// Debug.Log(_numContours + " contour[" + j + "] " + csize);
+										if (csize > 0)
 										{
-											var cbuf = System.IntPtr.Zero;
-											var csize = GetGlyphContour(ref cbuf, fh, id, j, ref odd, ref reverse);
-											// Debug.Log(_numContours + " contour[" + j + "] " + csize);
-											if (csize > 0)
+											// Debug.Log(csize + " gc[" + j + "] " + (reverse ? "reverse" : "fwd") + " winding " + (odd ? "even_odd" : "nonzero"));
+											contours[j] = new Vector3[csize];
+											var cvec = new float[csize * 3];
+											Marshal.Copy(cbuf, cvec, 0, csize * 3);
+											if (reverse)
 											{
-												// Debug.Log(csize + " gc[" + j + "] " + (reverse ? "reverse" : "fwd") + " winding " + (odd ? "even_odd" : "nonzero"));
-												contours[j] = new Vector3[csize];
-												var cvec = new float[csize * 3];
-												Marshal.Copy(cbuf, cvec, 0, csize * 3);
-												if (reverse)
+												for (var z = 0; z < csize; z++)
 												{
-													for (var z = 0; z < csize; z++)
-													{
-														var offset = z * 3;
-														// Debug.Log(cvec[offset] + " " + cvec[offset+1] + " " + cvec[offset+2]);
-														contours[j][csize - z - 1] = new(cvec[offset], cvec[offset + 1], cvec[offset + 2]);
-													}
+													var offset = z * 3;
+													// Debug.Log(cvec[offset] + " " + cvec[offset+1] + " " + cvec[offset+2]);
+													contours[j][csize - z - 1] = new(cvec[offset], cvec[offset + 1], cvec[offset + 2]);
 												}
-												else
+											}
+											else
+											{
+												for (var z = 0; z < csize; z++)
 												{
-													for (var z = 0; z < csize; z++)
-													{
-														var offset = z * 3;
-														// Debug.Log(cvec[offset] + " " + cvec[offset+1] + " " + cvec[offset+2]);
-														contours[j][z] = new(cvec[offset], cvec[offset + 1], cvec[offset + 2]);
-													}
+													var offset = z * 3;
+													// Debug.Log(cvec[offset] + " " + cvec[offset+1] + " " + cvec[offset+2]);
+													contours[j][z] = new(cvec[offset], cvec[offset + 1], cvec[offset + 2]);
 												}
 											}
 										}
-										CreateSides(mesh, parameter);
-										mesh.SetTriangles(indices, 0);
-										if (null != sideIndices)
-										{
-											mesh.SetIndices(sideIndices, MeshTopology.Triangles, 1);
-										}
-										if (null != bevelIndices)
-										{
-											// Debug.Log("bevel ind");
-											mesh.SetIndices(bevelIndices, MeshTopology.Triangles, 2);
-										}
 									}
-									else
+									CreateSides(mesh, parameter);
+									mesh.SetTriangles(indices, 0);
+									if (null != sideIndices)
 									{
-										mesh.SetTriangles(indices, 0);
+										mesh.SetIndices(sideIndices, MeshTopology.Triangles, 1);
 									}
-									mesh.RecalculateBounds();
+									if (null != bevelIndices)
+									{
+										// Debug.Log("bevel ind");
+										mesh.SetIndices(bevelIndices, MeshTopology.Triangles, 2);
+									}
 								}
-								ClearGlyphData(fh, id);
-								return;
+								else
+								{
+									mesh.SetTriangles(indices, 0);
+								}
+								mesh.RecalculateBounds();
 							}
+							ClearGlyphData(fh, id);
+							return;
 						}
-						ClearGlyphData(fh, id);
-						// Debug.Log("no glyph " + size);
 					}
-					// Debug.Log("ZERO fonthandle " + _fh);
+					ClearGlyphData(fh, id);
+					// Debug.Log("no glyph " + size);
 				}
-				return;
 			}
 		}
 	}

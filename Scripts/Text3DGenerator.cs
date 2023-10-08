@@ -37,21 +37,11 @@ namespace EthansGameKit
 			CloseFont(fontHandle);
 			fontHandle = default;
 		}
-		public void BuildMesh(Mesh mesh, char c, float depth = 0.1f, bool backFace = true)
+		public void BuildMesh(Mesh mesh, char c, VTextParameter parameter)
 		{
 			if (char.IsControl(c)) throw new ArgumentException("Control characters are not supported");
 			var info = new VGlyphInfo(fontHandle, c);
-			info.GetMesh(mesh, default, new(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY), new() { Depth = depth, Backface = backFace });
-			//return mesh;
-			/*
-			mesh.vertices = newMesh.vertices;
-			mesh.subMeshCount = newMesh.subMeshCount;
-			for (var i = 0; i < newMesh.subMeshCount; i++)
-			{
-				mesh.SetTriangles(newMesh.GetTriangles(i), i);
-			}
-			newMesh.Destroy();
-			*/
+			info.GetMesh(mesh, default, new(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY), parameter);
 		}
 		~Text3DGenerator()
 		{
@@ -62,16 +52,14 @@ namespace EthansGameKit
 	[Serializable]
 	public class RuntimeText3DManager
 	{
+		[SerializeField] VTextParameter parameter;
 		[SerializeField] string fontFilePath;
-		[SerializeField] float depth;
-		[SerializeField] bool backFace;
 		Dictionary<char, WeakReference<Mesh>> meshes = new();
 		Text3DGenerator generator;
 		Text3DGenerator Generator => generator ??= new(fontFilePath);
-		public RuntimeText3DManager(string fontFilePath, float depth, bool backFace)
+		public RuntimeText3DManager(string fontFilePath, bool backFace, float depth, float bevel)
 		{
-			this.depth = depth;
-			this.backFace = backFace;
+			parameter = new() { Backface = backFace, Depth = depth, Bevel = bevel };
 			this.fontFilePath = fontFilePath;
 		}
 		public Mesh GetMesh(char c)
@@ -85,11 +73,11 @@ namespace EthansGameKit
 				}
 			}
 			mesh = new();
-			Generator.BuildMesh(mesh, c, depth, backFace);
+			Generator.BuildMesh(mesh, c, parameter);
 			meshes[c] = new(mesh);
 			return mesh;
 		}
-		public void BuildMesh(Mesh mesh, string str)
+		public void BuildMesh(Mesh mesh, string str, float blankSpace = 0.3f, float characterSpace = 0.1f, float lineSpace = 1)
 		{
 			mesh.Clear();
 			var position = Vector3.zero;
@@ -103,29 +91,51 @@ namespace EthansGameKit
 			var characterTriangles = new List<int>();
 			foreach (var c in str)
 			{
-				var characterMesh = GetMesh(c);
-				var count = vertices.Count;
-				var characterVertices = characterMesh.vertices;
-				for (var i = 0; i < characterVertices.Length; i++)
+				switch (c)
 				{
-					vertices.Add(characterVertices[i] + position);
-				}
-				for (var subMeshIndex = 0; subMeshIndex < 3; ++subMeshIndex)
-				{
-					characterMesh.GetTriangles(characterTriangles, subMeshIndex);
-					for (var i = 0; i < characterTriangles.Count; i++)
+					case '\n':
+						position.x = 0;
+						position.y -= lineSpace;
+						continue;
+					case ' ':
+						position.x += blankSpace;
+						continue;
+					case '\t':
+						position.x += blankSpace * 4;
+						continue;
+					case '\r':
+						position.x = 0;
+						continue;
+					default:
 					{
-						triangles[subMeshIndex].Add(characterTriangles[i] + count);
+						var characterMesh = GetMesh(c);
+						var count = vertices.Count;
+						var characterVertices = characterMesh.vertices;
+						for (var i = 0; i < characterVertices.Length; i++)
+						{
+							vertices.Add(characterVertices[i] + position);
+						}
+						for (var subMeshIndex = 0; subMeshIndex < 3; ++subMeshIndex)
+						{
+							characterMesh.GetTriangles(characterTriangles, subMeshIndex);
+							for (var i = 0; i < characterTriangles.Count; i++)
+							{
+								triangles[subMeshIndex].Add(characterTriangles[i] + count);
+							}
+							characterTriangles.Clear();
+						}
+						position.x += characterMesh.bounds.size.x + characterSpace;
+						break;
 					}
-					characterTriangles.Clear();
 				}
-				position.x += characterMesh.bounds.size.x;
 			}
 			mesh.SetVertices(vertices);
 			mesh.subMeshCount = 3;
 			mesh.SetTriangles(triangles[0], 0);
 			mesh.SetTriangles(triangles[1], 1);
 			mesh.SetTriangles(triangles[2], 2);
+			mesh.RecalculateBounds();
+			mesh.RecalculateNormals();
 		}
 	}
 }

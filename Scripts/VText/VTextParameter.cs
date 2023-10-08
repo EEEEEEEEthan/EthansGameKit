@@ -8,7 +8,7 @@ namespace EthansGameKit.VText
 	///     change requires rebuild of glyp meshes
 	/// </summary>
 	[System.Serializable]
-	class VTextParameter
+	public class VTextParameter
 	{
 		bool m_modified;
 		/// <summary>
@@ -97,22 +97,6 @@ namespace EthansGameKit.VText
 				}
 			}
 		}
-		/// <summary>
-		///     Fontname
-		///     getter setter
-		/// </summary>
-		public string Fontname
-		{
-			get => m_fontname;
-			set
-			{
-				if (m_fontname != value)
-				{
-					m_fontname = value;
-					m_modified = true;
-				}
-			}
-		}
 		public bool CheckClearModified()
 		{
 			if (m_modified)
@@ -147,15 +131,6 @@ namespace EthansGameKit.VText
 		///     in degree for smoothing sides and bevel.
 		/// </summary>
 		[SerializeField] float m_crease = 35.0f;
-		/// <summary>
-		///     The fontname must specify a font available in StreamingAsset
-		///     folder.
-		///     Accepted formats are:
-		///     - ttf
-		///     - otf
-		///     - ps (Postscript)
-		/// </summary>
-		[SerializeField] string m_fontname = "mittelschrift.otf";
 		#endregion
 	}
 }
