@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Editor
 {
-	[CreateAssetMenu(fileName = "ResourceMapper", menuName = PackageDefines.name + "/" + nameof(ResourceMapper))]
+	[CreateAssetMenu(fileName = "ResourceMapper", menuName = PackageDefines.packageName + "/" + nameof(ResourceMapper))]
 	class ResourceMapper : CodeGenerator
 	{
 		[MenuItem("Tools/ResourceMapper.GenerateAll")]
