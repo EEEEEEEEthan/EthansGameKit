@@ -140,7 +140,6 @@ namespace EthansGameKit
 		}
 	}
 
-	[Obsolete("有bug")]
 	[Serializable]
 	public class ResourceCache<T> : AbsTimedCache<T> where T : Object
 	{
@@ -157,6 +156,7 @@ namespace EthansGameKit
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
+			return;
 
 			void cb(AsyncOperation _)
 			{
@@ -167,7 +167,6 @@ namespace EthansGameKit
 		}
 	}
 
-	[Obsolete("有bug")]
 	[Serializable]
 	public sealed class ResourceCache : ResourceCache<Object>
 	{
@@ -176,10 +175,9 @@ namespace EthansGameKit
 		}
 	}
 
-	[Obsolete("有bug")]
 	public sealed class ResourceGroupCache<T> : AbsTimedCache<T[]> where T : Object
 	{
-		readonly string resourcePath;
+		public readonly string resourcePath;
 		public ResourceGroupCache(string resourcePath)
 		{
 			this.resourcePath = resourcePath;
@@ -192,6 +190,7 @@ namespace EthansGameKit
 		{
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
+			return;
 
 			void cb(AsyncOperation _)
 			{
@@ -199,6 +198,43 @@ namespace EthansGameKit
 				Assert.IsNotNull(result);
 				callback.TryInvoke(LoadValue());
 			}
+		}
+	}
+
+	[Serializable]
+	public class EditorAssetCache<T> : AbsTimedCache<T> where T : Object
+	{
+		[SerializeField] string assetPath;
+		public EditorAssetCache(string resourcePath)
+		{
+			assetPath = resourcePath;
+		}
+		protected override T LoadValue()
+		{
+#if UNITY_EDITOR
+			return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
+#endif
+		}
+		protected override void LoadValueAsync(Action<T> callback)
+		{
+			var operation = Resources.LoadAsync<T>(assetPath);
+			operation.completed += cb;
+			return;
+
+			void cb(AsyncOperation _)
+			{
+				var result = operation.asset as T;
+				Assert.IsNotNull(result);
+				callback.TryInvoke(result);
+			}
+		}
+	}
+
+	[Serializable]
+	public sealed class EditorAssetCache : EditorAssetCache<Object>
+	{
+		public EditorAssetCache(string assetPath) : base(assetPath)
+		{
 		}
 	}
 }

@@ -1,15 +1,17 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace EthansGameKit.Editor
 {
-	[CustomPropertyDrawer(typeof(ResourceCache<>), true)]
-	class ResourceCachePropertyDrawer : PropertyDrawer
+	abstract class CachePropertyDrawer : PropertyDrawer
 	{
 		const float ident = 0;
 		readonly HashSet<string> shownDetails = new();
+		protected abstract string PathFieldName { get; }
 		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
 			// Draw the foldout arrow
@@ -22,34 +24,27 @@ namespace EthansGameKit.Editor
 			else
 				shownDetails.Add(property.propertyPath);
 			position.height = EditorGUIUtility.singleLineHeight;
-			var pathProperty = property.FindPropertyRelative("resourcePath");
-			var value = AssetDatabase.LoadAssetAtPath<Object>(pathProperty.stringValue);
+			var pathProperty = property.FindPropertyRelative(PathFieldName);
 			var prefabObjectPosition = new Rect(position.x, position.y, position.width, position.height);
-			var propertyInfo = typeof(ResourceCache<>).BaseType.GetProperty("Value", (BindingFlags)0xffff);
-			var newValue = EditorGUI.ObjectField(prefabObjectPosition, label, value, propertyInfo.PropertyType, false);
+			var valueProperty = GetValueProperty(property);
+			var value = LoadValue(pathProperty.stringValue, valueProperty.PropertyType);
+			var newValue = EditorGUI.ObjectField(prefabObjectPosition, label, value, valueProperty.PropertyType, false);
 			if (newValue != value)
 			{
-				var path = AssetDatabase.GetAssetPath(newValue);
+				var path = GetFilePath(newValue);
 				pathProperty.stringValue = path;
 			}
 			if (showProperties)
 			{
-				// Indent the properties
 				EditorGUI.indentLevel++;
 				position.x += ident;
 				position.width -= ident;
-
-				// Display the alias property field
 				position.y += EditorGUIUtility.singleLineHeight;
 				var aliasPropertyPosition = new Rect(position.x, position.y, position.width, position.height);
 				EditorGUI.PropertyField(aliasPropertyPosition, pathProperty);
-
-				// Remove the indent
 				EditorGUI.indentLevel--;
 				position.x -= ident;
 				position.width += ident;
-
-				// Apply modified properties
 				property.serializedObject.ApplyModifiedProperties();
 			}
 		}
@@ -61,6 +56,43 @@ namespace EthansGameKit.Editor
 				height += EditorGUIUtility.singleLineHeight * 1.1f;
 			}
 			return height;
+		}
+		protected abstract string GetFilePath(Object value);
+		protected abstract Object LoadValue(string path, Type type);
+		PropertyInfo GetValueProperty(SerializedProperty property)
+		{
+			var propertyType = property.GetField().FieldType;
+			return propertyType.GetProperty("Value", (BindingFlags)0xffff, true);
+		}
+	}
+
+	[CustomPropertyDrawer(typeof(EditorAssetCache<>), true)]
+	class AssetCachePropertyDrawer : CachePropertyDrawer
+	{
+		protected override string PathFieldName => "assetPath";
+		protected override string GetFilePath(Object value)
+		{
+			return AssetDatabase.GetAssetPath(value);
+		}
+		protected override Object LoadValue(string path, Type type)
+		{
+			return AssetDatabase.LoadAssetAtPath(path, type);
+		}
+	}
+
+	[CustomPropertyDrawer(typeof(ResourceCache<>), true)]
+	class ResourceCachePropertyDrawer : CachePropertyDrawer
+	{
+		protected override string PathFieldName => "resourcePath";
+		protected override string GetFilePath(Object value)
+		{
+			var path = AssetDatabase.GetAssetPath(value);
+			// 在resources目录下的路径
+			return path[(path.IndexOf("Resources", StringComparison.Ordinal) + 10)..];
+		}
+		protected override Object LoadValue(string path, Type type)
+		{
+			return Resources.Load(path, type);
 		}
 	}
 }

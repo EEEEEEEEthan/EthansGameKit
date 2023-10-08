@@ -22,15 +22,15 @@ namespace EthansGameKit
 					}
 				}
 				serializedObject.ApplyModifiedProperties();
-				if (GUILayout.Button("重建"))
+				if (GUILayout.Button("重建3D网格"))
 				{
+					UnityEditor.Undo.RecordObject(target, "重建3D网格");
 					target.Rebuild();
 				}
 			}
 		}
 #endif
-		// todo: 避免资源引用
-		[SerializeField] Text3DAsset asset;
+		[SerializeField] EditorAssetCache<Text3DAsset> asset;
 		[SerializeField] Material surfaceMaterial;
 		[SerializeField] Material sideMaterial;
 		[SerializeField] Material bevelMaterial;
@@ -38,6 +38,15 @@ namespace EthansGameKit
 		[SerializeField, HideInInspector] bool widthMeshCollider;
 		[SerializeField, HideInInspector] bool widthRigidbody;
 		[SerializeField, HideInInspector] float massPerCharacter = 0.5f;
+		void OnDrawGizmosSelected()
+		{
+			foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>())
+			{
+				Gizmos.matrix = meshRenderer.transform.localToWorldMatrix;
+				var localBounds = meshRenderer.localBounds;
+				Gizmos.DrawWireCube(localBounds.center, localBounds.size);
+			}
+		}
 		void Rebuild()
 		{
 			for (var i = transform.childCount; i-- > 0;)
@@ -52,14 +61,14 @@ namespace EthansGameKit
 				switch (c)
 				{
 					case ' ':
-						position.x += asset.BlankSpace;
+						position.x += asset.Value.BlankSpace;
 						continue;
 					case '\t':
-						position.x += asset.BlankSpace * 4;
+						position.x += asset.Value.BlankSpace * 4;
 						continue;
 					case '\n':
 						position.x = 0;
-						position.y -= asset.LineSpace;
+						position.y -= asset.Value.LineSpace;
 						continue;
 					case '\r':
 						position.x = 0;
@@ -74,11 +83,11 @@ namespace EthansGameKit
 						var meshFilter = obj.AddComponent<MeshFilter>();
 						var meshRenderer = obj.AddComponent<MeshRenderer>();
 						meshRenderer.sharedMaterials = materials;
-						var mesh = asset.Editor_GetMesh(c.ToString());
-						if (!mesh) asset.Editor_AddTexts(new[] { c.ToString() });
-						mesh = asset.Editor_GetMesh(c.ToString());
+						var mesh = asset.Value.Editor_GetMesh(c.ToString());
+						if (!mesh) asset.Value.Editor_AddTexts(new[] { c.ToString() });
+						mesh = asset.Value.Editor_GetMesh(c.ToString());
 						meshFilter.sharedMesh = mesh;
-						position.x += mesh.bounds.size.x + asset.CharacterSpace;
+						position.x += meshRenderer.localBounds.size.x + asset.Value.CharacterSpace;
 						if (widthMeshCollider)
 						{
 							var meshCollider = obj.AddComponent<MeshCollider>();
