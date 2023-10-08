@@ -16,7 +16,7 @@ namespace EthansGameKit.VText
 		class VGlyphInfo
 		{
 			readonly char id;
-			Mesh mesh;
+			//Mesh mesh;
 			readonly System.IntPtr fh;
 			readonly int numContours;
 			Vector3[][] contours;
@@ -73,10 +73,6 @@ namespace EthansGameKit.VText
 			[DllImport("VText")]
 			static extern int GetGlyphContour(ref System.IntPtr buffer, [In] System.IntPtr fontHandle, [In] uint id, [In] int index, ref bool odd, ref bool reverse);
 #endif
-			~VGlyphInfo()
-			{
-				mesh = null;
-			}
 			/// <summary>
 			///     Initializes a new instance of the <see cref="VGlyphInfo" /> class.
 			/// </summary>
@@ -130,7 +126,7 @@ namespace EthansGameKit.VText
 			///     in submesh.
 			/// </summary>
 			/// <param name="p">VTextParameter</param>
-			void CreateSides(VTextParameter p)
+			void CreateSides(Mesh mesh, VTextParameter p)
 			{
 				var bevel = p.Bevel;
 				sideIndices = null;
@@ -624,16 +620,13 @@ namespace EthansGameKit.VText
 			/// <param name="shift"></param>
 			/// <param name="size"></param>
 			/// <param name="parameter"></param>
-			public Mesh GetMesh(Vector2 shift, Vector2 size, VTextParameter parameter)
+			public void GetMesh(Mesh mesh, Vector2 shift, Vector2 size, VTextParameter parameter)
 			{
-				// Debug.Log("c: " + _id);
-				if (null == mesh)
+				mesh.Clear();
+				if (true)
 				{
-					mesh = new()
-					{
-						name = "c_" + id,
-						subMeshCount = 3,
-					};
+					mesh.name = "c_" + id;
+					mesh.subMeshCount = 3;
 					if (System.IntPtr.Zero != fh)
 					{
 						var buffer = System.IntPtr.Zero;
@@ -762,7 +755,7 @@ namespace EthansGameKit.VText
 												}
 											}
 										}
-										CreateSides(parameter);
+										CreateSides(mesh, parameter);
 										mesh.SetTriangles(indices, 0);
 										if (null != sideIndices)
 										{
@@ -781,7 +774,7 @@ namespace EthansGameKit.VText
 									mesh.RecalculateBounds();
 								}
 								ClearGlyphData(fh, id);
-								return mesh;
+								return;
 							}
 						}
 						ClearGlyphData(fh, id);
@@ -789,7 +782,7 @@ namespace EthansGameKit.VText
 					}
 					// Debug.Log("ZERO fonthandle " + _fh);
 				}
-				return mesh;
+				return;
 			}
 		}
 	}

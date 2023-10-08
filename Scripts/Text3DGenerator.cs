@@ -41,8 +41,9 @@ namespace EthansGameKit
 		{
 			if (char.IsControl(c)) throw new ArgumentException("Control characters are not supported");
 			var info = new VGlyphInfo(fontHandle, c);
-			var newMesh = info.GetMesh(default, new(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY), new() { Depth = depth, Backface = backFace });
-			mesh.Clear();
+			info.GetMesh(mesh, default, new(bounds.maxX - bounds.minX, bounds.maxY - bounds.minY), new() { Depth = depth, Backface = backFace });
+			//return mesh;
+			/*
 			mesh.vertices = newMesh.vertices;
 			mesh.subMeshCount = newMesh.subMeshCount;
 			for (var i = 0; i < newMesh.subMeshCount; i++)
@@ -50,6 +51,7 @@ namespace EthansGameKit
 				mesh.SetTriangles(newMesh.GetTriangles(i), i);
 			}
 			newMesh.Destroy();
+			*/
 		}
 		~Text3DGenerator()
 		{
