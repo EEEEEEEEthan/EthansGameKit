@@ -12,18 +12,18 @@ namespace EthansGameKit.VText
 		/// <summary>
 		///     The minimum x.
 		/// </summary>
-		public float minX;
+		public readonly float minX;
 		/// <summary>
 		///     The max x.
 		/// </summary>
-		public float maxX;
+		public readonly float maxX;
 		/// <summary>
 		///     The minimum y.
 		/// </summary>
-		public float minY;
+		public readonly float minY;
 		/// <summary>
 		///     The max y.
 		/// </summary>
-		public float maxY;
+		public readonly float maxY;
 	}
 }

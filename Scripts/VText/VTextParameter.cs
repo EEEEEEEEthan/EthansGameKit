@@ -1,5 +1,6 @@
 using UnityEngine;
 
+// ReSharper disable StringLiteralTypo
 namespace EthansGameKit.VText
 {
 	/// <summary>

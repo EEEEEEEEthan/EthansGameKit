@@ -15,18 +15,6 @@ namespace EthansGameKit.VText
 		/// </summary>
 		class VGlyphInfo
 		{
-			/// <summary>
-			///     The size of the glyph.
-			/// </summary>
-			public Vector2 size;
-			/// <summary>
-			///     The distance to next glyph to advance to.
-			///     Note: most of the fonts have zero advance.y!
-			///     So if you layout vertical we use spacing instead.
-			/// </summary>
-			public Vector2 advance;
-			public Vector2 horizontalBearing;
-			public Vector2 verticalBearing;
 			readonly char id;
 			Mesh mesh;
 			readonly System.IntPtr fh;
@@ -36,14 +24,14 @@ namespace EthansGameKit.VText
 			[StructLayout(LayoutKind.Sequential)]
 			struct GlyphInfo
 			{
-				public readonly float sizeX;
-				public readonly float sizeY;
-				public readonly float advanceX;
-				public readonly float advanceY;
-				public readonly float horizBearingX;
-				public readonly float horizBearingY;
-				public readonly float vertBearingX;
-				public readonly float vertBearingY;
+				readonly float sizeX;
+				readonly float sizeY;
+				readonly float advanceX;
+				readonly float advanceY;
+				readonly float horizBearingX;
+				readonly float horizBearingY;
+				readonly float vertBearingX;
+				readonly float vertBearingY;
 				public readonly int numContours;
 			}
 
@@ -108,13 +96,6 @@ namespace EthansGameKit.VText
 					if (GetGlyphInfo(ip, fh, this.id))
 					{
 						gi = (GlyphInfo)Marshal.PtrToStructure(ip, typeof(GlyphInfo));
-						// Debug.Log(" size " + gi.sizeX + " " + gi.sizeY);
-						size = new(gi.sizeX, gi.sizeY);
-						// Debug.Log(" advance " + gi.advanceX + " " + gi.advanceY);
-						advance = new(gi.advanceX, gi.advanceY);
-						horizontalBearing = new(gi.horizBearingX, gi.horizBearingY);
-						verticalBearing = new(gi.vertBearingX, gi.vertBearingY);
-						// Debug.Log(gi.numContours + " contours \'" + id + "\'");
 						numContours = gi.numContours;
 					}
 					Marshal.FreeHGlobal(ip);
