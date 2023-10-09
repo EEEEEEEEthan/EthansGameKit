@@ -1,19 +1,35 @@
 ﻿using EthansGameKit.CachePools;
+using JetBrains.Annotations;
 
 namespace EthansGameKit.MathUtilities
 {
 	public static class Lcg
 	{
 		static int currentIntValue;
+		[PublicAPI]
 		public static uint Next(uint seed)
 		{
 			return Next(seed, 1103515245, 12345, uint.MaxValue);
 		}
+		[PublicAPI]
 		public static int Next(int seed)
 		{
 			var trueSeed = (uint)seed;
 			return (int)Next(trueSeed);
 		}
+		[PublicAPI]
+		public static uint Next(uint seed, uint a, uint c, uint m)
+		{
+			return (a * seed + c) % m;
+		}
+		/// <summary>
+		///     获取一个序列的因子.使用这个因子可以生成一个不重复的随机序列
+		/// </summary>
+		/// <param name="seed">随机种子</param>
+		/// <param name="a">作为LCG的a参数</param>
+		/// <param name="c">作为LCG的c参数</param>
+		/// <param name="m">序列长度</param>
+		[PublicAPI]
 		public static void GetSequenceFactors(uint seed, out uint a, out uint c, uint m)
 		{
 			c = seed;
@@ -61,10 +77,6 @@ namespace EthansGameKit.MathUtilities
 			}
 			++a;
 			if (a > m) a = 1;
-		}
-		public static uint Next(uint seed, uint a, uint c, uint m)
-		{
-			return (a * seed + c) % m;
 		}
 	}
 }

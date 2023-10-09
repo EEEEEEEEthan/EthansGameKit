@@ -50,16 +50,21 @@ namespace EthansGameKit.Pathfinding
 				}
 				return true;
 			}
+			/// <summary>
+			///     获取从终点(含)到起点(含)的路径
+			/// </summary>
+			/// <param name="buffer">0号元素是寻路终点,末尾元素是寻路起点</param>
+			/// <param name="nodeId">寻路终点</param>
+			/// <returns>路径长度.若长度为0表示不可达</returns>
+			/// <exception cref="Exception"></exception>
 			protected int GetPath(ref int[] buffer, int nodeId)
 			{
 				var count = 0;
 				while (true)
 				{
-					buffer[count++] = nodeId;
 					if (!TryGetFromInfo(nodeId, out var fromNodeId, out _))
-					{
-						throw new("寻路失败");
-					}
+						return 0;
+					buffer[count++] = nodeId;
 					if (nodeId == fromNodeId) return count;
 					if (count > 10000) throw new("寻路失败");
 				}
