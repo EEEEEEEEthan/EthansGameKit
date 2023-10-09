@@ -12,32 +12,27 @@ namespace EthansGameKit
 			{
 				base.OnInspectorGUI();
 				var target = (Text3D)this.target;
-				UnityEditor.EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(widthMeshCollider)));
-				if (target.widthMeshCollider)
-				{
-					UnityEditor.EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(widthRigidbody)));
-					if (target.widthRigidbody)
-					{
-						UnityEditor.EditorGUILayout.PropertyField(serializedObject.FindProperty(nameof(massPerCharacter)));
-					}
-				}
 				serializedObject.ApplyModifiedProperties();
-				if (GUILayout.Button("重建3D网格"))
+				if (UnityEditor.PrefabUtility.GetNearestPrefabInstanceRoot(target.gameObject) || UnityEditor.PrefabUtility.GetPrefabAssetType(target.gameObject) != UnityEditor.PrefabAssetType.NotAPrefab)
 				{
-					UnityEditor.Undo.RecordObject(target, "重建3D网格");
-					target.Rebuild();
+					// 警告: prefab无法重建
+					UnityEditor.EditorGUILayout.HelpBox("Prefab无法重建3D网格", UnityEditor.MessageType.Warning);
+				}
+				else if (GUILayout.Button("重建3D网格"))
+				{
+					UnityEditor.Undo.RecordObject(target.gameObject, "重建3D网格");
+					target.Editor_Rebuild();
+					UnityEditor.EditorUtility.SetDirty(target.gameObject);
 				}
 			}
 		}
 #endif
 		[SerializeField] EditorAssetCache<Text3DAsset> asset;
+		[SerializeField] GameObject prefab;
 		[SerializeField] Material surfaceMaterial;
 		[SerializeField] Material sideMaterial;
 		[SerializeField] Material bevelMaterial;
 		[SerializeField, TextArea] string text;
-		[SerializeField, HideInInspector] bool widthMeshCollider;
-		[SerializeField, HideInInspector] bool widthRigidbody;
-		[SerializeField, HideInInspector] float massPerCharacter = 0.5f;
 		void OnDrawGizmosSelected()
 		{
 			foreach (var meshRenderer in GetComponentsInChildren<MeshRenderer>())
@@ -47,15 +42,20 @@ namespace EthansGameKit
 				Gizmos.DrawWireCube(localBounds.center, localBounds.size);
 			}
 		}
-		void Rebuild()
+		void Editor_Rebuild()
 		{
+			if (!Application.isEditor)
+			{
+				Debug.LogError("Editor only!");
+				return;
+			}
+#if UNITY_EDITOR
 			for (var i = transform.childCount; i-- > 0;)
 			{
 				transform.GetChild(i).gameObject.Destroy();
 			}
 			var materials = new[] { surfaceMaterial, sideMaterial, bevelMaterial };
 			Vector3 position = default;
-			;
 			foreach (var c in text)
 			{
 				switch (c)
@@ -75,38 +75,29 @@ namespace EthansGameKit
 						continue;
 					default:
 					{
-						var obj = new GameObject(c.ToString());
+						var obj = prefab ? (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, transform) : new();
+						obj.name = c.ToString();
 						obj.transform.SetParent(transform);
 						obj.transform.localPosition = position;
 						obj.transform.localEulerAngles = default;
 						obj.transform.localScale = Vector3.one;
-						var meshFilter = obj.AddComponent<MeshFilter>();
-						var meshRenderer = obj.AddComponent<MeshRenderer>();
+						var meshFilter = obj.GetOrAddComponent<MeshFilter>();
+						var meshRenderer = obj.GetOrAddComponent<MeshRenderer>();
 						meshRenderer.sharedMaterials = materials;
 						var mesh = asset.Value.Editor_GetMesh(c.ToString());
 						if (!mesh) asset.Value.Editor_AddTexts(new[] { c.ToString() });
 						mesh = asset.Value.Editor_GetMesh(c.ToString());
 						meshFilter.sharedMesh = mesh;
 						position.x += meshRenderer.localBounds.size.x + asset.Value.CharacterSpace;
-						if (widthMeshCollider)
+						if (obj.TryGetComponent<MeshCollider>(out var meshCollider))
 						{
-							var meshCollider = obj.AddComponent<MeshCollider>();
 							meshCollider.sharedMesh = mesh;
-							if (widthRigidbody)
-							{
-								meshCollider.isTrigger = false;
-								meshCollider.convex = true;
-							}
-						}
-						if (widthRigidbody)
-						{
-							var rigidBody = obj.AddComponent<Rigidbody>();
-							rigidBody.mass = massPerCharacter;
 						}
 						break;
 					}
 				}
 			}
+#endif
 		}
 	}
 }
