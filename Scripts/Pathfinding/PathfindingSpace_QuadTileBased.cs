@@ -1,4 +1,7 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.Pathfinding
@@ -6,15 +9,42 @@ namespace EthansGameKit.Pathfinding
 	[Serializable]
 	sealed class PathfindingSpace_QuadTileBased : PathfindingSpace
 	{
-		sealed class ImpPathfinder : Pathfinder
+		public enum DirectionCode
+		{
+			North,
+			East,
+			South,
+			West,
+			NorthEast,
+			SouthEast,
+			SouthWest,
+			NorthWest,
+		}
+
+		public struct TilePosition
+		{
+			public int x;
+			public int y;
+			public Vector2 XY => new(x, y);
+			public Vector3 XZ => new(x, 0, y);
+		}
+
+		public new sealed class Pathfinder : PathfindingSpace.Pathfinder
 		{
 			readonly int[] fromMap;
 			readonly float[] costMap;
-			public ImpPathfinder(PathfindingSpace_QuadTileBased pathfindingSpace) : base(pathfindingSpace, 8)
+			new readonly PathfindingSpace_QuadTileBased pathfindingSpace;
+			int changeFlag;
+			public Pathfinder(PathfindingSpace_QuadTileBased pathfindingSpace) : base(pathfindingSpace, 8)
 			{
+				this.pathfindingSpace = pathfindingSpace;
 				fromMap = new int[pathfindingSpace.Count];
 				costMap = new float[pathfindingSpace.Count];
-				Reset();
+			}
+			protected override void Clear()
+			{
+				fromMap.MemSet(-1);
+				costMap.MemSet(float.PositiveInfinity);
 			}
 			protected override bool TryGetFromInfo(int nodeId, out int fromNodeId, out float totalCost)
 			{
@@ -27,53 +57,53 @@ namespace EthansGameKit.Pathfinding
 				fromMap[toNodeId] = fromNodeId;
 				costMap[toNodeId] = totalCost;
 			}
-			public void Reset()
+			public void Reset(IEnumerable<TilePosition> positions)
 			{
-				fromMap.MemSet(-1);
-				costMap.MemSet(float.PositiveInfinity);
+				base.Reset(positions.Select(pos => pathfindingSpace.GetNodeIndex(pos.x, pos.y)));
 			}
 		}
 
 		const float invalidCost = -1;
-		static void Direction2XZ(int direction, out int x, out int z)
+		static void Direction2XZ(DirectionCode direction, out int x, out int z)
 		{
 			switch (direction)
 			{
-				case 0:
+				case DirectionCode.North:
 					x = 0;
 					z = 1;
 					break;
-				case 1:
+				case DirectionCode.East:
 					x = 1;
 					z = 0;
 					break;
-				case 2:
+				case DirectionCode.South:
 					x = 0;
 					z = -1;
 					break;
-				case 3:
+				case DirectionCode.West:
 					x = -1;
 					z = 0;
 					break;
-				case 4:
+				case DirectionCode.NorthEast:
 					x = 1;
 					z = 1;
 					break;
-				case 5:
+				case DirectionCode.SouthEast:
 					x = 1;
 					z = -1;
 					break;
-				case 6:
+				case DirectionCode.SouthWest:
 					x = -1;
 					z = -1;
 					break;
-				case 7:
+				case DirectionCode.NorthWest:
 					x = -1;
 					z = 1;
 					break;
 				default: throw new ArgumentOutOfRangeException(nameof(direction));
 			}
 		}
+		CachePool<Pathfinder> pathfinderPool = new(0);
 		[SerializeField] int width;
 		[SerializeField] int widthPower;
 		[SerializeField] int count;
@@ -82,9 +112,7 @@ namespace EthansGameKit.Pathfinding
 		[SerializeField] float[] stepCosts;
 		[SerializeField] int dataWidthPowerPerTile;
 		public int Width => width;
-		public int WidthPower => widthPower;
 		public int Count => count;
-		int PosMask => posMask;
 		public PathfindingSpace_QuadTileBased(int widthPower, bool oct)
 		{
 			this.widthPower = widthPower;
@@ -102,11 +130,11 @@ namespace EthansGameKit.Pathfinding
 			var length = 0;
 			for (var direction = 0; direction < maxDirection; ++direction)
 			{
-				var index = GetStepIndex(fromNodeId, direction);
+				var index = GetStepIndex(fromNodeId, (DirectionCode)direction);
 				var cost = stepCosts[index];
 				if (cost != invalidCost)
 				{
-					Direction2XZ(direction, out var toX, out var toZ);
+					Direction2XZ((DirectionCode)direction, out var toX, out var toZ);
 					var toIndex = GetNodeIndex(toX, toZ);
 					toAndCost[length].toNodeId = toIndex;
 					toAndCost[length].stepCost = cost;
@@ -115,48 +143,81 @@ namespace EthansGameKit.Pathfinding
 			}
 			return length;
 		}
-		public bool Contains(int x, int z)
+		public Pathfinder CreatePathfinder()
 		{
-			return (uint)x < (uint)width && (uint)z < (uint)width;
+			if (pathfinderPool.TryGenerate(out var pathfinder))
+				return pathfinder;
+			return new(this);
+		}
+		public void RecyclePathfinder(Pathfinder pathfinder)
+		{
+			if (pathfinder.pathfindingSpace != this) throw new ArgumentException("pathfinder not belongs to this space");
+			pathfinderPool.Recycle(pathfinder);
+		}
+		public bool Contains(TilePosition position)
+		{
+			return Contains(position.x, position.y);
 		}
 		public bool Contains(int index)
 		{
 			return index > 0 && index < count;
 		}
-		public int GetNodeIndex(int x, int z)
+		public void GetNodePosition(int index, out TilePosition position)
 		{
-			return (x << widthPower) | z;
+			GetNodePosition(index, out var x, out var y);
+			position = new()
+			{
+				x = x,
+				y = y,
+			};
 		}
-		public void GetNodePosition(int index, out int x, out int z)
+		public void SetLink(TilePosition fromPosition, DirectionCode direction, float cost)
+		{
+			if (!TryGetNodeIndex(fromPosition, out var fromIndex))
+				throw new ArgumentOutOfRangeException(nameof(fromPosition));
+			var toIndex = GetStepIndex(fromIndex, direction);
+			stepCosts[toIndex] = cost;
+		}
+		public void RemoveLink(TilePosition fromPosition, DirectionCode direction)
+		{
+			if (!TryGetNodeIndex(fromPosition, out var fromIndex))
+				throw new ArgumentOutOfRangeException(nameof(fromPosition));
+			var toIndex = GetStepIndex(fromIndex, direction);
+			stepCosts[toIndex] = invalidCost;
+		}
+		public bool TryGetNodeIndex(TilePosition position, out int index)
+		{
+			if (!Contains(position.x, position.y))
+			{
+				index = -1;
+				return false;
+			}
+			index = GetNodeIndex(position.x, position.y);
+			return true;
+		}
+		internal void GetNodePosition(int index, out int x, out int y)
 		{
 			x = index >> widthPower;
-			z = index & posMask;
+			y = index & posMask;
 		}
-		/// <param name="fromNode"></param>
-		/// <param name="direction">0-前, 1-右, 2-后, 3-左, 4-右前, 5-右后, 6-左后, 7-左前</param>
-		/// <param name="cost"></param>
-		public void SetLink(int fromNode, int direction, float cost)
+		internal bool Contains(int x, int y)
 		{
-			var index = GetStepIndex(fromNode, direction);
-			stepCosts[index] = cost;
+			return (uint)x < (uint)width && (uint)y < (uint)width;
 		}
-		/// <param name="fromNode"></param>
-		/// <param name="direction">0-前, 1-右, 2-后, 3-左, 4-右前, 5-右后, 6-左后, 7-左前</param>
-		public void RemoveLink(int fromNode, int direction)
+		internal int GetNodeIndex(int x, int y)
 		{
-			var index = GetStepIndex(fromNode, direction);
-			stepCosts[index] = invalidCost;
+			return (x << widthPower) | y;
 		}
-		int GetStepIndex(int fromNode, int direction)
+		int GetStepIndex(int fromNode, DirectionCode direction)
 		{
 			if (!Contains(fromNode)) throw new ArgumentOutOfRangeException(nameof(fromNode));
-			if (direction >= maxDirection) throw new ArgumentOutOfRangeException(nameof(direction));
+			if ((int)direction >= maxDirection) throw new ArgumentOutOfRangeException(nameof(direction));
 			GetNodePosition(fromNode, out var x, out var z);
 			Direction2XZ(direction, out var dx, out var dz);
 			var toX = x + dx;
 			var toZ = z + dz;
 			if (!Contains(toX, toZ)) throw new ArgumentOutOfRangeException(nameof(direction));
-			return (fromNode << dataWidthPowerPerTile) + direction;
+			return (fromNode << dataWidthPowerPerTile) + (int)direction;
 		}
 	}
 }
