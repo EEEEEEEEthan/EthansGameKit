@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.Pathfinding
@@ -38,7 +37,7 @@ namespace EthansGameKit.Pathfinding
 		/// <summary>
 		///     寻路器
 		/// </summary>
-		public new sealed class Pathfinder : PathfindingSpace.Pathfinder
+		public new class Pathfinder : PathfindingSpace.Pathfinder
 		{
 			static int[] buffer = Array.Empty<int>();
 			readonly int[] fromMap;
@@ -76,14 +75,19 @@ namespace EthansGameKit.Pathfinding
 			/// </summary>
 			/// <param name="path">从起点(含)到终点(含)的路径</param>
 			/// <param name="position"></param>
-			/// <param name="reversed">若为真,<paramref name="path"/>变为从终点(含)到起点(含)</param>
+			/// <param name="reversed">若为真,<paramref name="path" />变为从终点(含)到起点(含)</param>
 			/// <returns>路径是否已发现</returns>
-			public bool TryGetPath(List<TilePosition> path, TilePosition position, bool reversed = false)
+			public PathfindingState TryGetPath(List<TilePosition> path, TilePosition position, bool reversed = false)
 			{
 				path.Clear();
 				var length = GetPath(ref buffer, pathfindingSpace.GetNodeIndex(position.x, position.y));
-				if (length <= 0)
-					return false;
+				switch (length)
+				{
+					case 0:
+						return PathfindingState.Pending;
+					case -1:
+						return PathfindingState.NotFound;
+				}
 				if (reversed)
 				{
 					for (var i = 0; i < length; ++i)
@@ -102,7 +106,7 @@ namespace EthansGameKit.Pathfinding
 						path.Add(new() { x = x, y = y });
 					}
 				}
-				return true;
+				return PathfindingState.Found;
 			}
 		}
 
@@ -164,7 +168,6 @@ namespace EthansGameKit.Pathfinding
 				default: throw new ArgumentOutOfRangeException(nameof(direction));
 			}
 		}
-		CachePool<Pathfinder> pathfinderPool = new(0);
 		[SerializeField] int width;
 		[SerializeField] int widthPower;
 		[SerializeField] int count;
@@ -203,17 +206,6 @@ namespace EthansGameKit.Pathfinding
 				}
 			}
 			return length;
-		}
-		public Pathfinder CreatePathfinder()
-		{
-			if (pathfinderPool.TryGenerate(out var pathfinder))
-				return pathfinder;
-			return new(this);
-		}
-		public void RecyclePathfinder(Pathfinder pathfinder)
-		{
-			if (pathfinder.pathfindingSpace != this) throw new ArgumentException("pathfinder not belongs to this space");
-			pathfinderPool.Recycle(pathfinder);
 		}
 		public bool Contains(TilePosition position)
 		{
