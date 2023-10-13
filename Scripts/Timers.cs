@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace EthansGameKit
 {
+	/// <summary>
+	///     定时器.即使在Editor模式下也能正常工作
+	/// </summary>
 	public static class Timers
 	{
 		public const uint invalidId = 0;
@@ -55,6 +58,8 @@ namespace EthansGameKit
 			InvokeAfterUnscaled(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
+		/// <param name="id">定时器id.尽量避免CancelInvoke一个非零的无效id，因为这样需要遍历所有定时器</param>
+		/// <returns></returns>
 		public static bool CancelInvoke(ref uint id)
 		{
 			if (id <= invalidId) return false;

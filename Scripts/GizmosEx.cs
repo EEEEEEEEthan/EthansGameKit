@@ -76,5 +76,16 @@ namespace EthansGameKit
 			Gizmos.DrawLine(center0 - right * radius, center1 - right * radius);
 			Gizmos.matrix = matrix;
 		}
+		public static void DrawWiredQuad(Vector3 center, Vector3 normal, Vector3 forward, Vector2 size)
+		{
+			size /= 2;
+			normal.Normalize();
+			var right = Vector3.Cross(normal, forward).normalized * size.x;
+			forward = forward.normalized * size.y;
+			Gizmos.DrawLine(center - right - forward, center - right + forward);
+			Gizmos.DrawLine(center - right + forward, center + right + forward);
+			Gizmos.DrawLine(center + right + forward, center + right - forward);
+			Gizmos.DrawLine(center + right - forward, center - right - forward);
+		}
 	}
 }
