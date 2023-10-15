@@ -77,6 +77,14 @@ namespace EthansGameKit
 		{
 			return Mathf.RoundToInt(@this);
 		}
+		public static void Remap(ref this float @this, float min, float max, float newMin, float newMax)
+		{
+			@this = Mathf.Lerp(newMin, newMax, @this.InverseLerp(min, max));
+		}
+		public static float Remapped(this float @this, float min, float max, float newMin, float newMax)
+		{
+			return Mathf.Lerp(newMin, newMax, @this.InverseLerp(min, max));
+		}
 		public static float DistanceTo(this float @this, float other)
 		{
 			return Mathf.Abs(@this - other);

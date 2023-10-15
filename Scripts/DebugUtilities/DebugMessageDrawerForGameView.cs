@@ -147,6 +147,8 @@ namespace EthansGameKit.DebugUtilities
 					t.gameObject.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 					t.hideFlags = HideFlags.HideAndDontSave | HideFlags.NotEditable;
 				}
+				cube.hideFlags = HideFlags.HideInInspector;
+				cube.hideFlags = HideFlags.HideInHierarchy;
 				return cachedIndicator;
 			}
 		}

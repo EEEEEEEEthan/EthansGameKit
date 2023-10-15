@@ -5,7 +5,7 @@ namespace EthansGameKit.Internal
 	class Singleton<T> : MonoBehaviour where T : Singleton<T>
 	{
 		static T instance;
-		protected static T Instance
+		public static T Instance
 		{
 			get
 			{

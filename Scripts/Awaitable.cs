@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Runtime.CompilerServices;
 using EthansGameKit.CachePools;
+using UnityEngine;
 
 namespace EthansGameKit
 {
@@ -20,6 +21,7 @@ namespace EthansGameKit
 			return Awaitable<T>.Create(out handle);
 		}
 		new IAwaiter<T> GetAwaiter();
+		WaitUntil ToWaitUntil();
 	}
 
 	public interface IAwaiter : INotifyCompletion
@@ -130,6 +132,11 @@ namespace EthansGameKit
 		public IAwaiter<T> GetAwaiter()
 		{
 			return this;
+		}
+		public WaitUntil ToWaitUntil()
+		{
+			var flag = this.flag;
+			return new(() => IsCompleted || flag != this.flag);
 		}
 		object IAwaiter.GetResult()
 		{

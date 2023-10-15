@@ -82,7 +82,7 @@ namespace EthansGameKit
 		{
 			lastAccess = -keepSeconds;
 		}
-		IAwaitable ITimedCache.LoadAsync()
+		public IAwaitable LoadAsync()
 		{
 			var awaitable = IAwaitable.Create(out var handle);
 			LoadValueAsync(onLoaded);
