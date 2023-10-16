@@ -9,8 +9,8 @@ namespace EthansGameKit.DebugUtilities
 	{
 		public static bool Enabled
 		{
-			get => DebugMessageDrawerForGameView.Enabled;
-			set => DebugMessageDrawerForGameView.Enabled = value;
+			get => DebugMessageDrawer.Enabled;
+			set => DebugMessageDrawer.Enabled = value;
 		}
 		/// <summary>
 		///     调试信息

@@ -19,18 +19,12 @@ namespace EthansGameKit.DebugUtilities
 			UnityEditor.Handles.BeginGUI();
 			drawer.DrawGUI(sceneView.camera, UnityEditor.HandleUtility.GUIPointToWorldRay(Event.current.mousePosition));
 			UnityEditor.Handles.EndGUI();
-			GUI.changed = true;
 		}
 	}
 #endif
 
 	class DebugMessageDrawerForGameView : Singleton<DebugMessageDrawerForGameView>
 	{
-		public static bool Enabled
-		{
-			get => Instance.enabled;
-			set => Instance.enabled = value;
-		}
 		readonly DebugMessageDrawer drawer = new();
 		Camera mainCamera;
 		void OnGUI()
@@ -39,13 +33,36 @@ namespace EthansGameKit.DebugUtilities
 			if (mainCamera)
 			{
 				drawer.DrawGUI(mainCamera, mainCamera.ScreenPointToRay(Input.mousePosition));
-				GUI.changed = true;
 			}
 		}
 	}
 
-	public class DebugMessageDrawer
+	class DebugMessageDrawer
 	{
+		public static bool Enabled
+		{
+			get => UnityEditor.EditorPrefs.GetBool("DebugMessageDrawer.Enabled", false);
+			set
+			{
+				if (value)
+					UnityEditor.EditorPrefs.SetBool("DebugMessageDrawer.Enabled", true);
+				else
+					UnityEditor.EditorPrefs.DeleteKey("DebugMessageDrawer.Enabled");
+			}
+		}
+		// toggle
+		[UnityEditor.MenuItem("Tools/" + PackageDefines.packageName + "/Debug Message Drawer")]
+		static void SwitchDebugMessageDrawer()
+		{
+			Enabled = !Enabled;
+			UnityEditor.Menu.SetChecked("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", Enabled);
+		}
+		[UnityEditor.MenuItem("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", true)]
+		static bool ValidSwitchDebugMessageDrawer()
+		{
+			UnityEditor.Menu.SetChecked("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", Enabled);
+			return true;
+		}
 		GUIStyle cachedTextStyle;
 		Material cachedMaterial;
 		Transform cachedIndicator;
@@ -154,8 +171,8 @@ namespace EthansGameKit.DebugUtilities
 		}
 		internal void DrawGUI(Camera camera, Ray ray)
 		{
-			GUI.changed = true;
 			var indicatorTransform = Indicator;
+			if (!Enabled) goto FAILED;
 			if (!camera || !Physics.Raycast(ray, out var hit) || !hit.collider) goto FAILED;
 			var provider = hit.collider.GetComponentInParent<IDebugMessageProvider>();
 			if (provider == null) goto FAILED;
@@ -170,6 +187,7 @@ namespace EthansGameKit.DebugUtilities
 				Debug.LogException(e);
 			}
 			if (message.IsNullOrEmpty()) goto FAILED;
+			GUI.changed = true;
 			indicatorTransform.gameObject.SetActive(true);
 			indicatorTransform.position = matrix.GetPosition();
 			indicatorTransform.rotation = matrix.rotation;

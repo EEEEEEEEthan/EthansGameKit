@@ -48,7 +48,8 @@ namespace EthansGameKit.VisualEffects
 								var name = $"{System.IO.Path.GetFileNameWithoutExtension(path)} {i}";
 								var extension = System.IO.Path.GetExtension(path);
 								path = $"{folder}/{name}{extension}";
-								if (!System.IO.File.Exists(path))								{
+								if (!System.IO.File.Exists(path))
+								{
 									mesh.name = name;
 									UnityEditor.AssetDatabase.CreateAsset(copiedMesh, path);
 									UnityEditor.AssetDatabase.SaveAssets();
