@@ -196,5 +196,33 @@ namespace EthansGameKit
 			if (safe) return @this.GetEnumerator().ToSafeEnumerator();
 			return @this.GetEnumerator();
 		}
+		public static Vector3 Sum(this IEnumerable<Vector3> @this)
+		{
+			Vector3 result = default;
+			foreach (var pos in @this)
+				result += pos;
+			return result;
+		}
+		public static Vector3Int Sum(this IEnumerable<Vector3Int> @this)
+		{
+			Vector3Int result = default;
+			foreach (var pos in @this)
+				result += pos;
+			return result;
+		}
+		public static Vector2 Sum(this IEnumerable<Vector2> @this)
+		{
+			Vector2 result = default;
+			foreach (var pos in @this)
+				result += pos;
+			return result;
+		}
+		public static Vector2Int Sum(this IEnumerable<Vector2Int> @this)
+		{
+			Vector2Int result = default;
+			foreach (var pos in @this)
+				result += pos;
+			return result;
+		}
 	}
 }

@@ -11,7 +11,7 @@ namespace EthansGameKit.Internal
 		static readonly HashSet<IRefreshableItem> refreshing = new();
 		public static void Refresh(IRefreshableItem item, bool immediate)
 		{
-			if (immediate || !Application.isPlaying)
+			if (immediate)
 			{
 				dirtyItems.Remove(item);
 				RefreshImmediate(item);
@@ -21,6 +21,15 @@ namespace EthansGameKit.Internal
 				dirtyItems.Add(item);
 			}
 		}
+#if UNITY_EDITOR
+		[UnityEditor.InitializeOnLoadMethod]
+		static void EditorInitialize()
+		{
+			UnityEditor.EditorApplication.update -= FrameUpdate;
+			if (!Application.isPlaying)
+				UnityEditor.EditorApplication.update += FrameUpdate;
+		}
+#endif
 		static void RefreshImmediate(IRefreshableItem item)
 		{
 			if (refreshing.Add(item))
@@ -40,7 +49,7 @@ namespace EthansGameKit.Internal
 				Debug.LogWarning("refreshing!", item as UnityEngine.Object);
 			}
 		}
-		void LateUpdate()
+		static void FrameUpdate()
 		{
 			var count = dirtyItems.Count;
 			if (count <= 0) return;
@@ -51,6 +60,10 @@ namespace EthansGameKit.Internal
 			for (var i = 0; i < count; i++)
 				RefreshImmediate(buffer[i]);
 			Array.Clear(buffer, 0, count);
+		}
+		void LateUpdate()
+		{
+			FrameUpdate();
 		}
 	}
 }

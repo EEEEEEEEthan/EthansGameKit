@@ -1,0 +1,17 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6344e53c8eca48a597f53f7b4c992cb2, type: 3}
+  m_Name: ResourceMapper
+  m_EditorClassIdentifier: 
+  script: {fileID: 11500000, guid: 0158edb465b58644fab86c5b794eb2f4, type: 3}
+  regionName: autogen
+  resourceFolder: {fileID: 102900000, guid: 1e390eedd0308ac40ad2d1061835670d, type: 3}
