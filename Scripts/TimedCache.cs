@@ -144,8 +144,13 @@ namespace EthansGameKit
 	public class ResourceCache<T> : AbsTimedCache<T> where T : Object
 	{
 		[SerializeField] string resourcePath;
+		public string ResourcePath => resourcePath;
 		public ResourceCache(string resourcePath)
 		{
+			if (resourcePath.IsNullOrEmpty())
+			{
+				throw new ArgumentNullException(nameof(resourcePath));
+			}
 			this.resourcePath = resourcePath;
 		}
 		protected override T LoadValue()
@@ -161,7 +166,8 @@ namespace EthansGameKit
 			void cb(AsyncOperation _)
 			{
 				var result = operation.asset as T;
-				Assert.IsNotNull(result);
+				if (!result)
+					throw new($"load failed: {resourcePath}");
 				callback.TryInvoke(result);
 			}
 		}
