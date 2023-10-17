@@ -148,9 +148,7 @@ namespace EthansGameKit
 		public ResourceCache(string resourcePath)
 		{
 			if (resourcePath.IsNullOrEmpty())
-			{
 				throw new ArgumentNullException(nameof(resourcePath));
-			}
 			this.resourcePath = resourcePath;
 		}
 		protected override T LoadValue()
@@ -167,7 +165,7 @@ namespace EthansGameKit
 			{
 				var result = operation.asset as T;
 				if (!result)
-					throw new($"load failed: {resourcePath}");
+					Debug.LogError($"load failed: {resourcePath}");
 				callback.TryInvoke(result);
 			}
 		}
