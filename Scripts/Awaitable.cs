@@ -11,7 +11,9 @@ namespace EthansGameKit
 		{
 			return Awaitable.Create(out handle);
 		}
+		public float Progress { get; }
 		IAwaiter GetAwaiter();
+		public WaitUntil ToWaitUntil();
 	}
 
 	public interface IAwaitable<out T> : IAwaitable
@@ -45,6 +47,14 @@ namespace EthansGameKit
 				throw new InvalidOperationException("The awaiter has been recycled");
 			awaitable.Set(result);
 		}
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		/// <param name="progress"></param>
+		public void SetProgress(float progress)
+		{
+			awaitable.Progress = progress;
+		}
 	}
 
 	public struct AsyncHandle
@@ -56,6 +66,14 @@ namespace EthansGameKit
 			if (awaitable.flag != flag)
 				throw new InvalidOperationException("The awaiter has been recycled");
 			awaitable.Set();
+		}
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		/// <param name="progress"></param>
+		public void SetProgress(float progress)
+		{
+			awaitable.Progress = progress;
 		}
 	}
 
@@ -73,6 +91,10 @@ namespace EthansGameKit
 		}
 		internal int flag;
 		Action continuation;
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		public float Progress { get; internal set; }
 		public bool IsCompleted { get; private set; }
 		public override string ToString()
 		{
@@ -81,6 +103,11 @@ namespace EthansGameKit
 		public object GetResult()
 		{
 			return null;
+		}
+		public WaitUntil ToWaitUntil()
+		{
+			var flag = this.flag;
+			return new(() => IsCompleted || flag != this.flag);
 		}
 		public void OnCompleted(Action continuation)
 		{
@@ -117,6 +144,10 @@ namespace EthansGameKit
 		Action continuation;
 		T result;
 		public bool IsCompleted { get; private set; }
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		public float Progress { get; internal set; }
 		public override string ToString()
 		{
 			return $"{GetType().FullName}({nameof(IsCompleted)}={IsCompleted})";
@@ -125,6 +156,11 @@ namespace EthansGameKit
 		{
 			return result;
 		}
+		public WaitUntil ToWaitUntil()
+		{
+			var flag = this.flag;
+			return new(() => IsCompleted || flag != this.flag);
+		}
 		public void OnCompleted(Action continuation)
 		{
 			this.continuation = continuation;
@@ -132,11 +168,6 @@ namespace EthansGameKit
 		public IAwaiter<T> GetAwaiter()
 		{
 			return this;
-		}
-		public WaitUntil ToWaitUntil()
-		{
-			var flag = this.flag;
-			return new(() => IsCompleted || flag != this.flag);
 		}
 		object IAwaiter.GetResult()
 		{
@@ -153,6 +184,7 @@ namespace EthansGameKit
 			this.result = result;
 			continuation?.Invoke();
 			continuation = null;
+			this.result = default;
 			GlobalCachePool<Awaitable<T>>.Recycle(this);
 		}
 	}
