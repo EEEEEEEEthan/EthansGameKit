@@ -23,7 +23,6 @@ namespace EthansGameKit
 			return Awaitable<T>.Create(out handle);
 		}
 		new IAwaiter<T> GetAwaiter();
-		WaitUntil ToWaitUntil();
 	}
 
 	public interface IAwaiter : INotifyCompletion
