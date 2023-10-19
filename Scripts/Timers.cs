@@ -49,13 +49,13 @@ namespace EthansGameKit
 		public static IAwaitable Await(double seconds, bool crossScene = false)
 		{
 			var awaitable = IAwaitable.Create(out var handle);
-			InvokeAfter(seconds, handle.Set, crossScene);
+			InvokeAfter(seconds, handle.SetResult, crossScene);
 			return awaitable;
 		}
 		public static IAwaitable AwaitUnscaled(double seconds, bool crossScene = false)
 		{
 			var awaitable = IAwaitable.Create(out var handle);
-			InvokeAfterUnscaled(seconds, handle.Set, crossScene);
+			InvokeAfterUnscaled(seconds, handle.SetResult, crossScene);
 			return awaitable;
 		}
 		/// <param name="id">定时器id.尽量避免CancelInvoke一个非零的无效id，因为这样需要遍历所有定时器</param>
