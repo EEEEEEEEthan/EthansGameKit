@@ -28,7 +28,7 @@ namespace EthansGameKit
 		public static Awaitable AwaitFreeFrame(TaskQueuePriorities priorities, bool crossScene)
 		{
 			var awaitable = new Awaitable(out var handle);
-			InvokeAtFreeFrame(handle.Set, priorities, crossScene);
+			InvokeAtFreeFrame(handle.TriggerCallback, priorities, crossScene);
 			return awaitable;
 		}
 		public static Awaitable AwaitFreeFrame(TaskQueuePriorities priorities)
