@@ -1,6 +1,7 @@
 ﻿using System;
 using EthansGameKit.Internal;
 using UnityEngine;
+using Awaitable = EthansGameKit.Await.Awaitable;
 
 namespace EthansGameKit
 {

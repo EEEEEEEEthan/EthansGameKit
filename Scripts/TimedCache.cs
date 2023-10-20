@@ -1,6 +1,7 @@
 ﻿using System;
 using UnityEngine;
 using UnityEngine.Assertions;
+using Awaitable = EthansGameKit.Await.Awaitable;
 using Object = UnityEngine.Object;
 
 namespace EthansGameKit
