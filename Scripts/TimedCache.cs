@@ -9,7 +9,7 @@ namespace EthansGameKit
 	{
 		bool HasValue { get; }
 		object Value { get; }
-		IAwaitable LoadAsync();
+		Awaitable LoadAsync();
 	}
 
 	public interface ITimedCache<out T> : ITimedCache
@@ -42,7 +42,7 @@ namespace EthansGameKit
 		{
 			this.source = source;
 		}
-		public IAwaitable LoadAsync()
+		public Awaitable LoadAsync()
 		{
 			return source.LoadAsync();
 		}
@@ -82,9 +82,9 @@ namespace EthansGameKit
 		{
 			lastAccess = -keepSeconds;
 		}
-		public IAwaitable LoadAsync()
+		public Awaitable LoadAsync()
 		{
-			var awaitable = IAwaitable.Create(out var handle);
+			var awaitable = new Awaitable(out var handle);
 			LoadValueAsync(onLoaded);
 			return awaitable;
 

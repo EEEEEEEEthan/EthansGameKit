@@ -46,15 +46,15 @@ namespace EthansGameKit
 			CancelInvoke(ref id);
 			id = InvokeAfterUnscaled(delay, callback, crossScene);
 		}
-		public static IAwaitable Await(double seconds, bool crossScene = false)
+		public static Awaitable Await(double seconds, bool crossScene = false)
 		{
-			var awaitable = IAwaitable.Create(out var handle);
+			var awaitable = new Awaitable(out var handle);
 			InvokeAfter(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
-		public static IAwaitable AwaitUnscaled(double seconds, bool crossScene = false)
+		public static Awaitable AwaitUnscaled(double seconds, bool crossScene = false)
 		{
-			var awaitable = IAwaitable.Create(out var handle);
+			var awaitable = new Awaitable(out var handle);
 			InvokeAfterUnscaled(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
