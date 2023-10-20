@@ -5,159 +5,186 @@ using UnityEngine;
 
 namespace EthansGameKit
 {
-	public readonly struct IAwaitable
+	public interface IAwaitable : INotifyCompletion
 	{
 		public static IAwaitable Create(out AsyncHandle handle)
 		{
-			var awaiter = Awaiter<object>.Generate();
-			handle = new(awaiter);
-			return new(awaiter);
+			return Awaitable.Create(out handle);
 		}
-		readonly Awaiter<object> awaiter;
-		IAwaitable(Awaiter<object> awaiter)
-		{
-			this.awaiter = awaiter;
-		}
-		public Awaiter<object> GetAwaiter()
-		{
-			return awaiter;
-		}
+		public float Progress { get; }
+		IAwaiter GetAwaiter();
+		public WaitUntil ToWaitUntil();
 	}
 
-	public readonly struct IAwaitable<T>
+	public interface IAwaitable<out T> : IAwaitable
 	{
 		public static IAwaitable<T> Create(out AsyncHandle<T> handle)
 		{
-			var awaiter = Awaiter<T>.Generate();
-			handle = new(awaiter);
-			return new(awaiter);
+			return Awaitable<T>.Create(out handle);
 		}
-		readonly Awaiter<T> awaiter;
-		IAwaitable(Awaiter<T> awaiter)
+		new IAwaiter<T> GetAwaiter();
+	}
+
+	public interface IAwaiter : INotifyCompletion
+	{
+		bool IsCompleted { get; }
+		object GetResult();
+	}
+
+	public interface IAwaiter<out T> : IAwaiter
+	{
+		new T GetResult();
+	}
+
+	public struct AsyncHandle<T>
+	{
+		internal int flag;
+		internal Awaitable<T> awaitable;
+		public void Set(T result)
 		{
-			this.awaiter = awaiter;
+			if (awaitable.flag != flag)
+				throw new InvalidOperationException("The awaiter has been recycled");
+			awaitable.Set(result);
 		}
-		public Awaiter<T> GetAwaiter()
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		/// <param name="progress"></param>
+		public void SetProgress(float progress)
 		{
-			return awaiter;
+			awaitable.Progress = progress;
 		}
 	}
 
-	public sealed class Awaiter<T> : INotifyCompletion
+	public struct AsyncHandle
 	{
-		internal static Awaiter<T> Generate()
+		internal int flag;
+		internal Awaitable awaitable;
+		public void Set()
 		{
-			if (GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter))
-			{
-				awaiter.Progress = default;
-				awaiter.IsCompleted = default;
-			}
-			else
-			{
-				awaiter = new();
-			}
-			return awaiter;
+			if (awaitable.flag != flag)
+				throw new InvalidOperationException("The awaiter has been recycled");
+			awaitable.Set();
 		}
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		/// <param name="progress"></param>
+		public void SetProgress(float progress)
+		{
+			awaitable.Progress = progress;
+		}
+	}
+
+	class Awaitable : IAwaiter, IAwaitable
+	{
+		public static IAwaitable Create(out AsyncHandle handle)
+		{
+			var awaitable = GlobalCachePool<Awaitable>.TryGenerate(out var awaiter) ? awaiter : new();
+			handle = new()
+			{
+				awaitable = awaitable,
+				flag = ++awaitable.flag,
+			};
+			return awaitable;
+		}
+		internal int flag;
+		Action continuation;
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		public float Progress { get; internal set; }
+		public bool IsCompleted { get; private set; }
+		public override string ToString()
+		{
+			return $"{GetType().FullName}({nameof(IsCompleted)}={IsCompleted})";
+		}
+		public object GetResult()
+		{
+			return null;
+		}
+		public WaitUntil ToWaitUntil()
+		{
+			var flag = this.flag;
+			return new(() => IsCompleted || flag != this.flag);
+		}
+		public void OnCompleted(Action continuation)
+		{
+			this.continuation += continuation;
+		}
+		public IAwaiter GetAwaiter()
+		{
+			return this;
+		}
+		public void Set()
+		{
+			if (IsCompleted) return;
+			IsCompleted = true;
+			var action = continuation;
+			continuation = null;
+			GlobalCachePool<Awaitable>.Recycle(this);
+			action?.Invoke();
+		}
+	}
+
+	class Awaitable<T> : IAwaiter<T>, IAwaitable<T>
+	{
+		public static IAwaitable<T> Create(out AsyncHandle<T> handle)
+		{
+			var awaitable = GlobalCachePool<Awaitable<T>>.TryGenerate(out var awaiter) ? awaiter : new();
+			handle = new()
+			{
+				awaitable = awaitable,
+				flag = ++awaitable.flag,
+			};
+			return awaitable;
+		}
+		internal int flag;
 		Action continuation;
 		T result;
-		float progress;
-		public float Progress
-		{
-			get => progress;
-			set
-			{
-				if (IsCompleted)
-				{
-					Debug.LogError("Progress cannot be set after completion.");
-					return;
-				}
-				if (value < progress)
-				{
-					Debug.LogWarning("Progress cannot be set to a lower value.");
-					value = progress;
-				}
-				if (value > 1)
-				{
-					Debug.LogWarning("Progress cannot be set to a higher value.");
-					value = 1;
-				}
-				progress = value;
-			}
-		}
 		public bool IsCompleted { get; private set; }
-		Awaiter()
+		/// <summary>
+		///     无实际意义,用于协助进度条显示.progress>=1不能代表完成
+		/// </summary>
+		public float Progress { get; internal set; }
+		public override string ToString()
 		{
-		}
-		void INotifyCompletion.OnCompleted(Action continuation)
-		{
-			if (IsCompleted) throw new InvalidOperationException("Already completed");
-			this.continuation = continuation;
+			return $"{GetType().FullName}({nameof(IsCompleted)}={IsCompleted})";
 		}
 		public T GetResult()
 		{
 			return result;
 		}
-		internal void Recycle()
+		public WaitUntil ToWaitUntil()
 		{
-			continuation = null;
-			GlobalCachePool<Awaiter<T>>.Recycle(this);
+			var flag = this.flag;
+			return new(() => IsCompleted || flag != this.flag);
 		}
-		internal void SetResult(T result)
+		public void OnCompleted(Action continuation)
 		{
-			if (IsCompleted)
-				throw new InvalidOperationException("Already completed.");
-			if (continuation is null)
-				throw new InvalidOperationException("Not awaiting.");
-			this.result = result;
-			Progress = 1;
+			this.continuation = continuation;
+		}
+		public IAwaiter<T> GetAwaiter()
+		{
+			return this;
+		}
+		object IAwaiter.GetResult()
+		{
+			return result;
+		}
+		IAwaiter IAwaitable.GetAwaiter()
+		{
+			return this;
+		}
+		public void Set(T result)
+		{
+			if (IsCompleted) return;
 			IsCompleted = true;
-			var actions = continuation;
+			this.result = result;
+			continuation?.Invoke();
 			continuation = null;
-			actions.TryInvoke();
-		}
-	}
-
-	public readonly struct AsyncHandle<T>
-	{
-		readonly Awaiter<T> awaiter;
-		public float Progress
-		{
-			get => awaiter.Progress;
-			set => awaiter.Progress = value;
-		}
-		internal AsyncHandle(Awaiter<T> awaiter)
-		{
-			this.awaiter = awaiter;
-		}
-		public void Recycle()
-		{
-			awaiter.Recycle();
-		}
-		public void SetResult(T result)
-		{
-			awaiter.SetResult(result);
-		}
-	}
-
-	public readonly struct AsyncHandle
-	{
-		readonly Awaiter<object> awaiter;
-		public float Progress
-		{
-			get => awaiter.Progress;
-			set => awaiter.Progress = value;
-		}
-		internal AsyncHandle(Awaiter<object> awaiter)
-		{
-			this.awaiter = awaiter;
-		}
-		public void Recycle()
-		{
-			awaiter.Recycle();
-		}
-		public void SetResult()
-		{
-			awaiter.SetResult(null);
+			this.result = default;
+			GlobalCachePool<Awaitable<T>>.Recycle(this);
 		}
 	}
 }

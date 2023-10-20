@@ -91,7 +91,7 @@ namespace EthansGameKit
 			void onLoaded(T result)
 			{
 				Value = result;
-				handle.SetResult();
+				handle.Set();
 			}
 		}
 		protected abstract T LoadValue();
