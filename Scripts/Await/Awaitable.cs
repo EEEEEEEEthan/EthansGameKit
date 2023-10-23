@@ -2,42 +2,14 @@ namespace EthansGameKit.Await
 {
 	public readonly struct Awaitable
 	{
-		public static Awaitable operator &(Awaitable a, Awaitable b)
-		{
-			var awaitable = new Awaitable(out var handle);
-			var awaiterA = a.GetAwaiter();
-			var awaiterB = b.GetAwaiter();
-			awaiterA.OnCompleted(onCompleted);
-			awaiterB.OnCompleted(onCompleted);
-			return awaitable;
-			void onCompleted()
-			{
-				if (awaiterA.IsCompleted && awaiterB.IsCompleted)
-					handle.TriggerCallback();
-			}
-		}
-		public static Awaitable operator |(Awaitable a, Awaitable b)
-		{
-			var awaitable = new Awaitable(out var handle);
-			var awaiterA = a.GetAwaiter();
-			var awaiterB = b.GetAwaiter();
-			awaiterA.OnCompleted(onCompleted);
-			awaiterB.OnCompleted(onCompleted);
-			return awaitable;
-			void onCompleted()
-			{
-				if (awaiterA.IsCompleted || awaiterB.IsCompleted)
-					handle.TriggerCallback();
-			}
-		}
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
-		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool IsCompleted => awaiter.RecycleFalg != recycleFlag;
 		internal Awaiter Awaiter
 		{
 			get
 			{
-				if (Expired) throw new AwaiterExpiredException();
+				if (IsCompleted) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}
@@ -82,18 +54,6 @@ namespace EthansGameKit.Await
 		public IAwaiter<T> GetAwaiter()
 		{
 			return Awaiter;
-		}
-		public Awaitable<TCast> Cast<TCast>() where TCast : T
-		{
-			var awaitable = new Awaitable<TCast>(out var handle);
-			var awaiter = Awaiter;
-			awaiter.OnCompleted(onCompleted);
-			void onCompleted()
-			{
-				var result = awaiter.GetResult();
-				handle.TriggerCallback((TCast)result);
-			}
-			return awaitable;
 		}
 	}
 }

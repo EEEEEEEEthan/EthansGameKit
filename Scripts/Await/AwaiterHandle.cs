@@ -1,17 +1,15 @@
-using System;
-
 namespace EthansGameKit.Await
 {
 	public readonly struct AwaiterHandle
 	{
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
-		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool IsCompleted => awaiter.RecycleFalg != recycleFlag;
 		Awaiter Awaiter
 		{
 			get
 			{
-				if (Expired) throw new AwaiterExpiredException();
+				if (IsCompleted) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}
@@ -30,12 +28,12 @@ namespace EthansGameKit.Await
 	{
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
-		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool IsCompleted => awaiter.RecycleFalg != recycleFlag;
 		Awaiter<T> Awaiter
 		{
 			get
 			{
-				if (Expired) throw new AwaiterExpiredException();
+				if (IsCompleted) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}

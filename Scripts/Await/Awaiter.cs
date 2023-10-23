@@ -15,12 +15,12 @@ namespace EthansGameKit.Await
 		int continuationCount;
 		public bool IsCompleted { get; private set; }
 		internal uint RecycleFalg { get; private set; }
-		public void OnCompleted(Action continuation)
+		public void OnCompleted(Action callback)
 		{
-			if (IsCompleted) continuation?.TryInvoke();
+			if (IsCompleted) throw new AwaiterExpiredException();
 			if (continuationCount >= callbacks.Length)
 				Array.Resize(ref callbacks, continuationCount + 1);
-			callbacks[continuationCount++] = continuation;
+			callbacks[continuationCount++] = callback;
 		}
 		public object GetResult()
 		{
