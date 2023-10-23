@@ -2,12 +2,11 @@ using System;
 
 namespace EthansGameKit.Await
 {
-	public readonly struct AwaiterHandle : IDisposable
+	public readonly struct AwaiterHandle
 	{
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
 		public bool Expired => awaiter.RecycleFalg != recycleFlag;
-		public bool AutoDispose => awaiter.AutoRecycle;
 		Awaiter Awaiter
 		{
 			get
@@ -21,22 +20,17 @@ namespace EthansGameKit.Await
 			this.awaiter = awaiter;
 			recycleFlag = this.awaiter.RecycleFalg;
 		}
-		public void Dispose()
-		{
-			Awaiter.Dispose();
-		}
 		public void TriggerCallback()
 		{
 			Awaiter.SetResult(null);
 		}
 	}
 
-	public readonly struct AwaiterHandle<T> : IDisposable
+	public readonly struct AwaiterHandle<T>
 	{
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
 		public bool Expired => awaiter.RecycleFalg != recycleFlag;
-		public bool AutoDispose => awaiter.AutoRecycle;
 		Awaiter<T> Awaiter
 		{
 			get
@@ -49,10 +43,6 @@ namespace EthansGameKit.Await
 		{
 			this.awaiter = awaiter;
 			recycleFlag = this.awaiter.RecycleFalg;
-		}
-		public void Dispose()
-		{
-			Awaiter.Dispose();
 		}
 		public void TriggerCallback(T result)
 		{

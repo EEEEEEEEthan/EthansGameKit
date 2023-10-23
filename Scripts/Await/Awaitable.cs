@@ -1,13 +1,10 @@
-using System;
-
 namespace EthansGameKit.Await
 {
-	public readonly struct Awaitable : IDisposable
+	public readonly struct Awaitable
 	{
 		public static Awaitable operator &(Awaitable a, Awaitable b)
 		{
 			var awaitable = new Awaitable(out var handle);
-			var awaiter = awaitable.GetAwaiter();
 			var awaiterA = a.GetAwaiter();
 			var awaiterB = b.GetAwaiter();
 			awaiterA.OnCompleted(onCompleted);
@@ -15,15 +12,27 @@ namespace EthansGameKit.Await
 			return awaitable;
 			void onCompleted()
 			{
-				if (awaiter.IsCompleted) return;
-				if (!awaiterA.IsCompleted || !awaiterB.IsCompleted) return;
-				handle.TriggerCallback();
+				if (awaiterA.IsCompleted && awaiterB.IsCompleted)
+					handle.TriggerCallback();
+			}
+		}
+		public static Awaitable operator |(Awaitable a, Awaitable b)
+		{
+			var awaitable = new Awaitable(out var handle);
+			var awaiterA = a.GetAwaiter();
+			var awaiterB = b.GetAwaiter();
+			awaiterA.OnCompleted(onCompleted);
+			awaiterB.OnCompleted(onCompleted);
+			return awaitable;
+			void onCompleted()
+			{
+				if (awaiterA.IsCompleted || awaiterB.IsCompleted)
+					handle.TriggerCallback();
 			}
 		}
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
 		public bool Expired => awaiter.RecycleFalg != recycleFlag;
-		public bool AutoDispose => awaiter.AutoRecycle;
 		internal Awaiter Awaiter
 		{
 			get
@@ -32,7 +41,7 @@ namespace EthansGameKit.Await
 				return awaiter;
 			}
 		}
-		public Awaitable(out AwaiterHandle handle, bool autoDispose = true) : this(Awaiter.Create(autoDispose), out handle)
+		public Awaitable(out AwaiterHandle handle) : this(Awaiter.Create(), out handle)
 		{
 		}
 		internal Awaitable(Awaiter awaiter, out AwaiterHandle handle)
@@ -40,10 +49,6 @@ namespace EthansGameKit.Await
 			this.awaiter = awaiter;
 			recycleFlag = awaiter.RecycleFalg;
 			handle = new(awaiter);
-		}
-		public void Dispose()
-		{
-			Awaiter.Dispose();
 		}
 		public IAwaiter GetAwaiter()
 		{
@@ -60,7 +65,6 @@ namespace EthansGameKit.Await
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
 		public bool Expired => awaiter.RecycleFalg != recycleFlag;
-		public bool AutoDispose => awaiter.AutoRecycle;
 		internal Awaiter<T> Awaiter
 		{
 			get
@@ -69,15 +73,27 @@ namespace EthansGameKit.Await
 				return awaiter;
 			}
 		}
-		public Awaitable(out AwaiterHandle<T> handle, bool autoDispose = true)
+		public Awaitable(out AwaiterHandle<T> handle)
 		{
-			awaiter = Awaiter<T>.Create(autoDispose);
+			awaiter = Awaiter<T>.Create();
 			recycleFlag = awaiter.RecycleFalg;
 			handle = new(awaiter);
 		}
 		public IAwaiter<T> GetAwaiter()
 		{
 			return Awaiter;
+		}
+		public Awaitable<TCast> Cast<TCast>() where TCast : T
+		{
+			var awaitable = new Awaitable<TCast>(out var handle);
+			var awaiter = Awaiter;
+			awaiter.OnCompleted(onCompleted);
+			void onCompleted()
+			{
+				var result = awaiter.GetResult();
+				handle.TriggerCallback((TCast)result);
+			}
+			return awaitable;
 		}
 	}
 }

@@ -3,53 +3,45 @@ using EthansGameKit.CachePools;
 
 namespace EthansGameKit.Await
 {
-	class Awaiter : IAwaiter, IDisposable
+	class Awaiter : IAwaiter
 	{
-		internal static Awaiter Create(bool autoRecycle)
+		internal static Awaiter Create()
 		{
 			if (!GlobalCachePool<Awaiter>.TryGenerate(out var awaiter)) awaiter = new();
-			awaiter.AutoRecycle = autoRecycle;
 			return awaiter;
 		}
 		object result;
-		Action[] completed = new Action[1];
+		Action[] callbacks = new Action[1];
 		int continuationCount;
 		public bool IsCompleted { get; private set; }
-		internal bool AutoRecycle { get; private protected set; }
 		internal uint RecycleFalg { get; private set; }
 		public void OnCompleted(Action continuation)
 		{
 			if (IsCompleted) continuation?.TryInvoke();
-			if (continuationCount >= completed.Length)
-				Array.Resize(ref completed, continuationCount + 1);
-			completed[continuationCount++] = continuation;
+			if (continuationCount >= callbacks.Length)
+				Array.Resize(ref callbacks, continuationCount + 1);
+			callbacks[continuationCount++] = continuation;
 		}
 		public object GetResult()
 		{
 			return result;
-		}
-		public void Dispose()
-		{
-			++RecycleFalg;
-			result = default;
-			completed = default;
-			IsCompleted = default;
-			Recycle();
 		}
 		internal void SetResult(object result)
 		{
 			if (IsCompleted) throw new AwaiterExpiredException();
 			IsCompleted = true;
 			this.result = result;
-			var count = completed.Length;
+			var count = callbacks.Length;
 			for (var i = 0; i < count; ++i)
 			{
-				var action = completed[i];
-				completed[i] = null;
+				var action = callbacks[i];
+				callbacks[i] = null;
 				action?.TryInvoke();
 			}
-			Array.Clear(completed, 0, count);
-			if (AutoRecycle) Dispose();
+			Array.Clear(callbacks, 0, count);
+			++RecycleFalg;
+			this.result = default;
+			IsCompleted = false;
 		}
 		private protected virtual void Recycle()
 		{
@@ -59,10 +51,9 @@ namespace EthansGameKit.Await
 
 	class Awaiter<T> : Awaiter, IAwaiter<T>
 	{
-		internal new static Awaiter<T> Create(bool autoRecycle)
+		internal new static Awaiter<T> Create()
 		{
 			if (!GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter)) awaiter = new();
-			awaiter.AutoRecycle = autoRecycle;
 			return awaiter;
 		}
 		private protected override void Recycle()
