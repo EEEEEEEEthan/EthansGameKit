@@ -3,17 +3,19 @@ using EthansGameKit.CachePools;
 
 namespace EthansGameKit.Await
 {
-	public class Awaiter : IAwaiter
+	class Awaiter : IAwaiter, IDisposable
 	{
-		internal static Awaiter Create()
+		internal static Awaiter Create(bool autoRecycle)
 		{
 			if (!GlobalCachePool<Awaiter>.TryGenerate(out var awaiter)) awaiter = new();
+			awaiter.AutoRecycle = autoRecycle;
 			return awaiter;
 		}
 		object result;
 		Action[] completed = new Action[1];
 		int continuationCount;
 		public bool IsCompleted { get; private set; }
+		internal bool AutoRecycle { get; private protected set; }
 		internal uint RecycleFalg { get; private set; }
 		public void OnCompleted(Action continuation)
 		{
@@ -26,17 +28,17 @@ namespace EthansGameKit.Await
 		{
 			return result;
 		}
-		public void Recycle()
+		public void Dispose()
 		{
 			++RecycleFalg;
 			result = default;
 			completed = default;
 			IsCompleted = default;
-			DoRecycle();
+			Recycle();
 		}
 		internal void SetResult(object result)
 		{
-			if (IsCompleted) throw new InvalidOperationException("Already completed");
+			if (IsCompleted) throw new AwaiterExpiredException();
 			IsCompleted = true;
 			this.result = result;
 			var count = completed.Length;
@@ -47,21 +49,23 @@ namespace EthansGameKit.Await
 				action?.TryInvoke();
 			}
 			Array.Clear(completed, 0, count);
+			if (AutoRecycle) Dispose();
 		}
-		private protected virtual void DoRecycle()
+		private protected virtual void Recycle()
 		{
 			GlobalCachePool<Awaiter>.Recycle(this);
 		}
 	}
 
-	public class Awaiter<T> : Awaiter, IAwaiter<T>
+	class Awaiter<T> : Awaiter, IAwaiter<T>
 	{
-		internal new static Awaiter<T> Create()
+		internal new static Awaiter<T> Create(bool autoRecycle)
 		{
 			if (!GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter)) awaiter = new();
+			awaiter.AutoRecycle = autoRecycle;
 			return awaiter;
 		}
-		private protected override void DoRecycle()
+		private protected override void Recycle()
 		{
 			GlobalCachePool<Awaiter<T>>.Recycle(this);
 		}

@@ -1,20 +1,20 @@
-using System;
-
 namespace EthansGameKit.Await
 {
 	public readonly struct AwaiterHandle
 	{
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
+		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool AutoDispose => awaiter.AutoRecycle;
 		Awaiter Awaiter
 		{
 			get
 			{
-				if (awaiter.RecycleFalg != recycleFlag) throw new InvalidOperationException("Awaiter expired");
+				if (Expired) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}
-		public AwaiterHandle(Awaiter awaiter)
+		internal AwaiterHandle(Awaiter awaiter)
 		{
 			this.awaiter = awaiter;
 			recycleFlag = this.awaiter.RecycleFalg;
@@ -25,7 +25,7 @@ namespace EthansGameKit.Await
 		}
 		public void Recycle()
 		{
-			Awaiter.Recycle();
+			Awaiter.Dispose();
 		}
 	}
 
@@ -33,26 +33,28 @@ namespace EthansGameKit.Await
 	{
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
+		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool AutoDispose => awaiter.AutoRecycle;
 		Awaiter<T> Awaiter
 		{
 			get
 			{
-				if (awaiter.RecycleFalg != recycleFlag) throw new InvalidOperationException("Awaiter expired");
+				if (Expired) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}
-		public AwaiterHandle(Awaiter<T> awaiter)
+		internal AwaiterHandle(Awaiter<T> awaiter)
 		{
 			this.awaiter = awaiter;
 			recycleFlag = this.awaiter.RecycleFalg;
 		}
-		public void TriggerCallback()
+		public void TriggerCallback(T result)
 		{
-			Awaiter.SetResult(null);
+			Awaiter.SetResult(result);
 		}
 		public void Recycle()
 		{
-			Awaiter.Recycle();
+			Awaiter.Dispose();
 		}
 	}
 }

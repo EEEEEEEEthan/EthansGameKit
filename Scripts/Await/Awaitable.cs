@@ -2,7 +2,7 @@ using System;
 
 namespace EthansGameKit.Await
 {
-	public readonly struct Awaitable
+	public readonly struct Awaitable : IDisposable
 	{
 		public static Awaitable operator &(Awaitable a, Awaitable b)
 		{
@@ -22,7 +22,17 @@ namespace EthansGameKit.Await
 		}
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
-		public Awaitable(out AwaiterHandle handle) : this(Awaiter.Create(), out handle)
+		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool AutoDispose => awaiter.AutoRecycle;
+		internal Awaiter Awaiter
+		{
+			get
+			{
+				if (Expired) throw new AwaiterExpiredException();
+				return awaiter;
+			}
+		}
+		public Awaitable(out AwaiterHandle handle, bool autoDispose = true) : this(Awaiter.Create(autoDispose), out handle)
 		{
 		}
 		internal Awaitable(Awaiter awaiter, out AwaiterHandle handle)
@@ -31,10 +41,13 @@ namespace EthansGameKit.Await
 			recycleFlag = awaiter.RecycleFalg;
 			handle = new(awaiter);
 		}
-		public Awaiter GetAwaiter()
+		public void Dispose()
 		{
-			if (awaiter.RecycleFalg != recycleFlag) throw new InvalidOperationException("Awaiter expired");
-			return awaiter;
+			Awaiter.Dispose();
+		}
+		public IAwaiter GetAwaiter()
+		{
+			return Awaiter;
 		}
 	}
 
@@ -42,20 +55,29 @@ namespace EthansGameKit.Await
 	{
 		public static implicit operator Awaitable(Awaitable<T> awaitable)
 		{
-			return new(awaitable.GetAwaiter(), out _);
+			return new(awaitable.Awaiter, out _);
 		}
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
-		public Awaitable(out AwaiterHandle<T> handle)
+		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool AutoDispose => awaiter.AutoRecycle;
+		internal Awaiter<T> Awaiter
 		{
-			awaiter = Awaiter<T>.Create();
+			get
+			{
+				if (Expired) throw new AwaiterExpiredException();
+				return awaiter;
+			}
+		}
+		public Awaitable(out AwaiterHandle<T> handle, bool autoDispose = true)
+		{
+			awaiter = Awaiter<T>.Create(autoDispose);
 			recycleFlag = awaiter.RecycleFalg;
 			handle = new(awaiter);
 		}
-		public Awaiter<T> GetAwaiter()
+		public IAwaiter<T> GetAwaiter()
 		{
-			if (awaiter.RecycleFalg != recycleFlag) throw new InvalidOperationException("Awaiter expired");
-			return awaiter;
+			return Awaiter;
 		}
 	}
 }
