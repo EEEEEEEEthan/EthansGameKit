@@ -1,6 +1,6 @@
 namespace EthansGameKit.Await
 {
-	public readonly struct AwaiterHandle
+	public readonly struct AwaiterSignal
 	{
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
@@ -13,18 +13,18 @@ namespace EthansGameKit.Await
 				return awaiter;
 			}
 		}
-		internal AwaiterHandle(Awaiter awaiter)
+		internal AwaiterSignal(Awaiter awaiter)
 		{
 			this.awaiter = awaiter;
 			recycleFlag = this.awaiter.RecycleFalg;
 		}
-		public void TriggerCallback()
+		public void Set()
 		{
 			Awaiter.SetResult(null);
 		}
 	}
 
-	public readonly struct AwaiterHandle<T>
+	public readonly struct AwaiterSignal<T>
 	{
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
@@ -37,12 +37,12 @@ namespace EthansGameKit.Await
 				return awaiter;
 			}
 		}
-		internal AwaiterHandle(Awaiter<T> awaiter)
+		internal AwaiterSignal(Awaiter<T> awaiter)
 		{
 			this.awaiter = awaiter;
 			recycleFlag = this.awaiter.RecycleFalg;
 		}
-		public void TriggerCallback(T result)
+		public void Set(T result)
 		{
 			Awaiter.SetResult(result);
 		}

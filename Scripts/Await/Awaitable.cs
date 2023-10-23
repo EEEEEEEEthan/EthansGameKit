@@ -15,12 +15,7 @@ namespace EthansGameKit.Await
 				return awaiter;
 			}
 		}
-		/// <param name="handle">回调触发器</param>
-		/// <param name="manualDispose">true表示手动回收.(调用<see cref="Dispose" />)</param>
-		public Awaitable(out AwaiterHandle handle, bool manualDispose = false) : this(Awaiter.Create(manualDispose), out handle)
-		{
-		}
-		internal Awaitable(Awaiter awaiter, out AwaiterHandle handle)
+		internal Awaitable(Awaiter awaiter, out AwaiterSignal handle)
 		{
 			this.awaiter = awaiter;
 			recycleFlag = awaiter.RecycleFalg;
@@ -53,11 +48,9 @@ namespace EthansGameKit.Await
 				return awaiter;
 			}
 		}
-		/// <param name="handle">回调触发器</param>
-		/// <param name="manualDispose">true表示手动回收.(调用<see cref="Dispose" />)</param>
-		public Awaitable(out AwaiterHandle<T> handle, bool manualDispose = false)
+		internal Awaitable(Awaiter<T> awaiter, out AwaiterSignal<T> handle)
 		{
-			awaiter = Awaiter<T>.Create(manualDispose);
+			this.awaiter = awaiter;
 			recycleFlag = awaiter.RecycleFalg;
 			handle = new(awaiter);
 		}

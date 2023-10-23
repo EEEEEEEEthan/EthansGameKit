@@ -3,13 +3,19 @@ using EthansGameKit.CachePools;
 
 namespace EthansGameKit.Await
 {
-	class Awaiter : IAwaiter, IDisposable
+	public class Awaiter : IAwaiter, IDisposable
 	{
-		internal static Awaiter Create(bool manualDispose)
+		public static Awaitable CreateAwaitable(out AwaiterSignal signal, bool manualDispose = false)
 		{
 			if (!GlobalCachePool<Awaiter>.TryGenerate(out var awaiter)) awaiter = new();
 			awaiter.ManualDispose = manualDispose;
-			return awaiter;
+			return new(awaiter, out signal);
+		}
+		public static Awaitable<T> CreateAwaitable<T>(out AwaiterSignal<T> signal, bool manualDispose = false)
+		{
+			if (!GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter)) awaiter = new();
+			awaiter.ManualDispose = manualDispose;
+			return new(awaiter, out signal);
 		}
 		object result;
 		Action[] callbacks = new Action[1];
@@ -58,12 +64,6 @@ namespace EthansGameKit.Await
 
 	class Awaiter<T> : Awaiter, IAwaiter<T>
 	{
-		internal new static Awaiter<T> Create(bool autoDispose = true)
-		{
-			if (!GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter)) awaiter = new();
-			awaiter.ManualDispose = autoDispose;
-			return awaiter;
-		}
 		private protected override void Recycle()
 		{
 			GlobalCachePool<Awaiter<T>>.Recycle(this);
