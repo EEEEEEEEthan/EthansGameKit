@@ -1,7 +1,7 @@
 ﻿using System;
+using EthansGameKit.Await;
 using UnityEngine;
 using UnityEngine.Assertions;
-using Awaitable = EthansGameKit.Await.Awaitable;
 using Object = UnityEngine.Object;
 
 namespace EthansGameKit
@@ -10,7 +10,7 @@ namespace EthansGameKit
 	{
 		bool HasValue { get; }
 		object Value { get; }
-		Awaitable LoadAsync();
+		AwaitableEntity LoadAsync();
 	}
 
 	public interface ITimedCache<out T> : ITimedCache
@@ -43,7 +43,7 @@ namespace EthansGameKit
 		{
 			this.source = source;
 		}
-		public Awaitable LoadAsync()
+		public AwaitableEntity LoadAsync()
 		{
 			return source.LoadAsync();
 		}
@@ -83,9 +83,9 @@ namespace EthansGameKit
 		{
 			lastAccess = -keepSeconds;
 		}
-		public Awaitable LoadAsync()
+		public AwaitableEntity LoadAsync()
 		{
-			var awaitable = Awaitable.Create(out var handle);
+			var awaitable = AwaitableEntity.Create(out var handle);
 			LoadValueAsync(onLoaded);
 			return awaitable;
 			void onLoaded(T result)

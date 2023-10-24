@@ -2,7 +2,6 @@
 using EthansGameKit.Await;
 using EthansGameKit.Internal;
 using UnityEngine;
-using Awaitable = EthansGameKit.Await.Awaitable;
 
 namespace EthansGameKit
 {
@@ -48,15 +47,15 @@ namespace EthansGameKit
 			CancelInvoke(ref id);
 			id = InvokeAfterUnscaled(delay, callback, crossScene);
 		}
-		public static Awaitable Await(double seconds, bool crossScene = false)
+		public static AwaitableEntity Await(double seconds, bool crossScene = false)
 		{
-			var awaitable = Awaitable.Create(out var handle);
+			var awaitable = AwaitableEntity.Create(out var handle);
 			InvokeAfter(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
-		public static Awaitable AwaitUnscaled(double seconds, bool crossScene = false)
+		public static AwaitableEntity AwaitUnscaled(double seconds, bool crossScene = false)
 		{
-			var awaitable = Awaitable.Create(out var handle);
+			var awaitable = AwaitableEntity.Create(out var handle);
 			InvokeAfterUnscaled(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
