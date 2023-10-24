@@ -50,14 +50,14 @@ namespace EthansGameKit
 		}
 		public static Awaitable Await(double seconds, bool crossScene = false)
 		{
-			var awaitable = new Awaitable(out var handle);
-			InvokeAfter(seconds, handle.TriggerCallback, crossScene);
+			var awaitable = Awaitable.Create(out var handle);
+			InvokeAfter(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
 		public static Awaitable AwaitUnscaled(double seconds, bool crossScene = false)
 		{
-			var awaitable = new Awaitable(out var handle);
-			InvokeAfterUnscaled(seconds, handle.TriggerCallback, crossScene);
+			var awaitable = Awaitable.Create(out var handle);
+			InvokeAfterUnscaled(seconds, handle.Set, crossScene);
 			return awaitable;
 		}
 		/// <param name="id">定时器id.尽量避免CancelInvoke一个非零的无效id，因为这样需要遍历所有定时器</param>

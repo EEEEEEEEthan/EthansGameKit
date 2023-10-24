@@ -1,24 +1,21 @@
 using System;
+using EthansGameKit.CachePools;
 
 namespace EthansGameKit.Await
 {
 	public readonly struct Awaitable : IDisposable
 	{
-		readonly Awaiter awaiter;
-		readonly uint recycleFlag;
-		public bool IsCompleted => awaiter.RecycleFalg != recycleFlag;
-		internal Awaiter Awaiter
+		public static Awaitable Create(out AwaiterSignal signal)
 		{
-			get
-			{
-				if (IsCompleted) throw new AwaiterExpiredException();
-				return awaiter;
-			}
+			if (!GlobalCachePool<Awaiter>.TryGenerate(out var awaiter)) awaiter = new();
+			return new(awaiter, out signal);
 		}
+		readonly AwaiterContainer awaiterContainer;
+		public bool IsCompleted => awaiterContainer.Expired || awaiterContainer.Awaiter.IsCompleted;
+		internal Awaiter Awaiter => awaiterContainer.Awaiter;
 		internal Awaitable(Awaiter awaiter, out AwaiterSignal handle)
 		{
-			this.awaiter = awaiter;
-			recycleFlag = awaiter.RecycleFalg;
+			awaiterContainer = new(awaiter);
 			handle = new(awaiter);
 		}
 		public void Dispose()
@@ -33,25 +30,20 @@ namespace EthansGameKit.Await
 
 	public readonly struct Awaitable<T> : IDisposable
 	{
+		public static Awaitable<T> Create(out AwaiterSignal<T> signal)
+		{
+			if (!GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter)) awaiter = new();
+			return new(awaiter, out signal);
+		}
 		public static implicit operator Awaitable(Awaitable<T> awaitable)
 		{
 			return new(awaitable.Awaiter, out _);
 		}
-		readonly Awaiter<T> awaiter;
-		readonly uint recycleFlag;
-		public bool Expired => awaiter.RecycleFalg != recycleFlag;
-		internal Awaiter<T> Awaiter
-		{
-			get
-			{
-				if (Expired) throw new AwaiterExpiredException();
-				return awaiter;
-			}
-		}
+		readonly AwaiterContainer<T> awaiterContainer;
+		internal Awaiter<T> Awaiter => awaiterContainer.Awaiter;
 		internal Awaitable(Awaiter<T> awaiter, out AwaiterSignal<T> handle)
 		{
-			this.awaiter = awaiter;
-			recycleFlag = awaiter.RecycleFalg;
+			awaiterContainer = new(awaiter);
 			handle = new(awaiter);
 		}
 		public void Dispose()

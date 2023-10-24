@@ -1,5 +1,4 @@
 ﻿using System;
-using EthansGameKit.Await;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Awaitable = EthansGameKit.Await.Awaitable;
@@ -86,14 +85,13 @@ namespace EthansGameKit
 		}
 		public Awaitable LoadAsync()
 		{
-			var awaitable = new Awaitable(out var handle);
+			var awaitable = Awaitable.Create(out var handle);
 			LoadValueAsync(onLoaded);
 			return awaitable;
-
 			void onLoaded(T result)
 			{
 				Value = result;
-				handle.TriggerCallback();
+				handle.Set();
 			}
 		}
 		protected abstract T LoadValue();
@@ -162,7 +160,6 @@ namespace EthansGameKit
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
 			return;
-
 			void cb(AsyncOperation _)
 			{
 				var result = operation.asset as T;
@@ -197,7 +194,6 @@ namespace EthansGameKit
 			var operation = Resources.LoadAsync<T>(resourcePath);
 			operation.completed += cb;
 			return;
-
 			void cb(AsyncOperation _)
 			{
 				var result = operation.asset as T;
@@ -226,7 +222,6 @@ namespace EthansGameKit
 			var operation = Resources.LoadAsync<T>(assetPath);
 			operation.completed += cb;
 			return;
-
 			void cb(AsyncOperation _)
 			{
 				var result = operation.asset as T;
