@@ -28,6 +28,7 @@ namespace EthansGameKit.Editor
 		}
 		string GetCodeBlock(string dir, int indent)
 		{
+			if (dir.IsNullOrEmpty()) throw new("dir is null or empty");
 			var strIdent = new string('\t', indent);
 			var strIdent2 = new string('\t', indent + 1);
 			var strIdent3 = new string('\t', indent + 2);

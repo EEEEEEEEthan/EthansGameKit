@@ -1,5 +1,5 @@
 using System;
-using EthansGameKit.Await;
+using EthansGameKit.Awaitable;
 using EthansGameKit.Internal;
 
 namespace EthansGameKit

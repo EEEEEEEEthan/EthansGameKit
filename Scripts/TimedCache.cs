@@ -1,5 +1,5 @@
 ﻿using System;
-using EthansGameKit.Await;
+using EthansGameKit.Awaitable;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;

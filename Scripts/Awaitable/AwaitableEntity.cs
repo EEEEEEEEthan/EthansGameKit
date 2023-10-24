@@ -1,7 +1,6 @@
 using System;
-using EthansGameKit.CachePools;
 
-namespace EthansGameKit.Await
+namespace EthansGameKit.Awaitable
 {
 	public readonly struct AwaitableEntity : IDisposable
 	{
@@ -33,11 +32,21 @@ namespace EthansGameKit.Await
 		}
 		public static AwaitableEntity Create(out AwaiterSignal signal)
 		{
-			if (!GlobalCachePool<Awaiter>.TryGenerate(out var awaiter)) awaiter = new();
+			var awaiter = Awaiter.Create();
 			return new(awaiter, out signal);
 		}
 		readonly AwaiterContainer awaiterContainer;
 		public bool IsCompleted => awaiterContainer.Expired || awaiterContainer.Awaiter.IsCompleted;
+		public float Progress
+		{
+			get
+			{
+				if (awaiterContainer.Expired) return 1;
+				var awaiter = awaiterContainer.Awaiter;
+				if (awaiter.IsCompleted) return 1;
+				return awaiter.Progress;
+			}
+		}
 		internal Awaiter Awaiter => awaiterContainer.Awaiter;
 		internal AwaitableEntity(Awaiter awaiter, out AwaiterSignal handle)
 		{
@@ -58,7 +67,7 @@ namespace EthansGameKit.Await
 	{
 		public static AwaitableEntity<T> Create(out AwaiterSignal<T> signal)
 		{
-			if (!GlobalCachePool<Awaiter<T>>.TryGenerate(out var awaiter)) awaiter = new();
+			var awaiter = Awaiter<T>.Create();
 			return new(awaiter, out signal);
 		}
 		public static implicit operator AwaitableEntity(AwaitableEntity<T> awaitableEntity)

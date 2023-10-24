@@ -1,6 +1,6 @@
 using System.Runtime.CompilerServices;
 
-namespace EthansGameKit.Await
+namespace EthansGameKit.Awaitable
 {
 	public interface IAwaiter : INotifyCompletion
 	{

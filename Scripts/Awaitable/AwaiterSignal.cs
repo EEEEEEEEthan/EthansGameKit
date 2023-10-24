@@ -1,15 +1,24 @@
-namespace EthansGameKit.Await
+namespace EthansGameKit.Awaitable
 {
 	public readonly struct AwaiterSignal
 	{
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
-		public bool IsCompleted => awaiter.RecycleFalg != recycleFlag;
+		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public float Progress
+		{
+			get
+			{
+				if (Expired) return 1;
+				return Awaiter.Progress;
+			}
+			set => Awaiter.Progress = value;
+		}
 		Awaiter Awaiter
 		{
 			get
 			{
-				if (IsCompleted) throw new AwaiterExpiredException();
+				if (Expired) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}
@@ -22,18 +31,31 @@ namespace EthansGameKit.Await
 		{
 			Awaiter.SetResult(null);
 		}
+		public void AddProgress(float add)
+		{
+			Awaiter.AddProgress(add);
+		}
 	}
 
 	public readonly struct AwaiterSignal<T>
 	{
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
-		public bool IsCompleted => awaiter.RecycleFalg != recycleFlag;
+		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public float Progress
+		{
+			get
+			{
+				if (Expired) return 1;
+				return Awaiter.Progress;
+			}
+			set => Awaiter.Progress = value;
+		}
 		Awaiter<T> Awaiter
 		{
 			get
 			{
-				if (IsCompleted) throw new AwaiterExpiredException();
+				if (Expired) throw new AwaiterExpiredException();
 				return awaiter;
 			}
 		}
@@ -45,6 +67,10 @@ namespace EthansGameKit.Await
 		public void Set(T result)
 		{
 			Awaiter.SetResult(result);
+		}
+		public void AddProgress(float add)
+		{
+			Awaiter.AddProgress(add);
 		}
 	}
 }

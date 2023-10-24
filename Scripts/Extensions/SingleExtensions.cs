@@ -29,6 +29,10 @@ namespace EthansGameKit
 			}
 			return true;
 		}
+		public static float Clamp(ref this float @this, float min, float max)
+		{
+			return @this = Mathf.Clamp(@this, min, max);
+		}
 		public static float Clamped(this float @this, float min, float max)
 		{
 			return Mathf.Clamp(@this, min, max);

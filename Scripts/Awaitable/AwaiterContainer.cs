@@ -1,4 +1,4 @@
-namespace EthansGameKit.Await
+namespace EthansGameKit.Awaitable
 {
 	readonly struct AwaiterContainer
 	{

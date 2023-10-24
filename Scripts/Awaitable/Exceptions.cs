@@ -1,6 +1,6 @@
 using System;
 
-namespace EthansGameKit.Await
+namespace EthansGameKit.Awaitable
 {
 	class AwaiterExpiredException: InvalidOperationException
 	{
