@@ -21,7 +21,7 @@ namespace EthansGameKit.Awaitable
 			set
 			{
 				if (IsCompleted) return;
-				if (progress < value) throw new ArgumentOutOfRangeException(nameof(progress));
+				if (progress > value) throw new ArgumentOutOfRangeException(nameof(progress));
 				progress = value;
 				progress.Clamp(0, 1);
 			}

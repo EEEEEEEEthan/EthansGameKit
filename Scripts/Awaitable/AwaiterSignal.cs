@@ -31,10 +31,6 @@ namespace EthansGameKit.Awaitable
 		{
 			Awaiter.SetResult(null);
 		}
-		public void AddProgress(float add)
-		{
-			Awaiter.AddProgress(add);
-		}
 	}
 
 	public readonly struct AwaiterSignal<T>
@@ -67,10 +63,6 @@ namespace EthansGameKit.Awaitable
 		public void Set(T result)
 		{
 			Awaiter.SetResult(result);
-		}
-		public void AddProgress(float add)
-		{
-			Awaiter.AddProgress(add);
 		}
 	}
 }
