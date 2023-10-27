@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using EthansGameKit.CachePools;
+using UnityEngine;
 
 // ReSharper disable TooWideLocalVariableScope
 namespace EthansGameKit.Collections
@@ -23,20 +24,17 @@ namespace EthansGameKit.Collections
 		void TrimExcess();
 	}
 
-	public class Heap<TKey, TValue> : IHeap<TKey, TValue>, IDisposable where TValue : IComparable<TValue>
+	[Serializable]
+	public sealed class Heap<TKey, TValue> : IHeap<TKey, TValue>, IDisposable where TValue : IComparable<TValue>
 	{
+		// ReSharper disable once StaticMemberInGenericType
 		static int[] finder = Array.Empty<int>();
-		public static Heap<TKey, TValue> Generate(IEqualityComparer<TKey> comparer)
+		public static Heap<TKey, TValue> Generate()
 		{
 			if (!GlobalCachePool<Heap<TKey, TValue>>.TryGenerate(out var heap))
 				heap = new();
 			heap.inPool = false;
-			heap.equalityComparer = comparer;
 			return heap;
-		}
-		public static Heap<TKey, TValue> Generate()
-		{
-			return Generate(Comparers.GetDefaultEqualityComparer<TKey>());
 		}
 		public static void ClearAndRecycle(ref Heap<TKey, TValue> heap)
 		{
@@ -44,20 +42,19 @@ namespace EthansGameKit.Collections
 			{
 				throw new InvalidOperationException("Heap is already in pool");
 			}
-			heap.equalityComparer = null;
 			heap.inPool = true;
 			heap.Clear();
 			GlobalCachePool<Heap<TKey, TValue>>.Recycle(ref heap);
 		}
-		TKey[] keys = new TKey[1];
-		TValue[] values = new TValue[1];
-		IEqualityComparer<TKey> equalityComparer;
-		bool inPool;
+		[SerializeField] TKey[] keys = new TKey[1];
+		[SerializeField] TValue[] values = new TValue[1];
+		[NonSerialized] bool inPool;
+		EqualityComparer<TKey> defaultComparer = EqualityComparer<TKey>.Default;
 		public int Count { get; private set; }
 		Heap()
 		{
 		}
-		public virtual void Dispose()
+		public void Dispose()
 		{
 			var o = this;
 			ClearAndRecycle(ref o);
@@ -159,21 +156,29 @@ namespace EthansGameKit.Collections
 				}
 			return false;
 		}
-		public void AddOrUpdate(TKey element, TValue sortingValue)
+		public void AddOrUpdate(TKey element, TValue sortingValue, IEqualityComparer<TKey> equalityComparer)
 		{
-			var index = Find(element);
+			var index = Find(element, equalityComparer);
 			if (index >= 0)
 				Update(index, element, sortingValue);
 			else
 				Add(element, sortingValue);
 		}
-		public void AddOrUpdate(TKey element, TValue oldValue, TValue newValue)
+		public void AddOrUpdate(TKey element, TValue oldValue, TValue newValue, IEqualityComparer<TKey> equalityComparer)
 		{
-			var index = Find(element, oldValue);
+			var index = Find(element, oldValue, equalityComparer);
 			if (index >= 0)
 				Update(index, element, newValue);
 			else
 				Add(element, newValue);
+		}
+		public void AddOrUpdate(TKey element, TValue sortingValue)
+		{
+			AddOrUpdate(element, sortingValue, defaultComparer);
+		}
+		public void AddOrUpdate(TKey element, TValue oldValue, TValue newValue)
+		{
+			AddOrUpdate(element, oldValue, newValue, defaultComparer);
 		}
 		public void Clear()
 		{
@@ -181,7 +186,7 @@ namespace EthansGameKit.Collections
 			Array.Clear(values, 0, values.Length);
 			Count = 0;
 		}
-		public int Find(TKey element, TValue sortingValue)
+		public int Find(TKey element, TValue sortingValue, IEqualityComparer<TKey> equalityComparer)
 		{
 			var count = Count;
 			if (count <= 0) return -1;
@@ -213,7 +218,7 @@ namespace EthansGameKit.Collections
 			}
 			return -1;
 		}
-		public int Find(TKey element)
+		public int Find(TKey element, IEqualityComparer<TKey> equalityComparer)
 		{
 			var count = Count;
 			for (var i = 0; i < count; i++)
@@ -221,7 +226,15 @@ namespace EthansGameKit.Collections
 					return i;
 			return -1;
 		}
-		protected virtual int GetHashCode(TKey obj)
+		public int Find(TKey element, TValue sortingValue)
+		{
+			return Find(element, sortingValue, defaultComparer);
+		}
+		public int Find(TKey element)
+		{
+			return Find(element, defaultComparer);
+		}
+		int GetHashCode(TKey obj)
 		{
 			return obj.GetHashCode();
 		}
