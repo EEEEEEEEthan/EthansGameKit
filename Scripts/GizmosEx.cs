@@ -53,6 +53,15 @@ namespace EthansGameKit
 			}
 			Gizmos.matrix = matrix;
 		}
+		public static void DrawArrow(Vector3 from, Vector3 to, float capSize)
+		{
+			Gizmos.DrawLine(from, to);
+			var rotation = Quaternion.LookRotation(to - from);
+			Gizmos.DrawRay(to, ((from - to).normalized + rotation.Right()) * capSize);
+			Gizmos.DrawRay(to, ((from - to).normalized + rotation.Down()) * capSize);
+			Gizmos.DrawRay(to, ((from - to).normalized + rotation.Left()) * capSize);
+			Gizmos.DrawRay(to, ((from - to).normalized + rotation.Up()) * capSize);
+		}
 		public static void DrawWiredCapsule(Vector3 point0, Vector3 point1, Vector3 forward, float radius)
 		{
 			var matrix = Gizmos.matrix;
