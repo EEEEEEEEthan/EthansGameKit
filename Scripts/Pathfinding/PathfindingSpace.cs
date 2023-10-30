@@ -20,6 +20,7 @@ namespace EthansGameKit.Pathfinding
 				this.space = space;
 			}
 			public abstract IReadOnlyDictionary<TNode, TNode> FromMap { get; }
+			public abstract IReadOnlyDictionary<TNode, float> CostMap { get; }
 			protected abstract IDictionary<TNode, float> WritableCostMap { get; }
 			protected abstract IDictionary<TNode, TNode> WritableFromMap { get; }
 			protected abstract float GetHeuristic(TNode node);

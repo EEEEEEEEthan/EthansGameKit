@@ -24,6 +24,7 @@ namespace EthansGameKit.Pathfinding
 			return Vector3.Distance(node, heuristicTarget);
 		}
 		public override IReadOnlyDictionary<Vector3, Vector3> FromMap => fromMap;
+		public override IReadOnlyDictionary<Vector3, float> CostMap => costMap;
 		protected override IDictionary<Vector3, float> WritableCostMap => costMap;
 		protected override IDictionary<Vector3, Vector3> WritableFromMap => fromMap;
 		protected override float GetStepCost(Vector3 fromNode, Vector3 toNode, float basicCost)
