@@ -1,48 +1,88 @@
 using System;
 using System.Collections.Generic;
-using UnityEngine;
+using EthansGameKit.Collections;
 
 namespace EthansGameKit.Pathfinding
 {
-	[Serializable]
-	public abstract class PathfindingSpace<TNode> : MonoBehaviour
+	public abstract class PathfindingSpace<TNode>
 	{
-		TNode[] buffer_TNodes = Array.Empty<TNode>();
-		byte[] buffer_Bytes = Array.Empty<byte>();
-		public abstract void AddLink(TNode fromNode, TNode toNode, byte costType);
-		public abstract void RemoveLink(TNode fromNode, TNode toNode);
-		public abstract int GetLinks(TNode node, ref TNode[] toNodes, ref byte[] costTypes);
-		public (TNode[] toNodes, byte[]costTypes) GetLinks(TNode node)
+		public abstract class Pathfinder
 		{
-			var length = GetLinks(node, ref buffer_TNodes, ref buffer_Bytes);
-			var toNodes = new TNode[length];
-			var costTypes = new byte[length];
-			Array.Copy(buffer_TNodes, toNodes, length);
-			Array.Copy(buffer_Bytes, costTypes, length);
-			return (toNodes, costTypes);
-		}
-		public void GetLinks(TNode node, List<TNode> result, List<byte> costTypes)
-		{
-			var length = GetLinks(node, ref buffer_TNodes, ref buffer_Bytes);
-			for (var i = 0; i < length; i++)
+			readonly Heap<TNode, float> openList = Heap<TNode, float>.Generate();
+			readonly PathfindingSpace<TNode> space;
+			float maxCost = float.PositiveInfinity;
+			float maxHeuristic = float.PositiveInfinity;
+			TNode[] nodeBuffer = Array.Empty<TNode>();
+			float[] floatBuffer = Array.Empty<float>();
+
+			protected Pathfinder(PathfindingSpace<TNode> space)
 			{
-				result.Add(buffer_TNodes[i]);
-				costTypes.Add(buffer_Bytes[i]);
+				this.space = space;
+			}
+			public abstract IReadOnlyDictionary<TNode, TNode> FromMap { get; }
+			protected abstract IDictionary<TNode, float> WritableCostMap { get; }
+			protected abstract IDictionary<TNode, TNode> WritableFromMap { get; }
+			protected abstract float GetHeuristic(TNode node);
+			protected abstract float GetStepCost(TNode fromNode, TNode toNode, float basicCost);
+
+			public bool MoveNext(out TNode current)
+			{
+				if (openList.Count <= 0)
+				{
+					current = default;
+					return false;
+				}
+				current = openList.Pop();
+				var costMap = WritableCostMap;
+				var fromMap = WritableFromMap;
+				costMap.TryGetValue(current, out var currentCost);
+				var linkCount = space.GetLinks(current, ref nodeBuffer, ref floatBuffer);
+				var toNodes = nodeBuffer;
+				var basicCosts = floatBuffer;
+				for (var i = linkCount; i-- > 0;)
+				{
+					var toNode = toNodes[i];
+					var basicCost = basicCosts[i];
+					var stepCost = GetStepCost(current, toNode, basicCost);
+					if (stepCost is float.PositiveInfinity or <= 0) continue;
+					var newCost = currentCost + stepCost;
+					if (newCost > maxCost) continue;
+					var heuristic = GetHeuristic(toNode);
+					if (heuristic > maxHeuristic) continue;
+					if (!costMap.TryGetValue(toNode, out var oldCost) || newCost < oldCost)
+					{
+						costMap[toNode] = newCost;
+						fromMap[toNode] = current;
+						openList.AddOrUpdate(toNode, newCost + heuristic);
+					}
+				}
+				return true;
+			}
+
+			protected void Reinitialize(
+				float maxCost,
+				float maxHeuristic,
+				IEnumerable<TNode> sources
+			)
+			{
+				this.maxCost = maxCost;
+				this.maxHeuristic = maxHeuristic;
+				openList.Clear();
+				WritableCostMap.Clear();
+				WritableFromMap.Clear();
+				foreach (var node in sources)
+				{
+					WritableCostMap[node] = 0;
+					WritableFromMap[node] = node;
+					openList.AddOrUpdate(node, GetHeuristic(node));
+				}
 			}
 		}
+
+		public abstract void ClearLinks();
+		public abstract void SetLink(TNode fromNode, TNode toNode, float basicCost);
+		public abstract bool RemoveLink(TNode fromNode, TNode toNode);
+		public abstract int GetLinks(TNode node, ref TNode[] toNodes, ref float[] basicCosts);
 		public abstract int GetLinkSources(ref TNode[] result);
-		public TNode[] GetLinkSources()
-		{
-			var length = GetLinkSources(ref buffer_TNodes);
-			var result = new TNode[length];
-			Array.Copy(buffer_TNodes, result, length);
-			return result;
-		}
-		public void GetLinkSources(List<TNode> result)
-		{
-			var length = GetLinkSources(ref buffer_TNodes);
-			for (var i = 0; i < length; i++)
-				result.Add(buffer_TNodes[i]);
-		}
 	}
 }

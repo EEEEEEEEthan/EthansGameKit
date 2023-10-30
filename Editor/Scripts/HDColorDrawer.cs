@@ -1,26 +1,27 @@
 using EthansGameKit.Attributes;
+using UnityEditor;
 using UnityEngine;
 
 namespace EthansGameKit.Editor
 {
-	[UnityEditor.CustomPropertyDrawer(typeof(HDColor))]
-	public class HDColorDrawer : UnityEditor.PropertyDrawer
+	[CustomPropertyDrawer(typeof(HDColor))]
+	public class HDColorDrawer : PropertyDrawer
 	{
-		public override void OnGUI(Rect position, UnityEditor.SerializedProperty property, GUIContent label)
+		public override void OnGUI(Rect position, SerializedProperty property, GUIContent label)
 		{
-			if (property.propertyType == UnityEditor.SerializedPropertyType.Color)
+			if (property.propertyType == SerializedPropertyType.Color)
 			{
-				UnityEditor.EditorGUI.BeginChangeCheck();
+				EditorGUI.BeginChangeCheck();
 				var oldColor = property.colorValue;
-				var newColor = UnityEditor.EditorGUI.ColorField(position, label, oldColor, true, true, true);
-				if (UnityEditor.EditorGUI.EndChangeCheck())
+				var newColor = EditorGUI.ColorField(position, label, oldColor, true, true, true);
+				if (EditorGUI.EndChangeCheck())
 				{
 					property.colorValue = newColor;
 				}
 			}
 			else
 			{
-				UnityEditor.EditorGUI.LabelField(position, label.text, $"Use {nameof(HDColor)} with Color field.");
+				EditorGUI.LabelField(position, label.text, $"Use {nameof(HDColor)} with Color field.");
 			}
 		}
 	}

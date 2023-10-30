@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEngine;
 
 namespace EthansGameKit
 {
@@ -11,7 +12,7 @@ namespace EthansGameKit
 			{
 				public static class Materials
 				{
-					public static ITimedCache<UnityEngine.Material> Outline_Material { get; } = new ResourceCache<UnityEngine.Material>("EthansGameKit/Materials/Outline");
+					public static ITimedCache<Material> Outline_Material { get; } = new ResourceCache<Material>("EthansGameKit/Materials/Outline");
 					public static IReadOnlyDictionary<string, ITimedCache> AllAssets { get; } = new Dictionary<string, ITimedCache>
 					{
 						["Outline_Material"] = Outline_Material,

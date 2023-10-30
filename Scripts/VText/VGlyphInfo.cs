@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using UnityEngine;
 
@@ -17,7 +18,7 @@ namespace EthansGameKit.VText
 		{
 			readonly char id;
 			//Mesh mesh;
-			readonly System.IntPtr fh;
+			readonly IntPtr fh;
 			readonly int numContours;
 			Vector3[][] contours;
 
@@ -65,26 +66,26 @@ namespace EthansGameKit.VText
 			private static extern int GetGlyphContour(ref System.IntPtr buffer, [In] System.IntPtr fontHandle, [In] uint id, [In] int index, ref bool odd, ref bool reverse);
 #else
 			[DllImport("VText")]
-			static extern bool GetGlyphInfo([Out] System.IntPtr gi, [In] System.IntPtr fontHandle, [In] uint id);
+			static extern bool GetGlyphInfo([Out] IntPtr gi, [In] IntPtr fontHandle, [In] uint id);
 			[DllImport("VText")]
-			static extern int GetGlyphVertices(ref System.IntPtr buffer, [In] System.IntPtr fontHandle, [In] uint id);
+			static extern int GetGlyphVertices(ref IntPtr buffer, [In] IntPtr fontHandle, [In] uint id);
 			[DllImport("VText")]
-			static extern int GetGlyphTriangleIndices(ref System.IntPtr buffer, [In] System.IntPtr fontHandle, [In] uint id);
+			static extern int GetGlyphTriangleIndices(ref IntPtr buffer, [In] IntPtr fontHandle, [In] uint id);
 			[DllImport("VText")]
-			static extern void ClearGlyphData([In] System.IntPtr fontHandle, [In] uint id);
+			static extern void ClearGlyphData([In] IntPtr fontHandle, [In] uint id);
 			[DllImport("VText")]
-			static extern int GetGlyphContour(ref System.IntPtr buffer, [In] System.IntPtr fontHandle, [In] uint id, [In] int index, ref bool odd, ref bool reverse);
+			static extern int GetGlyphContour(ref IntPtr buffer, [In] IntPtr fontHandle, [In] uint id, [In] int index, ref bool odd, ref bool reverse);
 #endif
 			/// <summary>
 			///     Initializes a new instance of the <see cref="VGlyphInfo" /> class.
 			/// </summary>
 			/// <param name="fontHandle">Font handle.</param>
 			/// <param name="id">Glyph ddentifier.</param>
-			public VGlyphInfo(System.IntPtr fontHandle, char id)
+			public VGlyphInfo(IntPtr fontHandle, char id)
 			{
 				this.id = id;
 				fh = fontHandle;
-				if (System.IntPtr.Zero != fh)
+				if (IntPtr.Zero != fh)
 				{
 					// Debug.Log("fonthandle " + _fh);
 					var gi = new GlyphInfo();
@@ -627,9 +628,9 @@ namespace EthansGameKit.VText
 				mesh.Clear();
 				mesh.name = "c_" + id;
 				mesh.subMeshCount = 3;
-				if (System.IntPtr.Zero != fh)
+				if (IntPtr.Zero != fh)
 				{
-					var buffer = System.IntPtr.Zero;
+					var buffer = IntPtr.Zero;
 					var vsize = GetGlyphVertices(ref buffer, fh, id);
 					// Debug.Log(vsize + " **** glyph vertices **** " + _id);
 					if (vsize > 0)
@@ -637,7 +638,7 @@ namespace EthansGameKit.VText
 						var res = new float[vsize * 2];
 						// fetch xy float array
 						Marshal.Copy(buffer, res, 0, vsize * 2);
-						var ibuffer = System.IntPtr.Zero;
+						var ibuffer = IntPtr.Zero;
 						// fetch indices
 						var isize = GetGlyphTriangleIndices(ref ibuffer, fh, id);
 						// Debug.Log(isize + " **** glyph indices **** " + _id);
@@ -726,7 +727,7 @@ namespace EthansGameKit.VText
 									contours = new Vector3[numContours][];
 									for (var j = 0; j < numContours; j++)
 									{
-										var cbuf = System.IntPtr.Zero;
+										var cbuf = IntPtr.Zero;
 										var csize = GetGlyphContour(ref cbuf, fh, id, j, ref odd, ref reverse);
 										// Debug.Log(_numContours + " contour[" + j + "] " + csize);
 										if (csize > 0)

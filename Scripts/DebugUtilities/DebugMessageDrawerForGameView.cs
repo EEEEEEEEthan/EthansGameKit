@@ -1,24 +1,25 @@
 ﻿using System;
 using EthansGameKit.Internal;
+using UnityEditor;
 using UnityEngine;
 
 namespace EthansGameKit.DebugUtilities
 {
 #if UNITY_EDITOR
-	[UnityEditor.InitializeOnLoad]
+	[InitializeOnLoad]
 	static class DebugMessageDrawerForSceneView
 	{
 		static readonly DebugMessageDrawer drawer = new();
 		static DebugMessageDrawerForSceneView()
 		{
-			UnityEditor.SceneView.duringSceneGui -= OnSceneGUI;
-			UnityEditor.SceneView.duringSceneGui += OnSceneGUI;
+			SceneView.duringSceneGui -= OnSceneGUI;
+			SceneView.duringSceneGui += OnSceneGUI;
 		}
-		static void OnSceneGUI(UnityEditor.SceneView sceneView)
+		static void OnSceneGUI(SceneView sceneView)
 		{
-			UnityEditor.Handles.BeginGUI();
-			drawer.DrawGUI(sceneView.camera, UnityEditor.HandleUtility.GUIPointToWorldRay(Event.current.mousePosition));
-			UnityEditor.Handles.EndGUI();
+			Handles.BeginGUI();
+			drawer.DrawGUI(sceneView.camera, HandleUtility.GUIPointToWorldRay(Event.current.mousePosition));
+			Handles.EndGUI();
 		}
 	}
 #endif
@@ -41,26 +42,26 @@ namespace EthansGameKit.DebugUtilities
 	{
 		public static bool Enabled
 		{
-			get => UnityEditor.EditorPrefs.GetBool("DebugMessageDrawer.Enabled", false);
+			get => EditorPrefs.GetBool("DebugMessageDrawer.Enabled", false);
 			set
 			{
 				if (value)
-					UnityEditor.EditorPrefs.SetBool("DebugMessageDrawer.Enabled", true);
+					EditorPrefs.SetBool("DebugMessageDrawer.Enabled", true);
 				else
-					UnityEditor.EditorPrefs.DeleteKey("DebugMessageDrawer.Enabled");
+					EditorPrefs.DeleteKey("DebugMessageDrawer.Enabled");
 			}
 		}
 		// toggle
-		[UnityEditor.MenuItem("Tools/" + PackageDefines.packageName + "/Debug Message Drawer")]
+		[MenuItem("Tools/" + PackageDefines.packageName + "/Debug Message Drawer")]
 		static void SwitchDebugMessageDrawer()
 		{
 			Enabled = !Enabled;
-			UnityEditor.Menu.SetChecked("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", Enabled);
+			Menu.SetChecked("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", Enabled);
 		}
-		[UnityEditor.MenuItem("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", true)]
+		[MenuItem("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", true)]
 		static bool ValidSwitchDebugMessageDrawer()
 		{
-			UnityEditor.Menu.SetChecked("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", Enabled);
+			Menu.SetChecked("Tools/" + PackageDefines.packageName + "/Debug Message Drawer", Enabled);
 			return true;
 		}
 		GUIStyle cachedTextStyle;

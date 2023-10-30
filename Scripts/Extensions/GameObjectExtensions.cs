@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using UnityEditor;
+using UnityEngine;
 
 // ReSharper disable once CheckNamespace
 namespace EthansGameKit
@@ -42,9 +43,9 @@ namespace EthansGameKit
 			if (!component)
 			{
 #if UNITY_EDITOR
-				UnityEditor.Undo.RecordObject(@this, $"Add Component {typeof(T).Name}");
+				Undo.RecordObject(@this, $"Add Component {typeof(T).Name}");
 				@this.AddComponent<T>();
-				UnityEditor.EditorUtility.SetDirty(@this);
+				EditorUtility.SetDirty(@this);
 #endif
 			}
 			return component;

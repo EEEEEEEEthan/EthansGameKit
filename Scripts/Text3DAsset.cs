@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEngine;
 
 namespace EthansGameKit
@@ -9,7 +10,7 @@ namespace EthansGameKit
 	public class Text3DAsset : ScriptableObject
 	{
 #if UNITY_EDITOR
-		[UnityEditor.CustomEditor(typeof(Text3DAsset))]
+		[CustomEditor(typeof(Text3DAsset))]
 		class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()
@@ -18,22 +19,22 @@ namespace EthansGameKit
 				base.OnInspectorGUI();
 				if (GUILayout.Button("以字母顺序排序"))
 				{
-					UnityEditor.Undo.RecordObject(target, "以字母顺序排序");
+					Undo.RecordObject(target, "以字母顺序排序");
 					Array.Sort(target.texts);
 					// 脏标记,撤销
-					UnityEditor.EditorUtility.SetDirty(target);
+					EditorUtility.SetDirty(target);
 				}
 				if (!target.font)
 				{
 					// 警示符号,提示没有选择字体
-					UnityEditor.EditorGUILayout.HelpBox("没有选择字体", UnityEditor.MessageType.Error);
+					EditorGUILayout.HelpBox("没有选择字体", MessageType.Error);
 					return;
 				}
-				var fontFilePath = UnityEditor.AssetDatabase.GetAssetPath(target.font);
+				var fontFilePath = AssetDatabase.GetAssetPath(target.font);
 				if (fontFilePath.IsNullOrEmpty() || fontFilePath == "Library/unity default resources")
 				{
 					// 警示符号,提示没有选择字体
-					UnityEditor.EditorGUILayout.HelpBox("无法获取字体路径", UnityEditor.MessageType.Error);
+					EditorGUILayout.HelpBox("无法获取字体路径", MessageType.Error);
 					return;
 				}
 				if (GUILayout.Button("生成模型"))
@@ -57,7 +58,7 @@ namespace EthansGameKit
 		public Mesh Editor_GetMesh(string key)
 		{
 #if UNITY_EDITOR
-			var assets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(UnityEditor.AssetDatabase.GetAssetPath(this));
+			var assets = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(this));
 			foreach (var asset in assets)
 				if (asset is Mesh mesh && mesh.name == key)
 					return mesh;
@@ -89,8 +90,8 @@ namespace EthansGameKit
 			{
 				return;
 			}
-			var fontFilePath = UnityEditor.AssetDatabase.GetAssetPath(font);
-			var assets = UnityEditor.AssetDatabase.LoadAllAssetsAtPath(UnityEditor.AssetDatabase.GetAssetPath(this));
+			var fontFilePath = AssetDatabase.GetAssetPath(font);
+			var assets = AssetDatabase.LoadAllAssetsAtPath(AssetDatabase.GetAssetPath(this));
 			var old = new Dictionary<string, Mesh>();
 			foreach (var asset in assets)
 				if (asset is Mesh mesh)
@@ -107,15 +108,15 @@ namespace EthansGameKit
 			foreach (var (name, mesh) in old)
 			{
 				if (!tobeAdded.ContainsKey(name))
-					UnityEditor.AssetDatabase.RemoveObjectFromAsset(mesh);
+					AssetDatabase.RemoveObjectFromAsset(mesh);
 			}
 			foreach (var (name, mesh) in tobeAdded)
 			{
 				if (!old.ContainsKey(name))
-					UnityEditor.AssetDatabase.AddObjectToAsset(mesh, this);
+					AssetDatabase.AddObjectToAsset(mesh, this);
 			}
-			UnityEditor.AssetDatabase.SaveAssets();
-			UnityEditor.AssetDatabase.Refresh();
+			AssetDatabase.SaveAssets();
+			AssetDatabase.Refresh();
 #endif
 		}
 	}

@@ -1,3 +1,4 @@
+using UnityEditor;
 using UnityEngine;
 
 namespace EthansGameKit
@@ -5,7 +6,7 @@ namespace EthansGameKit
 	public class Text3D : MonoBehaviour
 	{
 #if UNITY_EDITOR
-		[UnityEditor.CustomEditor(typeof(Text3D))]
+		[CustomEditor(typeof(Text3D))]
 		class Editor : UnityEditor.Editor
 		{
 			public override void OnInspectorGUI()
@@ -13,16 +14,16 @@ namespace EthansGameKit
 				base.OnInspectorGUI();
 				var target = (Text3D)this.target;
 				serializedObject.ApplyModifiedProperties();
-				if (UnityEditor.PrefabUtility.GetNearestPrefabInstanceRoot(target.gameObject) || UnityEditor.PrefabUtility.GetPrefabAssetType(target.gameObject) != UnityEditor.PrefabAssetType.NotAPrefab)
+				if (PrefabUtility.GetNearestPrefabInstanceRoot(target.gameObject) || PrefabUtility.GetPrefabAssetType(target.gameObject) != PrefabAssetType.NotAPrefab)
 				{
 					// 警告: prefab无法重建
-					UnityEditor.EditorGUILayout.HelpBox("Prefab无法重建3D网格", UnityEditor.MessageType.Warning);
+					EditorGUILayout.HelpBox("Prefab无法重建3D网格", MessageType.Warning);
 				}
 				else if (GUILayout.Button("重建3D网格"))
 				{
-					UnityEditor.Undo.RecordObject(target.gameObject, "重建3D网格");
+					Undo.RecordObject(target.gameObject, "重建3D网格");
 					target.Editor_Rebuild();
-					UnityEditor.EditorUtility.SetDirty(target.gameObject);
+					EditorUtility.SetDirty(target.gameObject);
 				}
 			}
 		}
@@ -75,7 +76,7 @@ namespace EthansGameKit
 						continue;
 					default:
 					{
-						var obj = prefab ? (GameObject)UnityEditor.PrefabUtility.InstantiatePrefab(prefab, transform) : new();
+						var obj = prefab ? (GameObject)PrefabUtility.InstantiatePrefab(prefab, transform) : new();
 						obj.name = c.ToString();
 						obj.transform.SetParent(transform);
 						obj.transform.localPosition = position;

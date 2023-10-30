@@ -1,5 +1,6 @@
 ﻿using System;
 using EthansGameKit.Awaitable;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.Assertions;
 using Object = UnityEngine.Object;
@@ -214,7 +215,7 @@ namespace EthansGameKit
 		protected override T LoadValue()
 		{
 #if UNITY_EDITOR
-			return UnityEditor.AssetDatabase.LoadAssetAtPath<T>(assetPath);
+			return AssetDatabase.LoadAssetAtPath<T>(assetPath);
 #endif
 		}
 		protected override void LoadValueAsync(Action<T> callback)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -87,7 +88,7 @@ namespace EthansGameKit.Editor
 			var endMark = $"#endregion {regionName}";
 			var newCode = Replace(script.text, startMark, endMark, Generate(), 2);
 			Debug.Log(newCode);
-			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
+			File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}
 		protected abstract string Generate();
@@ -96,7 +97,7 @@ namespace EthansGameKit.Editor
 			var startMark = $"#region {regionName}";
 			var endMark = $"#endregion {regionName}";
 			var newCode = Replace(script.text, startMark, endMark, "", 2);
-			System.IO.File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
+			File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}
 	}

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using EthansGameKit.Collections;
+using UnityEditor;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,12 +13,12 @@ namespace EthansGameKit.Internal
 		public static Heap<Timer, double> unscaledTimers = Heap<Timer, double>.Generate();
 		static readonly List<Timer> buffer = new();
 #if UNITY_EDITOR
-		[UnityEditor.InitializeOnLoadMethod]
+		[InitializeOnLoadMethod]
 		static void EditorInitialize()
 		{
-			UnityEditor.EditorApplication.update -= FrameUpdate;
+			EditorApplication.update -= FrameUpdate;
 			if (!Application.isPlaying)
-				UnityEditor.EditorApplication.update += FrameUpdate;
+				EditorApplication.update += FrameUpdate;
 		}
 #endif
 		static void OnSceneLoaded(Scene scene, LoadSceneMode mode)
@@ -57,7 +58,7 @@ namespace EthansGameKit.Internal
 		protected override void OnEnable()
 		{
 #if UNITY_EDITOR
-			UnityEditor.EditorApplication.update -= FrameUpdate;
+			EditorApplication.update -= FrameUpdate;
 #endif
 			base.OnEnable();
 			SceneManager.sceneLoaded += OnSceneLoaded;

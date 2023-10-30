@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using UnityEditor;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 namespace EthansGameKit.Internal
 {
@@ -22,12 +24,12 @@ namespace EthansGameKit.Internal
 			}
 		}
 #if UNITY_EDITOR
-		[UnityEditor.InitializeOnLoadMethod]
+		[InitializeOnLoadMethod]
 		static void EditorInitialize()
 		{
-			UnityEditor.EditorApplication.update -= FrameUpdate;
+			EditorApplication.update -= FrameUpdate;
 			if (!Application.isPlaying)
-				UnityEditor.EditorApplication.update += FrameUpdate;
+				EditorApplication.update += FrameUpdate;
 		}
 #endif
 		static void RefreshImmediate(IRefreshableItem item)
@@ -46,7 +48,7 @@ namespace EthansGameKit.Internal
 			}
 			else
 			{
-				Debug.LogWarning("refreshing!", item as UnityEngine.Object);
+				Debug.LogWarning("refreshing!", item as Object);
 			}
 		}
 		static void FrameUpdate()

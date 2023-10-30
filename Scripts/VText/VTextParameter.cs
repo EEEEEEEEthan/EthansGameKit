@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 // ReSharper disable StringLiteralTypo
@@ -7,7 +8,7 @@ namespace EthansGameKit.VText
 	///     VText parameter.
 	///     change requires rebuild of glyp meshes
 	/// </summary>
-	[System.Serializable]
+	[Serializable]
 	public class VTextParameter
 	{
 		bool m_modified;
