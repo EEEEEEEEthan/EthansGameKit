@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using EthansGameKit.CachePools;
 using UnityEngine;
 
@@ -188,11 +189,13 @@ namespace EthansGameKit.AStar
 			var fromIndex = GetIndex(fromNode);
 			costs[GetLinkIndexUnverified(fromIndex, (int)direction)] = basicCost;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetIndex(Vector2Int position)
 		{
 			if (!rect.Contains(position)) throw new ArgumentOutOfRangeException(nameof(position));
 			return GetIndexUnverified(position);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector2Int GetPosition(int index)
 		{
 			if (index > nodeCount) throw new ArgumentOutOfRangeException(nameof(index));
@@ -200,14 +203,18 @@ namespace EthansGameKit.AStar
 			if (!rect.Contains(position)) throw new ArgumentOutOfRangeException(nameof(index));
 			return position;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		int GetNeighborIndexUnverified(int fromNode, int direction) => fromNode + neighborIndexOffsetSequence[direction];
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		int GetLinkIndexUnverified(int fromNode, int direction) => (GetNeighborIndexUnverified(fromNode, direction) << linkBits) | direction;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		int GetIndexUnverified(Vector2Int position)
 		{
 			var x = position.x - xMin;
 			var y = position.y - yMin;
 			return (y << widthPower) | x;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		Vector2Int GetPositionUnverified(int index)
 		{
 			var x = index & (width - 1);
