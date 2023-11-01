@@ -170,7 +170,7 @@ namespace EthansGameKit.AStar
 			}
 		}
 
-		readonly int maxLinkCountPerNode;
+		public readonly int maxLinkCountPerNode;
 		int changeFlag;
 		/// <summary>
 		///     构造方法

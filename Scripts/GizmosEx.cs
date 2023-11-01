@@ -85,7 +85,7 @@ namespace EthansGameKit
 			Gizmos.DrawLine(center0 - right * radius, center1 - right * radius);
 			Gizmos.matrix = matrix;
 		}
-		public static void DrawWiredQuad(Vector3 center, Vector3 normal, Vector3 forward, Vector2 size)
+		public static void DrawWiredRect(Vector3 center, Vector3 normal, Vector3 forward, Vector2 size)
 		{
 			size /= 2;
 			normal.Normalize();
@@ -95,6 +95,14 @@ namespace EthansGameKit
 			Gizmos.DrawLine(center - right + forward, center + right + forward);
 			Gizmos.DrawLine(center + right + forward, center + right - forward);
 			Gizmos.DrawLine(center + right - forward, center - right - forward);
+		}
+		public static void DrawWiredRect(Rect rect)
+		{
+			DrawWiredRect(rect.center, Vector3.forward, Vector3.up, rect.size);
+		}
+		public static void DrawWiredRect(RectInt rect)
+		{
+			DrawWiredRect(rect.center, Vector3.forward, Vector3.up, rect.size);
 		}
 	}
 }
