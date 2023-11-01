@@ -175,23 +175,18 @@ namespace EthansGameKit.AStar
 				return true;
 			}
 			#region reinitialize
-			int[] buffer_reinitialize = Array.Empty<int>();
-			public void Reinitialize(IReadOnlyList<Vector2Int> sources, Vector2Int heuristicTarget)
+			int[] buffer_reinitialize = new int[1];
+			public void Reinitialize(IReadOnlyList<Vector2Int> sources, Vector2Int heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
 			{
 				this.heuristicTarget = heuristicTarget;
 				if (buffer_reinitialize.Length < sources.Count) buffer_reinitialize = new int[sources.Count];
-				for (var i = sources.Count; i-- > 0;)
-				{
-					if (space.TryGetIndex(sources[i], out var index))
-						buffer_reinitialize[i] = index;
-					else
-						Debug.LogWarning($"source {sources[i]} out of range {space.rawRect}");
-				}
-				base.Reinitialize(
-					float.PositiveInfinity,
-					float.PositiveInfinity,
-					buffer_reinitialize
-				);
+				for (var i = sources.Count; i-- > 0;) buffer_reinitialize[i] = space.GetIndex(sources[i]);
+				base.Reinitialize(maxCost, maxheuristic, buffer_reinitialize);
+			}
+			public void Reinitialize(Vector2Int source, Vector2Int heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+			{
+				buffer_reinitialize[0] = space.GetIndex(source);
+				base.Reinitialize(maxCost, maxheuristic, buffer_reinitialize);
 			}
 			#endregion
 		}
@@ -366,11 +361,11 @@ namespace EthansGameKit.AStar
 		static float[] costBuffer = new float[8];
 		public void DrawGizmos()
 		{
-			Gizmos.color = new Color(1, 1, 0, 0.2f);
+			Gizmos.color = new(1, 1, 0, 0.2f);
 			GizmosEx.DrawWiredRect(rawRect);
-			Gizmos.color = new Color(1, 0, 0, 0.5f);
+			Gizmos.color = new(1, 0, 0, 0.5f);
 			GizmosEx.DrawWiredRect(fullRect);
-			Gizmos.color = new Color(0, 1, 1, 0.1f);
+			Gizmos.color = new(0, 1, 1, 0.1f);
 			var offset = new Vector2(0.5f, 0.5f);
 			foreach (var fromPos in rawRect.allPositionsWithin)
 			{
