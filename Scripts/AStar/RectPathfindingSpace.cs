@@ -10,7 +10,7 @@ namespace EthansGameKit.AStar
 	/// <summary>
 	///     针对四邻域深度优化的寻路空间
 	/// </summary>
-	public sealed class RectPathfindingSpace : PathfindingSpace<int>
+	public sealed class RectPathfindingSpace : PathfindingSpace<Vector2Int, int>
 	{
 		public sealed class RectPathfinder : Pathfinder
 		{
@@ -242,6 +242,8 @@ namespace EthansGameKit.AStar
 				width - 1,
 			};
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override bool ContainsPosition(Vector2Int position) => fullRect.Contains(position);
 		protected override int GetLinks(int node, int[] toNodes, float[] basicCosts)
 		{
 			var count = 0;
@@ -257,27 +259,23 @@ namespace EthansGameKit.AStar
 			}
 			return count;
 		}
-		public RectPathfinder CreatePathfinder() => RectPathfinder.Create(this);
-		/// <summary>尝试获取路径</summary>
-		/// <param name="from"></param>
-		/// <param name="to"></param>
-		/// <param name="listedWaypoints">
-		///     <para>一个栈表示路径。起点在0号元素</para>
-		///     <para>若路径不存在，得到null</para>
-		///     <para>若起点终点相同，则长度为1</para>
-		/// </param>
-		/// <returns>true-路径存在; false-路径不存在</returns>
-		public bool TryGetPath(Vector2Int from, Vector2Int to, out List<Vector2Int> listedWaypoints)
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected override int GetIndexUnverified(Vector2Int position)
 		{
-			using var pathfinder = CreatePathfinder();
-			var fromIndex = GetIndex(from);
-			var toIndex = GetIndex(to);
-			pathfinder.Reinitialize(new[] { from }, to);
-			while (pathfinder.MoveNext(out _))
-			{
-			}
-			return pathfinder.TryGetPath(to, out listedWaypoints);
+			var x = position.x - xMin;
+			var y = position.y - yMin;
+			return (y << widthPower) | x;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected override bool ContainsKey(int key) => key >= 0 && key < nodeCount;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected override Vector2Int GetPositionUnverified(int index)
+		{
+			var x = index & (width - 1);
+			var y = index >> widthPower;
+			return new(x + xMin, y + yMin);
+		}
+		public RectPathfinder CreatePathfinder() => RectPathfinder.Create(this);
 		public void ClearLinks()
 		{
 			MarkChanged();
@@ -294,30 +292,6 @@ namespace EthansGameKit.AStar
 			MarkChanged();
 			var fromIndex = GetIndex(fromNode);
 			costs[GetLinkIndex(fromIndex, direction)] = basicCost;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndex(Vector2Int position)
-		{
-			if (!fullRect.Contains(position)) throw new ArgumentOutOfRangeException(nameof(position));
-			return GetIndexUnverified(position);
-		}
-		public bool TryGetIndex(Vector2Int position, out int index)
-		{
-			if (!fullRect.Contains(position))
-			{
-				index = default;
-				return false;
-			}
-			index = GetIndexUnverified(position);
-			return true;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Vector2Int GetPosition(int index)
-		{
-			if (index > nodeCount) throw new ArgumentOutOfRangeException(nameof(index));
-			var position = GetPositionUnverified(index);
-			if (!fullRect.Contains(position)) throw new ArgumentOutOfRangeException($"{nameof(index)}:{index}");
-			return position;
 		}
 		int GetLinkIndex(int fromNode, DirectionEnum direction)
 		{
@@ -342,20 +316,6 @@ namespace EthansGameKit.AStar
 		int GetNeighborIndexUnverified(int fromNode, int direction) => fromNode + neighborIndexOffsetSequence[direction];
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		int GetLinkIndexUnverified(int fromNode, int direction) => (GetNeighborIndexUnverified(fromNode, direction) << linkBits) | direction;
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		int GetIndexUnverified(Vector2Int position)
-		{
-			var x = position.x - xMin;
-			var y = position.y - yMin;
-			return (y << widthPower) | x;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		Vector2Int GetPositionUnverified(int index)
-		{
-			var x = index & (width - 1);
-			var y = index >> widthPower;
-			return new(x + xMin, y + yMin);
-		}
 		#region gizmos
 		static int[] toNodeBuffer = new int[8];
 		static float[] costBuffer = new float[8];

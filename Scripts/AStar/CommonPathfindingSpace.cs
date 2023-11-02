@@ -1,10 +1,11 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.AStar
 {
-	public sealed class CommonPathfindingSpace : PathfindingSpace<Vector3>
+	public sealed class CommonPathfindingSpace : PathfindingSpace<Vector3, Vector3>
 	{
 		public sealed class CommonPathfinder : Pathfinder
 		{
@@ -55,11 +56,14 @@ namespace EthansGameKit.AStar
 			public new bool TryGetPath(Vector3 target, out Stack<Vector3> path) => base.TryGetPath(target, out path);
 		}
 
+		readonly HashSet<Vector3> allPositions = new();
 		readonly Dictionary<Vector3, Dictionary<Vector3, float>> links = new();
 		readonly CachePool<CommonPathfinder> pathfinderPool = new(0);
 		public CommonPathfindingSpace(int maxLinkCountPerNode = 8) : base(maxLinkCountPerNode)
 		{
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override bool ContainsPosition(Vector3 position) => allPositions.Contains(position);
 		protected override int GetLinks(Vector3 node, Vector3[] toNodes, float[] basicCosts)
 		{
 			if (links.TryGetValue(node, out var toNodesDict))
@@ -77,10 +81,15 @@ namespace EthansGameKit.AStar
 			}
 			return 0;
 		}
+		protected override Vector3 GetPositionUnverified(Vector3 node) => node;
+		protected override Vector3 GetIndexUnverified(Vector3 position) => position;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected override bool ContainsKey(Vector3 key) => allPositions.Contains(key);
 		public CommonPathfinder CreatePathfinder() => CommonPathfinder.Create(this);
 		public void ClearLinks()
 		{
 			MarkChanged();
+			allPositions.Clear();
 			links.Clear();
 		}
 		public void SetLink(Vector3 fromNode, Vector3 toNode, float basicCost)
@@ -89,6 +98,8 @@ namespace EthansGameKit.AStar
 			if (!links.TryGetValue(fromNode, out var toNodes))
 				links[fromNode] = toNodes = new();
 			toNodes[toNode] = basicCost;
+			allPositions.Add(fromNode);
+			allPositions.Add(toNode);
 		}
 		public bool RemoveLink(Vector3 fromNode, Vector3 toNode)
 		{

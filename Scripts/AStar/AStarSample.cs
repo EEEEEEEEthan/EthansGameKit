@@ -25,8 +25,7 @@ namespace EthansGameKit.AStar
 				{
 					// 把MoveNext作为寻路的原子操作可以灵活分散计算量
 					// 每一次MoveNext可以抛出这一步寻路进行的节点
-					if (!pathfinder.MoveNext(out var nextStep)) break; // 返回false表示寻路已经遍历完成
-					var nextPosition = space.GetPosition(nextStep);
+					if (!pathfinder.MoveNext(out var nextPosition)) break; // 返回false表示寻路已经遍历完成
 					if (nextPosition == target) break; // 到达目标
 				}
 				pathfinder.TryGetPath(target, out var path);
@@ -41,7 +40,7 @@ namespace EthansGameKit.AStar
 				for (var i = 0; i < 20; ++i)
 				{
 					if (!pathfinder.MoveNext(out var nextStep)) break;
-					set.Add(space.GetPosition(nextStep));
+					set.Add(nextStep);
 				}
 				var destination = set.RandomPick();
 				pathfinder.TryGetPath(destination, out var path);
