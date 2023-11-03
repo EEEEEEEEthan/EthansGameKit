@@ -92,7 +92,7 @@ namespace EthansGameKit.AStar
 			/// <returns>true-路径存在; false-路径不存在</returns>
 			public bool TryGetPath(Vector2Int target, out List<Vector2Int> path)
 			{
-				var intTarget = space.GetIndex(target);
+				var intTarget = space.GetKey(target);
 				if (!base.TryGetPath(intTarget, out var intStack))
 				{
 					path = null;
@@ -109,12 +109,12 @@ namespace EthansGameKit.AStar
 			{
 				this.heuristicTarget = heuristicTarget;
 				if (buffer_reinitialize.Length < sources.Count) buffer_reinitialize = new int[sources.Count];
-				for (var i = sources.Count; i-- > 0;) buffer_reinitialize[i] = space.GetIndex(sources[i]);
+				for (var i = sources.Count; i-- > 0;) buffer_reinitialize[i] = space.GetKey(sources[i]);
 				base.Reinitialize(maxCost, maxheuristic, buffer_reinitialize);
 			}
 			public void Reinitialize(Vector2Int source, Vector2Int heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
 			{
-				buffer_reinitialize[0] = space.GetIndex(source);
+				buffer_reinitialize[0] = space.GetKey(source);
 				base.Reinitialize(maxCost, maxheuristic, buffer_reinitialize);
 			}
 			#endregion
@@ -198,10 +198,10 @@ namespace EthansGameKit.AStar
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override bool ContainsKey(int key) => key >= 0 && key < nodeCount;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override Vector2Int GetPositionUnverified(int index)
+		protected override Vector2Int GetPositionUnverified(int key)
 		{
-			var x = index & (width - 1);
-			var y = index >> widthPower;
+			var x = key & (width - 1);
+			var y = key >> widthPower;
 			return new(x + xMin, y + yMin);
 		}
 		public RectPathfinder CreatePathfinder() => RectPathfinder.Create(this);
@@ -213,13 +213,13 @@ namespace EthansGameKit.AStar
 		public void RemoveLink(Vector2Int fromNode, DirectionEnum direction)
 		{
 			MarkChanged();
-			var fromIndex = GetIndex(fromNode);
+			var fromIndex = GetKey(fromNode);
 			costs[GetLinkIndexUnverified(fromIndex, (int)direction)] = 0;
 		}
 		public void SetLink(Vector2Int fromNode, DirectionEnum direction, float basicCost)
 		{
 			MarkChanged();
-			var fromIndex = GetIndex(fromNode);
+			var fromIndex = GetKey(fromNode);
 			costs[GetLinkIndex(fromIndex, direction)] = basicCost;
 		}
 		int GetLinkIndex(int fromNode, DirectionEnum direction)

@@ -81,7 +81,7 @@ namespace EthansGameKit.AStar
 			}
 			return 0;
 		}
-		protected override Vector3 GetPositionUnverified(Vector3 node) => node;
+		protected override Vector3 GetPositionUnverified(Vector3 key) => key;
 		protected override Vector3 GetIndexUnverified(Vector3 position) => position;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override bool ContainsKey(Vector3 key) => allPositions.Contains(key);

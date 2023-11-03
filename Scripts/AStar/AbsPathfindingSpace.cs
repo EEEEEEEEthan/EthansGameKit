@@ -9,8 +9,8 @@ namespace EthansGameKit.AStar
 	/// <summary>
 	///     寻路空间.用于保存节点之间的关系.搭配<see cref="Pathfinder" />进行寻路
 	/// </summary>
-	/// <typeparam name="TKey">与玩法节点对应的数据节点</typeparam>
 	/// <typeparam name="TPosition">玩法节点</typeparam>
+	/// <typeparam name="TKey">寻路空间的节点.与玩法节点唯一对应</typeparam>
 	public abstract class PathfindingSpace<TPosition, TKey>
 	{
 		/// <summary>
@@ -192,6 +192,11 @@ namespace EthansGameKit.AStar
 		/// </summary>
 		/// <param name="maxLinkCountPerNode">每个节点最大连接数量</param>
 		protected PathfindingSpace(int maxLinkCountPerNode) => this.maxLinkCountPerNode = maxLinkCountPerNode;
+		/// <summary>
+		///     验证是否包含某节点
+		/// </summary>
+		/// <param name="position"></param>
+		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract bool ContainsPosition(TPosition position);
 		protected void MarkChanged() => ++changeFlag;
@@ -204,22 +209,51 @@ namespace EthansGameKit.AStar
 		/// <returns>连接数量</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract int GetLinks(TKey node, TKey[] toNodes, float[] basicCosts);
+		/// <summary>
+		///     将寻路节点转换为玩法节点
+		/// </summary>
+		/// <param name="key">寻路节点</param>
+		/// <returns>玩法节点</returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected TPosition GetPosition(TKey key)
 		{
 			if (!ContainsKey(key)) throw new ArgumentOutOfRangeException($"{key}");
 			return GetPositionUnverified(key);
 		}
+		/// <summary>
+		///     将玩法节点转换为寻路节点
+		/// </summary>
+		/// <param name="position">玩法节点</param>
+		/// <returns>寻路节点</returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected TKey GetIndex(TPosition position)
+		protected TKey GetKey(TPosition position)
 		{
 			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
 			return GetIndexUnverified(position);
 		}
+		/// <summary>
+		///     将寻路节点转换为玩法节点
+		/// </summary>
+		/// <remarks>这个方法不进行数据验证,以提高寻路计算速度</remarks>
+		/// <param name="key">寻路节点</param>
+		/// <returns>玩法节点</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract TPosition GetPositionUnverified(TKey node);
+		protected abstract TPosition GetPositionUnverified(TKey key);
+		/// <summary>
+		///     将玩法节点转换为寻路节点
+		/// </summary>
+		/// <remarks>这个方法不进行数据验证,以提高寻路计算速度</remarks>
+		/// <param name="position">玩法节点</param>
+		/// <returns>寻路节点</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract TKey GetIndexUnverified(TPosition position);
+		/// <summary>
+		///     是否包含寻路节点
+		/// </summary>
+		/// <param name="key">寻路节点</param>
+		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract bool ContainsKey(TKey key);
 	}
