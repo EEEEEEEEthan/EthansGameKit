@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace EthansGameKit.Collections.Wrappers
 {
-	public class FilteredEnumerator<T> : IEnumerator<T>
+	public readonly struct FilteredEnumerator<T> : IEnumerator<T>
 	{
 		readonly IEnumerator<T> rawEnumerator;
 		readonly IValueFilter<T> filter;
