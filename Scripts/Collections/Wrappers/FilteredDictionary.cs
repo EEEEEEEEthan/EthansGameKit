@@ -6,6 +6,14 @@ namespace EthansGameKit.Collections.Wrappers
 {
 	public readonly struct FilteredDictionary<TKey, TValue> : IReadOnlyDictionary<TKey, TValue>, IDictionary<TKey, TValue>
 	{
+		readonly struct KeyToValue : IValueConverter<TKey, TValue>
+		{
+			readonly IDictionary<TKey, TValue> rawDictionary;
+			public KeyToValue(IDictionary<TKey, TValue> rawDictionary) => this.rawDictionary = rawDictionary;
+			public TValue Convert(TKey oldItem) => rawDictionary[oldItem];
+			public TKey Recover(TValue newItem) => throw new InvalidOperationException();
+		}
+
 		readonly IDictionary<TKey, TValue> rawDictionary;
 		readonly IValueFilter<TKey> keyFilter;
 		public int Count
@@ -20,14 +28,7 @@ namespace EthansGameKit.Collections.Wrappers
 			}
 		}
 		public ICollection<TKey> Keys => rawDictionary.Keys.WrapAsFilteredCollection(keyFilter);
-		public ICollection<TValue> Values
-		{
-			get
-			{
-				var rawDictionary = this.rawDictionary;
-				return Keys.WrapAsConvertedCollection(new ValueConverter<TKey, TValue>(key => rawDictionary[key], null));
-			}
-		}
+		public ICollection<TValue> Values => Keys.WrapAsConvertedCollection(new KeyToValue(this));
 		bool ICollection<KeyValuePair<TKey, TValue>>.IsReadOnly => true;
 		IEnumerable<TKey> IReadOnlyDictionary<TKey, TValue>.Keys => Keys;
 		IEnumerable<TValue> IReadOnlyDictionary<TKey, TValue>.Values => Values;

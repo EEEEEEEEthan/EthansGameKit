@@ -6,6 +6,14 @@ namespace EthansGameKit.Collections.Wrappers
 {
 	readonly struct ListToDict<T> : IDictionary<int, T>, IReadOnlyDictionary<int, T>
 	{
+		readonly struct KeyToPair : IValueConverter<int, KeyValuePair<int, T>>
+		{
+			readonly IList<T> rawList;
+			public KeyToPair(IList<T> rawList) => this.rawList = rawList;
+			public KeyValuePair<int, T> Convert(int oldItem) => new(oldItem, rawList[oldItem]);
+			public int Recover(KeyValuePair<int, T> newItem) => newItem.Key;
+		}
+
 		readonly IList<T> rawList;
 		public int Count => rawList.Count;
 		public ICollection<int> Keys => new RangeInt(0, Count);
@@ -17,7 +25,7 @@ namespace EthansGameKit.Collections.Wrappers
 		public IEnumerator<KeyValuePair<int, T>> GetEnumerator()
 		{
 			var rawList = this.rawList;
-			return Keys.GetEnumerator().WrapAsConvertedEnumerator(key => new KeyValuePair<int, T>(key, rawList[key]));
+			return Keys.GetEnumerator().WrapAsConvertedEnumerator(new KeyToPair(rawList));
 		}
 		public void Clear()
 		{
