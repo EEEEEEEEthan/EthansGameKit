@@ -1,8 +1,8 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EthansGameKit.CachePools;
+using EthansGameKit.Collections.Wrappers;
 using UnityEngine;
 
 namespace EthansGameKit.AStar
@@ -14,102 +14,12 @@ namespace EthansGameKit.AStar
 	{
 		public sealed class RectPathfinder : Pathfinder
 		{
-			struct CostDict : IReadOnlyDictionary<Vector2Int, float>
+			readonly struct IndexToPositionConverter : IValueConverter<int, Vector2Int>
 			{
-				readonly RectPathfinder pathfinder;
-				readonly float[] rawArray;
-				public IEnumerable<Vector2Int> Keys => throw new NotImplementedException();
-				public IEnumerable<float> Values => throw new NotImplementedException();
-				public int Count => throw new NotImplementedException();
-				public CostDict(RectPathfinder pathfinder, float[] rawArray)
-				{
-					this.pathfinder = pathfinder;
-					this.rawArray = rawArray;
-				}
-				public bool ContainsKey(Vector2Int key) => pathfinder.space.rawRect.Contains(key);
-				public bool TryGetValue(Vector2Int key, out float value)
-				{
-					if (ContainsKey(key))
-					{
-						value = this[key];
-						return true;
-					}
-					value = default;
-					return true;
-				}
-				public IEnumerator<KeyValuePair<Vector2Int, float>> GetEnumerator() => throw new NotImplementedException();
-				IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-				public float this[Vector2Int position] => rawArray[pathfinder.space.GetIndex(position)];
-			}
-
-			readonly struct FlowDict : IReadOnlyDictionary<Vector2Int, Vector2Int>
-			{
-				readonly RectPathfinder pathfinder;
-				readonly int[] rawArray;
-				public IEnumerable<Vector2Int> Keys
-				{
-					get
-					{
-						var space = pathfinder.space;
-						for (var i = rawArray.Length; i-- > 0;)
-						{
-							var from = space.GetPositionUnverified(i);
-							var toIndex = rawArray[i];
-							if (toIndex < 0) continue;
-							yield return from;
-						}
-					}
-				}
-				public IEnumerable<Vector2Int> Values
-				{
-					get
-					{
-						var space = pathfinder.space;
-						for (var i = rawArray.Length; i-- > 0;)
-						{
-							var toIndex = rawArray[i];
-							if (toIndex < 0) continue;
-							var to = space.GetPositionUnverified(rawArray[i]);
-							yield return to;
-						}
-					}
-				}
-				public int Count => throw new NotImplementedException();
-				public FlowDict(RectPathfinder pathfinder, int[] rawArray)
-				{
-					this.pathfinder = pathfinder;
-					this.rawArray = rawArray;
-				}
-				public bool ContainsKey(Vector2Int key)
-				{
-					if (!pathfinder.space.rawRect.Contains(key)) return false;
-					var index = pathfinder.space.GetIndex(key);
-					return rawArray[index] >= 0;
-				}
-				public bool TryGetValue(Vector2Int key, out Vector2Int value)
-				{
-					if (ContainsKey(key))
-					{
-						value = this[key];
-						return true;
-					}
-					value = default;
-					return true;
-				}
-				public IEnumerator<KeyValuePair<Vector2Int, Vector2Int>> GetEnumerator()
-				{
-					var space = pathfinder.space;
-					for (var i = rawArray.Length; i-- > 0;)
-					{
-						var from = space.GetPositionUnverified(i);
-						var toIndex = rawArray[i];
-						if (toIndex < 0) continue;
-						var to = space.GetPositionUnverified(rawArray[i]);
-						yield return new(from, to);
-					}
-				}
-				IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
-				public Vector2Int this[Vector2Int position] => pathfinder.space.GetPosition(rawArray[pathfinder.space.GetIndex(position)]);
+				readonly RectPathfindingSpace space;
+				public IndexToPositionConverter(RectPathfindingSpace space) => this.space = space;
+				public Vector2Int Convert(int oldItem) => space.GetPositionUnverified(oldItem);
+				public int Recover(Vector2Int newItem) => space.GetIndexUnverified(newItem);
 			}
 
 			public static RectPathfinder Create(RectPathfindingSpace space)
@@ -121,8 +31,27 @@ namespace EthansGameKit.AStar
 			readonly float[] costMap;
 			readonly int[] flowMap;
 			Vector2Int heuristicTarget;
-			public IReadOnlyDictionary<Vector2Int, float> CostMap => new CostDict(this, costMap);
-			public IReadOnlyDictionary<Vector2Int, Vector2Int> FlowMap => new FlowDict(this, flowMap);
+			public IReadOnlyDictionary<Vector2Int, float> CostMap
+			{
+				get
+				{
+					var wrappedList = costMap.WrapAsDictionary();
+					var converter = new IndexToPositionConverter(space);
+					var dict = wrappedList.WrapAsConvertedDictionary(converter, new ValueConverter<float, float>(f => f, f => f));
+					return dict;
+				}
+			}
+			public IReadOnlyDictionary<Vector2Int, Vector2Int> FlowMap
+			{
+				get
+				{
+					var flowDict = flowMap.WrapAsDictionary();
+					var converter = new IndexToPositionConverter(space);
+					var dict = flowDict.WrapAsConvertedDictionary(converter, converter);
+					var result = dict.WrapAsFilteredDictionary(k => flowMap[space.GetIndexUnverified(k)] >= 0);
+					return result;
+				}
+			}
 			RectPathfinder(RectPathfindingSpace space) : base(space)
 			{
 				this.space = space;
