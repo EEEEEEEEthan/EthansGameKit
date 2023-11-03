@@ -27,17 +27,17 @@ namespace EthansGameKit.AStar
 				if (space.pool.TryGenerate(out var pathfinder)) return pathfinder;
 				return new(space);
 			}
-			public readonly RectPathfindingSpace space;
+			readonly RectPathfindingSpace space;
 			readonly float[] costMap;
 			readonly int[] flowMap;
+			readonly IndexToPositionConverter converter;
 			Vector2Int heuristicTarget;
 			public IReadOnlyDictionary<Vector2Int, float> CostMap
 			{
 				get
 				{
 					var wrappedList = costMap.WrapAsDictionary();
-					var converter = new IndexToPositionConverter(space);
-					var dict = wrappedList.WrapAsConvertedDictionary(converter, new ValueConverter<float, float>(f => f, f => f));
+					var dict = wrappedList.WrapAsConvertedDictionary(converter, IValueConverter<float, float>.Default);
 					return dict;
 				}
 			}
@@ -46,7 +46,6 @@ namespace EthansGameKit.AStar
 				get
 				{
 					var flowDict = flowMap.WrapAsDictionary();
-					var converter = new IndexToPositionConverter(space);
 					var dict = flowDict.WrapAsConvertedDictionary(converter, converter);
 					var result = dict.WrapAsFilteredDictionary(k => flowMap[space.GetIndexUnverified(k)] >= 0);
 					return result;
@@ -57,6 +56,7 @@ namespace EthansGameKit.AStar
 				this.space = space;
 				costMap = new float[space.nodeCount];
 				flowMap = new int[space.nodeCount];
+				converter = new(space);
 				Clear();
 			}
 			protected override void Recycle()
@@ -132,7 +132,7 @@ namespace EthansGameKit.AStar
 			UpLeft,
 		}
 
-		public readonly int nodeCount;
+		readonly int nodeCount;
 		readonly int widthPower;
 		readonly int width;
 		readonly int xMin;
@@ -248,6 +248,12 @@ namespace EthansGameKit.AStar
 		#region gizmos
 		static int[] toNodeBuffer = new int[8];
 		static float[] costBuffer = new float[8];
+		/// <summary>
+		///     <para>gizmos</para>
+		///     <para>红框: 内存区域</para>
+		///     <para>黄框: 地图区域</para>
+		///     <para>蓝线: 有效连接</para>
+		/// </summary>
 		public void DrawGizmos()
 		{
 			Gizmos.color = new(1, 1, 0, 0.2f);
