@@ -85,7 +85,7 @@ namespace EthansGameKit.AStar
 			/// <summary>尝试获取路径</summary>
 			/// <param name="target">目标</param>
 			/// <param name="path">
-			///     <para>一个栈表示路径。起点在0号元素</para>
+			///     <para>一个列表示路径。起点在0号元素</para>
 			///     <para>若路径不存在，得到null</para>
 			///     <para>若起点终点相同，则长度为1</para>
 			/// </param>

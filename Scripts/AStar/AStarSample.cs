@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -5,7 +6,7 @@ namespace EthansGameKit.AStar
 {
 	class AStarSample
 	{
-		void Sample()
+		async void Sample()
 		{
 			var space = new RectPathfindingSpace(new(0, 0, 12, 34), false);
 			// 初始化寻路网
@@ -59,6 +60,35 @@ namespace EthansGameKit.AStar
 				// flowmap即每一个僵尸坐标想要去的下一个节点
 				var zombiePosition = new Vector2Int(0, 0);
 				var nextPosition = pathfinder.FlowMap[zombiePosition];
+			}
+			{
+				// 情景4: 异步寻路
+				var target = new Vector2Int(0, 1);
+				pathfinder.Reinitialize(new Vector2Int(0, 0), target);
+				var time = DateTime.Now;
+				while (true)
+				{
+					if (!pathfinder.MoveNext(out var nextPosition)) break;
+					if (nextPosition == target) break; // 到达目标
+					if (DateTime.Now - time > TimeSpan.FromMilliseconds(10)) // 计算太久了，等下一帧
+					{
+						time = DateTime.Now;
+						goto NEXT_LOOP;
+					}
+					if (DateTime.Now < time) // 调时
+					{
+						time = DateTime.Now;
+						goto NEXT_LOOP;
+					}
+					if (pathfinder.Expired) // 说明地图已经发生变化。可以考虑重新寻路或者先寻完再检查路径
+					{
+						// 这里选择重新寻路
+						pathfinder.Reinitialize(new Vector2Int(0, 0), target);
+					}
+				NEXT_LOOP:
+					await TaskQueue.AwaitFreeFrame();
+				}
+				pathfinder.TryGetPath(target, out var path);
 			}
 		}
 	}
