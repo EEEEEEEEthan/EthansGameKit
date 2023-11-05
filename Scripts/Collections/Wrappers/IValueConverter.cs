@@ -4,7 +4,13 @@ namespace EthansGameKit.Collections.Wrappers
 {
 	public interface IValueConverter<TRawItem, TNewItem>
 	{
+		public static IValueConverter<TRawItem, TRawItem> DefaultKey => DefaultConverter<TRawItem>.Default;
+		public static IValueConverter<TNewItem, TNewItem> DefaultValue => DefaultConverter<TNewItem>.Default;
 		public static IValueConverter<TRawItem, TNewItem> Default => new DefaultConverter<TRawItem, TNewItem>();
+		public static IValueConverter<TRawItem, TNewItem> Create(Func<TRawItem, TNewItem> convert, Func<TNewItem, TRawItem> recover)
+		{
+			return new ValueConverter<TRawItem, TNewItem>(convert, recover);
+		}
 		TNewItem Convert(TRawItem oldItem);
 		TRawItem Recover(TNewItem newItem);
 	}
@@ -34,7 +40,7 @@ namespace EthansGameKit.Collections.Wrappers
 		}
 	}
 
-	public readonly struct ValueConverter<TRawItem, TNewItem> : IValueConverter<TRawItem, TNewItem>
+	readonly struct ValueConverter<TRawItem, TNewItem> : IValueConverter<TRawItem, TNewItem>
 	{
 		readonly Func<TRawItem, TNewItem> convert;
 		readonly Func<TNewItem, TRawItem> recover;
