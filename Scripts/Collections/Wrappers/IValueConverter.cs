@@ -11,8 +11,27 @@ namespace EthansGameKit.Collections.Wrappers
 
 	struct DefaultConverter<TRawItem, TNewItem> : IValueConverter<TRawItem, TNewItem>
 	{
-		public TNewItem Convert(TRawItem oldItem) => (TNewItem)(object)oldItem;
-		public TRawItem Recover(TNewItem newItem) => (TRawItem)(object)newItem;
+		public TNewItem Convert(TRawItem oldItem)
+		{
+			return (TNewItem)(object)oldItem;
+		}
+		public TRawItem Recover(TNewItem newItem)
+		{
+			return (TRawItem)(object)newItem;
+		}
+	}
+
+	struct DefaultConverter<T> : IValueConverter<T, T>
+	{
+		public static DefaultConverter<T> Default { get; } = new();
+		public T Convert(T oldItem)
+		{
+			return oldItem;
+		}
+		public T Recover(T newItem)
+		{
+			return newItem;
+		}
 	}
 
 	public readonly struct ValueConverter<TRawItem, TNewItem> : IValueConverter<TRawItem, TNewItem>
@@ -24,7 +43,13 @@ namespace EthansGameKit.Collections.Wrappers
 			this.convert = convert;
 			this.recover = recover;
 		}
-		public TNewItem Convert(TRawItem oldItem) => convert(oldItem);
-		public TRawItem Recover(TNewItem newItem) => recover(newItem);
+		public TNewItem Convert(TRawItem oldItem)
+		{
+			return convert(oldItem);
+		}
+		public TRawItem Recover(TNewItem newItem)
+		{
+			return recover(newItem);
+		}
 	}
 }

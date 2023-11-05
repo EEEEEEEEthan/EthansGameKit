@@ -84,7 +84,10 @@ namespace EthansGameKit.Collections.Wrappers
 			var oldValue = valueConverter.Recover(item.Value);
 			return rawDictionary.Remove(new KeyValuePair<TOldKey, TOldValue>(oldKey, oldValue));
 		}
-		IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return GetEnumerator();
+		}
 		public TNewValue this[TNewKey key]
 		{
 			get
@@ -102,7 +105,27 @@ namespace EthansGameKit.Collections.Wrappers
 
 	public static partial class Extensions
 	{
-		public static ConvertedDictionary<TOldKey, TOldValue, TNewKey, TNewValue> WrapAsConvertedDictionary<TOldKey, TOldValue, TNewKey, TNewValue>(this IDictionary<TOldKey, TOldValue> rawDict,
-			IValueConverter<TOldKey, TNewKey> keyConverter, IValueConverter<TOldValue, TNewValue> valueConverter) => new(rawDict, keyConverter, valueConverter);
+		public static ConvertedDictionary<TOldKey, TOldValue, TNewKey, TNewValue> WrapAsConvertedDictionary<TOldKey, TOldValue, TNewKey, TNewValue>(this IDictionary<TOldKey, TOldValue> @this,
+			IValueConverter<TOldKey, TNewKey> keyConverter, IValueConverter<TOldValue, TNewValue> valueConverter)
+		{
+			return new(@this, keyConverter, valueConverter);
+		}
+		public static ConvertedDictionary<TKey, TOldValue, TKey, TNewValue> WrapAsConvertedDictionary<TKey, TOldValue, TNewValue>(
+			this IDictionary<TKey, TOldValue> @this,
+			IValueConverter<TOldValue, TNewValue> valueConverter)
+		{
+			return @this.WrapAsConvertedDictionary(DefaultConverter<TKey>.Default, valueConverter);
+		}
+		public static ConvertedDictionary<TKey, TOldValue, TKey, TNewValue> WrapAsConvertedDictionary<TKey, TOldValue, TNewValue>(
+			this IDictionary<TKey, TOldValue> @this,
+			Func<TOldValue, TNewValue> converter)
+		{
+			return @this.WrapAsConvertedDictionary(DefaultConverter<TKey>.Default, new ValueConverter<TOldValue, TNewValue>(converter, null));
+		}
+		public static ConvertedDictionary<TKey, TOldValue, TKey, TNewValue> WrapAsConvertedDictionary<TKey, TOldValue, TNewValue>(
+			this IDictionary<TKey, TOldValue> @this)
+		{
+			return @this.WrapAsConvertedDictionary(DefaultConverter<TKey>.Default, IValueConverter<TOldValue, TNewValue>.Default);
+		}
 	}
 }
