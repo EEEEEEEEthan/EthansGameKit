@@ -92,6 +92,7 @@ namespace EthansGameKit.AStar
 			/// <remarks>调用频繁.如果计算量大，子类应当自行缓存</remarks>
 			/// <param name="node">节点坐标</param>
 			/// <returns>启发值,越小越优先</returns>
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			protected abstract float GetHeuristic(TKey node);
 			/// <summary>获取单步消耗</summary>
 			/// <remarks>
@@ -102,16 +103,20 @@ namespace EthansGameKit.AStar
 			/// <param name="toNode">单步终点</param>
 			/// <param name="basicCost">基础消耗值</param>
 			/// <returns>计算过不同寻路器加成的单步消耗 例如toNode是水，不会游泳的动物返回float.MaxValue等</returns>
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			protected abstract float GetStepCost(TKey fromNode, TKey toNode, float basicCost);
 			/// <summary>获取移动至这个位置的总消耗</summary>
 			/// <returns>true-有记录; false-还没有记录</returns>
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			protected abstract bool GetCachedTotalCost(TKey node, out float cost);
 			/// <summary>缓存移动至这个位置的总消耗</summary>
 			protected abstract void CacheTotalCost(TKey node, float cost);
 			/// <summary>获取移动至这个位置的母节点</summary>
 			/// <returns>true-有记录; false-还没有记录</returns>
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			protected abstract bool GetCachedParentNode(TKey node, out TKey parent);
 			/// <summary>缓存移动至这个位置的母节点</summary>
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			protected abstract void CacheParentNode(TKey node, TKey parent);
 			/// <summary>
 			///     清理寻路缓存。在开始新的寻路时会触发
