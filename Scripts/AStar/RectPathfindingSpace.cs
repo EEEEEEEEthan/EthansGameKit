@@ -12,7 +12,7 @@ namespace EthansGameKit.AStar
 	/// </summary>
 	public sealed class RectPathfindingSpace : PathfindingSpace<Vector2Int, int>
 	{
-		public sealed class RectPathfinder : Pathfinder
+		public abstract class RectPathfinderBase : Pathfinder
 		{
 			readonly struct IndexToPositionConverter : IValueConverter<int, Vector2Int>
 			{
@@ -22,16 +22,10 @@ namespace EthansGameKit.AStar
 				public int Recover(Vector2Int newItem) => space.GetIndexUnverified(newItem);
 			}
 
-			public static RectPathfinder Create(RectPathfindingSpace space)
-			{
-				if (space.pool.TryGenerate(out var pathfinder)) return pathfinder;
-				return new(space);
-			}
-			readonly RectPathfindingSpace space;
-			readonly float[] costMap;
-			readonly int[] flowMap;
+			protected readonly RectPathfindingSpace space;
+			protected readonly float[] costMap;
+			protected readonly int[] flowMap;
 			readonly IndexToPositionConverter converter;
-			Vector2Int heuristicTarget;
 			public IReadOnlyDictionary<Vector2Int, float> CostMap
 			{
 				get
@@ -51,7 +45,7 @@ namespace EthansGameKit.AStar
 					return result;
 				}
 			}
-			RectPathfinder(RectPathfindingSpace space) : base(space)
+			protected RectPathfinderBase(RectPathfindingSpace space) : base(space)
 			{
 				this.space = space;
 				costMap = new float[space.nodeCount];
@@ -59,24 +53,10 @@ namespace EthansGameKit.AStar
 				converter = new(space);
 				Clear();
 			}
-			protected override void Recycle()
+			protected sealed override void Recycle()
 			{
-				space.pool.Recycle(this);
+				space.Recycle(this);
 			}
-			protected override float GetHeuristic(int node)
-			{
-				var position = space.GetPositionUnverified(node);
-				return (position - heuristicTarget).sqrMagnitude;
-			}
-			protected override float GetStepCost(int fromNode, int toNode, float basicCost) => basicCost;
-			protected override bool GetCachedTotalCost(int node, out float cost)
-			{
-				cost = costMap[node];
-				return true;
-			}
-			protected override void CacheTotalCost(int node, float cost) => costMap[node] = cost;
-			protected override bool GetCachedParentNode(int node, out int parent) => (parent = flowMap[node]) >= 0;
-			protected override void CacheParentNode(int node, int parent) => flowMap[node] = parent;
 			protected override void OnClear()
 			{
 				costMap.MemSet(float.MaxValue);
@@ -103,21 +83,38 @@ namespace EthansGameKit.AStar
 					path.Add(space.GetPosition(index));
 				return true;
 			}
-			#region reinitialize
-			int[] buffer_reinitialize = new int[1];
-			public void Reinitialize(IReadOnlyList<Vector2Int> sources, Vector2Int heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+		}
+
+		public sealed class RectPathfinder : RectPathfinderBase
+		{
+			public static RectPathfinder Create(RectPathfindingSpace space)
 			{
-				this.heuristicTarget = heuristicTarget;
-				if (buffer_reinitialize.Length < sources.Count) buffer_reinitialize = new int[sources.Count];
-				for (var i = sources.Count; i-- > 0;) buffer_reinitialize[i] = space.GetKey(sources[i]);
-				base.Reinitialize(maxCost, maxheuristic, buffer_reinitialize);
+				if (space.GetPool(typeof(RectPathfinder)).TryGenerate(out var pathfinder)) return (RectPathfinder)pathfinder;
+				return new(space);
 			}
-			public void Reinitialize(Vector2Int source, Vector2Int heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+			RectPathfinder(RectPathfindingSpace space) : base(space)
 			{
-				buffer_reinitialize[0] = space.GetKey(source);
-				base.Reinitialize(maxCost, maxheuristic, buffer_reinitialize);
 			}
-			#endregion
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			protected override float GetHeuristic(int node)
+			{
+				var position = space.GetPositionUnverified(node);
+				return (position - HeuristicTarget).sqrMagnitude;
+			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			protected override float GetStepCost(int fromNode, int toNode, float basicCost) => basicCost;
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			protected override bool GetCachedTotalCost(int node, out float cost)
+			{
+				cost = costMap[node];
+				return true;
+			}
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			protected override void CacheTotalCost(int node, float cost) => costMap[node] = cost;
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			protected override bool GetCachedParentNode(int node, out int parent) => (parent = flowMap[node]) >= 0;
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			protected override void CacheParentNode(int node, int parent) => flowMap[node] = parent;
 		}
 
 		public enum DirectionEnum
@@ -141,7 +138,6 @@ namespace EthansGameKit.AStar
 		readonly int[] neighborIndexOffsetSequence;
 		readonly int linkBits;
 		readonly int linkCount;
-		readonly CachePool<RectPathfinder> pool = new(0);
 		RectInt rawRect;
 		RectInt fullRect;
 		public RectInt RawRect => rawRect;
@@ -204,7 +200,6 @@ namespace EthansGameKit.AStar
 			var y = key >> widthPower;
 			return new(x + xMin, y + yMin);
 		}
-		public RectPathfinder CreatePathfinder() => RectPathfinder.Create(this);
 		public void ClearLinks()
 		{
 			MarkChanged();

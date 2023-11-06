@@ -18,8 +18,8 @@ namespace EthansGameKit.AStar
 		/// </summary>
 		public abstract class Pathfinder : IDisposable
 		{
+			internal readonly PathfindingSpace<TPosition, TKey> space;
 			readonly Heap<TKey, float> openList = Heap<TKey, float>.Generate();
-			readonly PathfindingSpace<TPosition, TKey> space;
 			readonly TKey[] nodeBuffer;
 			readonly float[] floatBuffer;
 			float maxCost = float.PositiveInfinity;
@@ -30,6 +30,7 @@ namespace EthansGameKit.AStar
 			///     <para>如果space被修改过，pathfinder就会过期</para>
 			/// </summary>
 			public bool Expired => changeFlag != space.changeFlag;
+			protected TPosition HeuristicTarget { get; private set; }
 			protected Pathfinder(PathfindingSpace<TPosition, TKey> space)
 			{
 				this.space = space;
@@ -103,28 +104,6 @@ namespace EthansGameKit.AStar
 			///     清理寻路缓存。在开始新的寻路时会触发
 			/// </summary>
 			protected abstract void OnClear();
-			/// <summary>
-			///     重新初始化,准备下一次寻路
-			/// </summary>
-			/// <param name="maxCost">最大消耗</param>
-			/// <param name="maxHeuristic">最大启发值</param>
-			/// <param name="sources">起点列表</param>
-			protected void Reinitialize(
-				float maxCost,
-				float maxHeuristic,
-				IEnumerable<TKey> sources
-			)
-			{
-				this.maxCost = maxCost;
-				this.maxHeuristic = maxHeuristic;
-				Clear();
-				foreach (var node in sources)
-				{
-					CacheParentNode(node, node);
-					CacheTotalCost(node, 0);
-					openList.AddOrUpdate(node, GetHeuristic(node));
-				}
-			}
 			/// <summary>尝试获取路径</summary>
 			/// <param name="target">目标</param>
 			/// <param name="path">
@@ -183,9 +162,33 @@ namespace EthansGameKit.AStar
 				}
 				return true;
 			}
+			#region reinitialize
+			readonly TPosition[] buffer_reinitialize = new TPosition[1];
+			public void Reinitialize(IEnumerable<TPosition> sources, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+			{
+				Clear();
+				this.maxCost = maxCost;
+				maxHeuristic = maxheuristic;
+				HeuristicTarget = heuristicTarget;
+				foreach (var source in sources)
+				{
+					var key = space.GetKey(source);
+					CacheParentNode(key, key);
+					CacheTotalCost(key, 0);
+					openList.AddOrUpdate(key, GetHeuristic(key));
+				}
+			}
+			public void Reinitialize(TPosition source, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+			{
+				HeuristicTarget = heuristicTarget;
+				buffer_reinitialize[0] = source;
+				Reinitialize(buffer_reinitialize, heuristicTarget, maxCost, maxheuristic);
+			}
+			#endregion
 		}
 
 		protected readonly int maxLinkCountPerNode;
+		readonly Dictionary<Type, CachePool<Pathfinder>> pools = new();
 		int changeFlag;
 		/// <summary>
 		///     构造方法
@@ -199,6 +202,19 @@ namespace EthansGameKit.AStar
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract bool ContainsPosition(TPosition position);
+		protected CachePool<Pathfinder> GetPool(Type pathfinderType)
+		{
+			if (!pools.TryGetValue(pathfinderType, out var pool))
+				pool = pools[pathfinderType] = new(0);
+			return pool;
+		}
+		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
+		protected void Recycle(Pathfinder pathfinder)
+		{
+			if (pathfinder.space != this) throw new ArgumentException("pathfinder.space != this");
+			var pool = GetPool(pathfinder.GetType());
+			pool.Recycle(pathfinder);
+		}
 		protected void MarkChanged() => ++changeFlag;
 		/// <summary>
 		///     获取这个点的所有连接

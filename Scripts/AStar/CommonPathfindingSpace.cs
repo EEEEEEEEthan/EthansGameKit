@@ -14,18 +14,17 @@ namespace EthansGameKit.AStar
 				if (space.pathfinderPool.TryGenerate(out var finder)) return finder;
 				return new(space);
 			}
-			readonly CommonPathfindingSpace space;
+			new readonly CommonPathfindingSpace space;
 			readonly Dictionary<Vector3, float> costMap = new();
 			readonly Dictionary<Vector3, Vector3> flowMap = new();
-			Vector3 heuristicTarget;
 			public IReadOnlyDictionary<Vector3, Vector3> FlowMap => flowMap;
 			public IReadOnlyDictionary<Vector3, float> CostMap => costMap;
 			CommonPathfinder(CommonPathfindingSpace space) : base(space) => this.space = space;
 			protected override void Recycle()
 			{
-				space.pathfinderPool.Recycle(this);
+				space.Recycle(this);
 			}
-			protected override float GetHeuristic(Vector3 node) => Vector3.Distance(node, heuristicTarget);
+			protected override float GetHeuristic(Vector3 node) => Vector3.Distance(node, HeuristicTarget);
 			protected override float GetStepCost(Vector3 fromNode, Vector3 toNode, float basicCost) => basicCost;
 			protected override bool GetCachedTotalCost(Vector3 node, out float cost) => costMap.TryGetValue(node, out cost);
 			protected override void CacheTotalCost(Vector3 node, float cost) => costMap[node] = cost;
@@ -35,15 +34,6 @@ namespace EthansGameKit.AStar
 			{
 				costMap.Clear();
 				flowMap.Clear();
-			}
-			public void Reinitialize(IEnumerable<Vector3> sources, Vector3 heuristicTarget)
-			{
-				this.heuristicTarget = heuristicTarget;
-				base.Reinitialize(
-					float.PositiveInfinity,
-					float.PositiveInfinity,
-					sources
-				);
 			}
 			/// <summary>尝试获取路径</summary>
 			/// <param name="target">目标</param>
