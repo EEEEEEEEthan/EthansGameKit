@@ -22,7 +22,7 @@ namespace EthansGameKit.AStar
 				public int Recover(Vector2Int newItem) => space.GetIndexUnverified(newItem);
 			}
 
-			protected readonly RectPathfindingSpace space;
+			protected new readonly RectPathfindingSpace space;
 			protected readonly float[] costMap;
 			protected readonly int[] flowMap;
 			readonly IndexToPositionConverter converter;
@@ -52,10 +52,6 @@ namespace EthansGameKit.AStar
 				flowMap = new int[space.nodeCount];
 				converter = new(space);
 				Clear();
-			}
-			protected sealed override void Recycle()
-			{
-				space.Recycle(this);
 			}
 			protected override void OnClear()
 			{
@@ -169,6 +165,7 @@ namespace EthansGameKit.AStar
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool ContainsPosition(Vector2Int position) => fullRect.Contains(position);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override int GetLinks(int node, int[] toNodes, float[] basicCosts)
 		{
 			var count = 0;

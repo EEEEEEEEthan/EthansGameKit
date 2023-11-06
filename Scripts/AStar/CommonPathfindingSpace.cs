@@ -20,10 +20,6 @@ namespace EthansGameKit.AStar
 			public IReadOnlyDictionary<Vector3, Vector3> FlowMap => flowMap;
 			public IReadOnlyDictionary<Vector3, float> CostMap => costMap;
 			CommonPathfinder(CommonPathfindingSpace space) : base(space) => this.space = space;
-			protected override void Recycle()
-			{
-				space.Recycle(this);
-			}
 			protected override float GetHeuristic(Vector3 node) => Vector3.Distance(node, HeuristicTarget);
 			protected override float GetStepCost(Vector3 fromNode, Vector3 toNode, float basicCost) => basicCost;
 			protected override bool GetCachedTotalCost(Vector3 node, out float cost) => costMap.TryGetValue(node, out cost);

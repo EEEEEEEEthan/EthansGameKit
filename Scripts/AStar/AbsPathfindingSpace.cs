@@ -44,7 +44,7 @@ namespace EthansGameKit.AStar
 			public void Dispose()
 			{
 				Clear();
-				Recycle();
+				space.Recycle(this);
 			}
 			/// <summary>下一步寻路</summary>
 			/// <param name="current">下一步检索的节点</param>
@@ -71,10 +71,6 @@ namespace EthansGameKit.AStar
 				openList.Clear();
 				OnClear();
 			}
-			/// <summary>
-			///     回收至PathfindingSpace
-			/// </summary>
-			protected abstract void Recycle();
 			/// <summary>启发函数</summary>
 			/// <remarks>调用频繁.如果计算量大，子类应当自行缓存</remarks>
 			/// <param name="node">节点坐标</param>
