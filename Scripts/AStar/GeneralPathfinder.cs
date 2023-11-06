@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace EthansGameKit.AStar.General
+namespace EthansGameKit.AStar
 {
 	// ReSharper disable once ClassNeverInstantiated.Global
 	public sealed class GeneralPathfinder : PathfindingSpace<Vector3, Vector3>.Pathfinder

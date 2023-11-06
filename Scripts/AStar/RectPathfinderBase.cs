@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using EthansGameKit.Collections.Wrappers;
 using UnityEngine;
 
-namespace EthansGameKit.AStar.RectGrid
+namespace EthansGameKit.AStar
 {
 	public abstract class RectPathfinderBase : PathfindingSpace<Vector2Int, int>.Pathfinder
 	{

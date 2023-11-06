@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using EthansGameKit.CachePools;
 using UnityEngine;
 
-namespace EthansGameKit.AStar.General
+namespace EthansGameKit.AStar
 {
 	public sealed class GeneralPathfindingSpace : PathfindingSpace<Vector3, Vector3>
 	{

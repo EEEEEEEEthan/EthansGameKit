@@ -2,7 +2,7 @@ using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-namespace EthansGameKit.AStar.RectGrid
+namespace EthansGameKit.AStar
 {
 	/// <summary>
 	///     针对四邻域深度优化的寻路空间
