@@ -17,6 +17,7 @@ namespace EthansGameKit.AStar
 			space.SetLink(new(0, 1), RectPathfindingSpace.DirectionEnum.Right, 1);
 			space.SetLink(new(0, 1), RectPathfindingSpace.DirectionEnum.Down, 1);
 			// 生成pathfinder. pathfinder继承于IDisposable，可以在Dispose时回收至内存池
+			// 只要泛型匹配，可以使用任何继承于Pathfinder的类
 			using var pathfinder = space.CreatePathfinder<RectPathfinder>();
 			{
 				// 情景1: 移动至制定目标

@@ -57,15 +57,6 @@ namespace EthansGameKit.AStar
 			/// <summary>下一步寻路</summary>
 			/// <returns>true-寻路继续; false-寻路程序已经遍历了整个地图</returns>
 			public bool MoveNext() => MoveNext(out TKey _);
-			/// <summary>
-			///     清理缓存
-			/// </summary>
-			public void Clear()
-			{
-				changeFlag = Space.changeFlag;
-				openList.Clear();
-				OnClear();
-			}
 			/// <summary>尝试获取路径</summary>
 			/// <param name="target">目标</param>
 			/// <returns>
@@ -87,6 +78,15 @@ namespace EthansGameKit.AStar
 					node = next;
 				}
 				throw new("死循环");
+			}
+			/// <summary>
+			///     清理缓存
+			/// </summary>
+			protected void Clear()
+			{
+				changeFlag = Space.changeFlag;
+				openList.Clear();
+				OnClear();
 			}
 			/// <summary>启发函数</summary>
 			/// <remarks>调用频繁.如果计算量大，子类应当自行缓存</remarks>
@@ -213,30 +213,6 @@ namespace EthansGameKit.AStar
 		/// <summary>
 		///     将寻路节点转换为玩法节点
 		/// </summary>
-		/// <param name="key">寻路节点</param>
-		/// <returns>玩法节点</returns>
-		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TPosition GetPosition(TKey key)
-		{
-			if (!ContainsKey(key)) throw new ArgumentOutOfRangeException($"{key}");
-			return GetPositionUnverified(key);
-		}
-		/// <summary>
-		///     将玩法节点转换为寻路节点
-		/// </summary>
-		/// <param name="position">玩法节点</param>
-		/// <returns>寻路节点</returns>
-		/// <exception cref="ArgumentOutOfRangeException"></exception>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public TKey GetKey(TPosition position)
-		{
-			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
-			return GetIndexUnverified(position);
-		}
-		/// <summary>
-		///     将寻路节点转换为玩法节点
-		/// </summary>
 		/// <remarks>这个方法不进行数据验证,以提高寻路计算速度</remarks>
 		/// <param name="key">寻路节点</param>
 		/// <returns>玩法节点</returns>
@@ -250,18 +226,73 @@ namespace EthansGameKit.AStar
 		/// <returns>寻路节点</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract TKey GetIndexUnverified(TPosition position);
+		public TKey GetIndex(TPosition position)
+		{
+			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
+			return GetIndexUnverified(position);
+		}
+		public abstract List<TPosition> GetLinkSources();
+		public List<(TPosition to, float cost)> GetLinks(TPosition position)
+		{
+			var key = GetIndex(position);
+			var keys = ArrayCachePool<TKey>.Generate(maxLinkCountPerNode);
+			var basicCosts = ArrayCachePool<float>.Generate(maxLinkCountPerNode);
+			var linkCount = GetLinks(key, keys, basicCosts);
+			var result = ListPool<(TPosition to, float cost)>.Generate();
+			for (var i = 0; i < linkCount; ++i)
+			{
+				var to = keys[i];
+				var basicCost = basicCosts[i];
+				result.Add((GetPosition(to), basicCost));
+			}
+			ArrayCachePool<TKey>.Recycle(ref keys);
+			ArrayCachePool<float>.Recycle(ref basicCosts);
+			return result;
+		}
+		public List<(TPosition from, TPosition to, float cost)> GetLinks()
+		{
+			var result = ListPool<(TPosition from, TPosition to, float cost)>.Generate();
+			var links = GetLinkSources();
+			foreach (var from in links)
+			{
+				foreach (var (to, cost) in GetLinks(from))
+				{
+					result.Add((from, to, cost));
+				}
+			}
+			links.ClearAndRecycle();
+			return result;
+		}
 		/// <summary>
 		///     是否包含寻路节点
 		/// </summary>
 		/// <param name="key">寻路节点</param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public abstract bool ContainsKey(TKey key);
-		protected CachePool<Pathfinder> GetPool(Type pathfinderType)
+		protected abstract bool ContainsKey(TKey key);
+		/// <summary>
+		///     将寻路节点转换为玩法节点
+		/// </summary>
+		/// <param name="key">寻路节点</param>
+		/// <returns>玩法节点</returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected TPosition GetPosition(TKey key)
 		{
-			if (!pools.TryGetValue(pathfinderType, out var pool))
-				pool = pools[pathfinderType] = new(0);
-			return pool;
+			if (!ContainsKey(key)) throw new ArgumentOutOfRangeException($"{key}");
+			return GetPositionUnverified(key);
+		}
+		/// <summary>
+		///     将玩法节点转换为寻路节点
+		/// </summary>
+		/// <param name="position">玩法节点</param>
+		/// <returns>寻路节点</returns>
+		/// <exception cref="ArgumentOutOfRangeException"></exception>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected TKey GetKey(TPosition position)
+		{
+			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
+			return GetIndexUnverified(position);
 		}
 		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
 		protected void MarkChanged() => ++changeFlag;
@@ -274,6 +305,12 @@ namespace EthansGameKit.AStar
 		/// <returns>连接数量</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract int GetLinks(TKey node, TKey[] toNodes, float[] basicCosts);
+		CachePool<Pathfinder> GetPool(Type pathfinderType)
+		{
+			if (!pools.TryGetValue(pathfinderType, out var pool))
+				pool = pools[pathfinderType] = new(0);
+			return pool;
+		}
 		void Recycle(Pathfinder pathfinder)
 		{
 			if (pathfinder.Space != this) throw new ArgumentException("pathfinder.space != this");

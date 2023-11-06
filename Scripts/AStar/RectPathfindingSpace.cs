@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.AStar
@@ -21,7 +23,7 @@ namespace EthansGameKit.AStar
 			UpLeft,
 		}
 
-		readonly int widthPower;
+		public readonly bool allowDiagonal;
 		readonly int width;
 		readonly int xMin;
 		readonly int yMin;
@@ -29,6 +31,7 @@ namespace EthansGameKit.AStar
 		readonly int[] neighborIndexOffsetSequence;
 		readonly int linkBits;
 		readonly int linkCount;
+		[SerializeField] readonly int widthPower;
 		RectInt rawRect;
 		RectInt fullRect;
 		public RectInt RawRect => rawRect;
@@ -46,6 +49,7 @@ namespace EthansGameKit.AStar
 			NodeCount = width * height;
 			linkBits = allowDiagonal ? 3 : 2;
 			linkCount = 1 << linkBits;
+			this.allowDiagonal = allowDiagonal;
 			costs = new float[NodeCount << linkBits];
 			neighborIndexOffsetSequence = new[]
 			{
@@ -68,8 +72,21 @@ namespace EthansGameKit.AStar
 			var y = position.y - yMin;
 			return (y << widthPower) | x;
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool ContainsKey(int key) => key >= 0 && key < NodeCount;
+		public override List<Vector2Int> GetLinkSources()
+		{
+			var result = ListPool<Vector2Int>.Generate();
+			var toNodeBuffer = ArrayCachePool<int>.Generate(maxLinkCountPerNode);
+			var costBuffer = ArrayCachePool<float>.Generate(maxLinkCountPerNode);
+			foreach (var fromPos in rawRect.allPositionsWithin)
+			{
+				var fromIndex = GetIndexUnverified(fromPos);
+				var count = GetLinks(fromIndex, toNodeBuffer, costBuffer);
+				if (count > 0) result.Add(fromPos);
+			}
+			ArrayCachePool<int>.Recycle(ref toNodeBuffer);
+			ArrayCachePool<float>.Recycle(ref costBuffer);
+			return result;
+		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override Vector2Int GetPositionUnverified(int key)
 		{
@@ -77,6 +94,8 @@ namespace EthansGameKit.AStar
 			var y = key >> widthPower;
 			return new(x + xMin, y + yMin);
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected override bool ContainsKey(int key) => key >= 0 && key < NodeCount;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override int GetLinks(int node, int[] toNodes, float[] basicCosts)
 		{
@@ -106,6 +125,7 @@ namespace EthansGameKit.AStar
 		}
 		public void SetLink(Vector2Int fromNode, DirectionEnum direction, float basicCost)
 		{
+			if (!allowDiagonal && (int)direction >= 4) throw new ArgumentOutOfRangeException();
 			MarkChanged();
 			var fromIndex = GetKey(fromNode);
 			costs[GetLinkIndex(fromIndex, direction)] = basicCost;

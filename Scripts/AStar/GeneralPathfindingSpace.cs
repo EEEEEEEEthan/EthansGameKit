@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EthansGameKit.CachePools;
 using UnityEngine;
 
 namespace EthansGameKit.AStar
@@ -16,8 +17,9 @@ namespace EthansGameKit.AStar
 		public override bool ContainsPosition(Vector3 position) => allPositions.Contains(position);
 		public override Vector3 GetPositionUnverified(Vector3 key) => key;
 		public override Vector3 GetIndexUnverified(Vector3 position) => position;
+		public override List<Vector3> GetLinkSources() => ListPool<Vector3>.Generate(links.Keys);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool ContainsKey(Vector3 key) => allPositions.Contains(key);
+		protected override bool ContainsKey(Vector3 key) => allPositions.Contains(key);
 		protected override int GetLinks(Vector3 node, Vector3[] toNodes, float[] basicCosts)
 		{
 			if (links.TryGetValue(node, out var toNodesDict))
