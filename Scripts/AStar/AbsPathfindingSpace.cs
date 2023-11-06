@@ -171,6 +171,7 @@ namespace EthansGameKit.AStar
 				HeuristicTarget = heuristicTarget;
 				foreach (var source in sources)
 				{
+					if (!Space.ContainsPosition(source)) continue;
 					var key = Space.GetKey(source);
 					CacheParentNode(key, key);
 					CacheTotalCost(key, 0);

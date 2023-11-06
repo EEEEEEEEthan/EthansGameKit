@@ -74,6 +74,8 @@ namespace EthansGameKit.Components
 		{
 			if (!enabled) return;
 			if (Space is null) return;
+			Gizmos.color = new(1, 1, 0, 0.1f);
+			GizmosEx.DrawWiredRect(Space.rawRect);
 			Gizmos.color = new(0, 1, 1, 0.05f);
 			{
 				var halfCell = new Vector2(0.5f, 0.5f);
@@ -104,7 +106,7 @@ namespace EthansGameKit.Components
 				Vector2Int.down + Vector2Int.left,
 				Vector2Int.up + Vector2Int.left,
 			};
-			foreach (var fromPosition in Space.RawRect.allPositionsWithin)
+			foreach (var fromPosition in Space.rawRect.allPositionsWithin)
 			{
 				var fromTile = Tilemap.GetTile((Vector3Int)fromPosition);
 				foreach (var step in tile2cost)
@@ -124,9 +126,9 @@ namespace EthansGameKit.Components
 					break;
 				}
 			}
-			if (allowDiagonal)
+			if (allowDiagonal) 
 			{
-				foreach (var fromPosition in Space.RawRect.allPositionsWithin)
+				foreach (var fromPosition in Space.rawRect.allPositionsWithin)
 				{
 					const float rate = 0.70710678118654752440084436210485f;
 					{
@@ -135,6 +137,7 @@ namespace EthansGameKit.Components
 						if (cost1 > 0 && cost2 > 0)
 							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.UpRight, (cost1 + cost2) * rate);
 					}
+					/*
 					{
 						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Down, RectPathfindingSpace.DirectionEnum.Right);
 						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Right, RectPathfindingSpace.DirectionEnum.Down);
@@ -153,6 +156,7 @@ namespace EthansGameKit.Components
 						if (cost1 > 0 && cost2 > 0)
 							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.UpLeft, (cost1 + cost2) * rate);
 					}
+					*/
 				}
 			}
 		}

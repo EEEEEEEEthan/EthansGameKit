@@ -31,10 +31,9 @@ namespace EthansGameKit.AStar
 		readonly int[] neighborIndexOffsetSequence;
 		readonly int linkBits;
 		readonly int linkCount;
-		[SerializeField] readonly int widthPower;
-		RectInt rawRect;
-		RectInt fullRect;
-		public RectInt RawRect => rawRect;
+		readonly int widthPower;
+		public readonly RectInt rawRect;
+		public readonly RectInt fullRect;
 		public override int NodeCount { get; }
 		public RectPathfindingSpace(RectInt rect, bool allowDiagonal) : base(allowDiagonal ? 8 : 4)
 		{
@@ -138,19 +137,74 @@ namespace EthansGameKit.AStar
 		public float GetCost(Vector2Int fromNode, params DirectionEnum[] directions)
 		{
 			if (directions is null) return -1;
+			if (!rawRect.Contains(fromNode)) return -1;
 			var index = GetKey(fromNode);
 			var result = 0f;
 			foreach (var direction in directions)
 			{
-				var toIndex = GetLinkIndex(index, direction);
-				var cost = costs[toIndex];
+				if (!TryGetLinkIndex(index, direction, out var linkIndex)) return -1;
+				var cost = costs[linkIndex];
 				if (cost < 0) return -1;
 				result += cost;
+				index = GetNeighborIndexUnverified(index, (int)direction);
 			}
 			return result;
 		}
+		bool TryGetLinkIndex(int fromNode, DirectionEnum direction, out int index)
+		{
+			if (!ContainsKey(fromNode))
+			{
+				index = 0;
+				return false;
+			}
+			var fromPosition = GetPosition(fromNode);
+			if (!fullRect.Contains(fromPosition))
+			{
+				index = default;
+				return false;
+			}
+			Vector2Int toPosition;
+			switch (direction)
+			{
+				case DirectionEnum.Up:
+					toPosition = fromPosition + Vector2Int.up;
+					break;
+				case DirectionEnum.Right:
+					toPosition = fromPosition + Vector2Int.right;
+					break;
+				case DirectionEnum.Down:
+					toPosition = fromPosition + Vector2Int.down;
+					break;
+				case DirectionEnum.Left:
+					toPosition = fromPosition + Vector2Int.left;
+					break;
+				case DirectionEnum.UpRight:
+					toPosition = fromPosition + Vector2Int.up + Vector2Int.right;
+					break;
+				case DirectionEnum.DownRight:
+					toPosition = fromPosition + Vector2Int.down + Vector2Int.right;
+					break;
+				case DirectionEnum.DownLeft:
+					toPosition = fromPosition + Vector2Int.down + Vector2Int.left;
+					break;
+				case DirectionEnum.UpLeft:
+					toPosition = fromPosition + Vector2Int.up + Vector2Int.left;
+					break;
+				default:
+					index = default;
+					return false;
+			}
+			if (!fullRect.Contains(toPosition))
+			{
+				index = default;
+				return false;
+			}
+			index = GetLinkIndexUnverified(fromNode, (int)direction);
+			return true;
+		}
 		int GetLinkIndex(int fromNode, DirectionEnum direction)
 		{
+			if (!ContainsKey(fromNode)) throw new ArgumentOutOfRangeException($"fromNode:{fromNode}, direction:{direction}");
 			var fromPosition = GetPosition(fromNode);
 			if (!fullRect.Contains(fromPosition)) throw new ArgumentOutOfRangeException($"fromNode:{fromPosition}, direction:{direction}");
 			var toPosition = direction switch
