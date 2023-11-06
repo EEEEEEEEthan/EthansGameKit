@@ -9,7 +9,6 @@ namespace EthansGameKit.AStar.General
 	{
 		readonly HashSet<Vector3> allPositions = new();
 		readonly Dictionary<Vector3, Dictionary<Vector3, float>> links = new();
-		readonly CachePool<GeneralPathfinder> pathfinderPool = new(0);
 		public override int NodeCount => allPositions.Count;
 		public GeneralPathfindingSpace(int maxLinkCountPerNode = 8) : base(maxLinkCountPerNode)
 		{
