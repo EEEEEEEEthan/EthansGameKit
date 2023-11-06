@@ -210,23 +210,6 @@ namespace EthansGameKit.AStar
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract bool ContainsPosition(TPosition position);
-		protected CachePool<Pathfinder> GetPool(Type pathfinderType)
-		{
-			if (!pools.TryGetValue(pathfinderType, out var pool))
-				pool = pools[pathfinderType] = new(0);
-			return pool;
-		}
-		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
-		protected void MarkChanged() => ++changeFlag;
-		/// <summary>
-		///     获取这个点的所有连接
-		/// </summary>
-		/// <param name="node"></param>
-		/// <param name="toNodes">可移动至节点</param>
-		/// <param name="basicCosts">这一步花费的基础消耗</param>
-		/// <returns>连接数量</returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract int GetLinks(TKey node, TKey[] toNodes, float[] basicCosts);
 		/// <summary>
 		///     将寻路节点转换为玩法节点
 		/// </summary>
@@ -274,6 +257,23 @@ namespace EthansGameKit.AStar
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract bool ContainsKey(TKey key);
+		protected CachePool<Pathfinder> GetPool(Type pathfinderType)
+		{
+			if (!pools.TryGetValue(pathfinderType, out var pool))
+				pool = pools[pathfinderType] = new(0);
+			return pool;
+		}
+		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
+		protected void MarkChanged() => ++changeFlag;
+		/// <summary>
+		///     获取这个点的所有连接
+		/// </summary>
+		/// <param name="node"></param>
+		/// <param name="toNodes">可移动至节点</param>
+		/// <param name="basicCosts">这一步花费的基础消耗</param>
+		/// <returns>连接数量</returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract int GetLinks(TKey node, TKey[] toNodes, float[] basicCosts);
 		void Recycle(Pathfinder pathfinder)
 		{
 			if (pathfinder.Space != this) throw new ArgumentException("pathfinder.space != this");
