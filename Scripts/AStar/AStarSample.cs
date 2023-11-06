@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EthansGameKit.AStar.RectGrid;
 using UnityEngine;
 
 namespace EthansGameKit.AStar
@@ -17,7 +18,7 @@ namespace EthansGameKit.AStar
 			space.SetLink(new(0, 1), RectPathfindingSpace.DirectionEnum.Right, 1);
 			space.SetLink(new(0, 1), RectPathfindingSpace.DirectionEnum.Down, 1);
 			// 生成pathfinder. pathfinder继承于IDisposable，可以在Dispose时回收至内存池
-			using var pathfinder = space.CreatePathfinder<RectPathfindingSpace.RectPathfinder>();
+			using var pathfinder = space.CreatePathfinder<RectPathfinder>();
 			{
 				// 情景1: 移动至制定目标
 				var target = new Vector2Int(0, 1);
