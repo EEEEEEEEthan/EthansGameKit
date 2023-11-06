@@ -15,13 +15,12 @@ namespace EthansGameKit.AStar
 		{
 			readonly struct IndexToPositionConverter : IValueConverter<int, Vector2Int>
 			{
-				readonly RectPathfindingSpace space;
-				public IndexToPositionConverter(RectPathfindingSpace space) => this.space = space;
+				readonly PathfindingSpace<Vector2Int, int> space;
+				public IndexToPositionConverter(PathfindingSpace<Vector2Int, int> space) => this.space = space;
 				public Vector2Int Convert(int oldItem) => space.GetPositionUnverified(oldItem);
 				public int Recover(Vector2Int newItem) => space.GetIndexUnverified(newItem);
 			}
 
-			protected RectPathfindingSpace space;
 			protected float[] costMap;
 			protected int[] flowMap;
 			IReadOnlyDictionary<Vector2Int, float> costDict;
@@ -31,9 +30,9 @@ namespace EthansGameKit.AStar
 			public override IReadOnlyDictionary<Vector2Int, Vector2Int> FlowMap => flowDict;
 			protected override void OnInitialize()
 			{
-				space = (RectPathfindingSpace)Space;
-				costMap = new float[space.nodeCount];
-				flowMap = new int[space.nodeCount];
+				var space = Space;
+				costMap = new float[space.NodeCount];
+				flowMap = new int[space.NodeCount];
 				converter = new(space);
 				{
 					var wrappedList = costMap.WrapAsDictionary();
@@ -61,7 +60,7 @@ namespace EthansGameKit.AStar
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
 			protected override float GetHeuristic(int node)
 			{
-				var position = space.GetPositionUnverified(node);
+				var position = Space.GetPositionUnverified(node);
 				return (position - HeuristicTarget).sqrMagnitude;
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -92,7 +91,6 @@ namespace EthansGameKit.AStar
 			UpLeft,
 		}
 
-		readonly int nodeCount;
 		readonly int widthPower;
 		readonly int width;
 		readonly int xMin;
@@ -104,6 +102,7 @@ namespace EthansGameKit.AStar
 		RectInt rawRect;
 		RectInt fullRect;
 		public RectInt RawRect => rawRect;
+		public override int NodeCount { get; }
 		public RectPathfindingSpace(RectInt rect, bool allowDiagonal) : base(allowDiagonal ? 8 : 4)
 		{
 			rawRect = rect;
@@ -114,10 +113,10 @@ namespace EthansGameKit.AStar
 			width = 1 << widthPower;
 			var height = 1 << heightPower;
 			fullRect = new(xMin, yMin, width, height);
-			nodeCount = width * height;
+			NodeCount = width * height;
 			linkBits = allowDiagonal ? 3 : 2;
 			linkCount = 1 << linkBits;
-			costs = new float[nodeCount << linkBits];
+			costs = new float[NodeCount << linkBits];
 			neighborIndexOffsetSequence = new[]
 			{
 				width,
@@ -133,6 +132,22 @@ namespace EthansGameKit.AStar
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool ContainsPosition(Vector2Int position) => fullRect.Contains(position);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override int GetIndexUnverified(Vector2Int position)
+		{
+			var x = position.x - xMin;
+			var y = position.y - yMin;
+			return (y << widthPower) | x;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override bool ContainsKey(int key) => key >= 0 && key < NodeCount;
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public override Vector2Int GetPositionUnverified(int key)
+		{
+			var x = key & (width - 1);
+			var y = key >> widthPower;
+			return new(x + xMin, y + yMin);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override int GetLinks(int node, int[] toNodes, float[] basicCosts)
 		{
 			var count = 0;
@@ -147,22 +162,6 @@ namespace EthansGameKit.AStar
 				++count;
 			}
 			return count;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override int GetIndexUnverified(Vector2Int position)
-		{
-			var x = position.x - xMin;
-			var y = position.y - yMin;
-			return (y << widthPower) | x;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override bool ContainsKey(int key) => key >= 0 && key < nodeCount;
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override Vector2Int GetPositionUnverified(int key)
-		{
-			var x = key & (width - 1);
-			var y = key >> widthPower;
-			return new(x + xMin, y + yMin);
 		}
 		public void ClearLinks()
 		{

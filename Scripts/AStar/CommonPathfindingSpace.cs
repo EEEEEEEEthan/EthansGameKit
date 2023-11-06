@@ -9,12 +9,10 @@ namespace EthansGameKit.AStar
 	{
 		public sealed class CommonPathfinder : Pathfinder
 		{
-			readonly CommonPathfindingSpace space;
 			readonly Dictionary<Vector3, float> costMap = new();
 			readonly Dictionary<Vector3, Vector3> flowMap = new();
 			public override IReadOnlyDictionary<Vector3, Vector3> FlowMap => flowMap;
 			public override IReadOnlyDictionary<Vector3, float> CostMap => costMap;
-			public new CommonPathfindingSpace Space => (CommonPathfindingSpace)base.Space;
 			protected override void OnInitialize()
 			{
 			}
@@ -37,6 +35,7 @@ namespace EthansGameKit.AStar
 		public CommonPathfindingSpace(int maxLinkCountPerNode = 8) : base(maxLinkCountPerNode)
 		{
 		}
+		public override int NodeCount => allPositions.Count;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override bool ContainsPosition(Vector3 position) => allPositions.Contains(position);
 		protected override int GetLinks(Vector3 node, Vector3[] toNodes, float[] basicCosts)
@@ -56,10 +55,10 @@ namespace EthansGameKit.AStar
 			}
 			return 0;
 		}
-		protected override Vector3 GetPositionUnverified(Vector3 key) => key;
-		protected override Vector3 GetIndexUnverified(Vector3 position) => position;
+		public override Vector3 GetPositionUnverified(Vector3 key) => key;
+		public override Vector3 GetIndexUnverified(Vector3 position) => position;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override bool ContainsKey(Vector3 key) => allPositions.Contains(key);
+		public override bool ContainsKey(Vector3 key) => allPositions.Contains(key);
 		public void ClearLinks()
 		{
 			MarkChanged();

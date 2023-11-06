@@ -21,7 +21,7 @@ namespace EthansGameKit.AStar
 			{
 				// 情景1: 移动至制定目标
 				var target = new Vector2Int(0, 1);
-				pathfinder.Reinitialize(new Vector2Int(0, 0), target); // 启发坐标填目标，可以优先选择更近的路径。大部分情况能提升寻路效率
+				pathfinder.Reset(new Vector2Int(0, 0), target); // 启发坐标填目标，可以优先选择更近的路径。大部分情况能提升寻路效率
 				while (true)
 				{
 					// 把MoveNext作为寻路的原子操作可以灵活分散计算量
@@ -36,7 +36,7 @@ namespace EthansGameKit.AStar
 				// 情景2: 在附近随机移动
 				// 随机找一个点移动过去，如果这个点不可达，将会遍历整个地图.
 				// 可以先得到可达集，再随机取一个点
-				pathfinder.Reinitialize(new Vector2Int(0, 0), new(0, 0)); // 启发坐标填自己，可以形成一个均匀的dfs网
+				pathfinder.Reset(new Vector2Int(0, 0), new(0, 0)); // 启发坐标填自己，可以形成一个均匀的dfs网
 				var set = new HashSet<Vector2Int>();
 				for (var i = 0; i < 20; ++i)
 				{
@@ -52,7 +52,7 @@ namespace EthansGameKit.AStar
 				// 这种会预先把"流"预处理。
 				var buildings = new List<Vector2Int> { new(0, 1) };
 				// 把建筑当起点，反向寻路
-				pathfinder.Reinitialize(buildings, default);
+				pathfinder.Reset(buildings, default);
 				while (true)
 				{
 					if (!pathfinder.MoveNext(out _)) break;
@@ -64,7 +64,7 @@ namespace EthansGameKit.AStar
 			{
 				// 情景4: 异步寻路
 				var target = new Vector2Int(0, 1);
-				pathfinder.Reinitialize(new Vector2Int(0, 0), target);
+				pathfinder.Reset(new Vector2Int(0, 0), target);
 				var time = DateTime.Now;
 				while (true)
 				{
@@ -83,7 +83,7 @@ namespace EthansGameKit.AStar
 					if (pathfinder.Expired) // 说明地图已经发生变化。可以考虑重新寻路或者先寻完再检查路径
 					{
 						// 这里选择重新寻路
-						pathfinder.Reinitialize(new Vector2Int(0, 0), target);
+						pathfinder.Reset(new Vector2Int(0, 0), target);
 					}
 				NEXT_LOOP:
 					await TaskQueue.AwaitFreeFrame();

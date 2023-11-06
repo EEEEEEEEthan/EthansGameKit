@@ -118,7 +118,7 @@ namespace EthansGameKit.AStar
 			/// </summary>
 			protected abstract void OnClear();
 			protected abstract void OnInitialize();
-			internal void Initialize()
+			internal void OnConstruction()
 			{
 				changeFlag = Space.changeFlag;
 				nodeBuffer = new TKey[Space.maxLinkCountPerNode];
@@ -158,7 +158,7 @@ namespace EthansGameKit.AStar
 			}
 			#region reinitialize
 			readonly TPosition[] buffer_reinitialize = new TPosition[1];
-			public void Reinitialize(IEnumerable<TPosition> sources, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+			public void Reset(IEnumerable<TPosition> sources, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
 			{
 				Clear();
 				this.maxCost = maxCost;
@@ -172,11 +172,11 @@ namespace EthansGameKit.AStar
 					openList.AddOrUpdate(key, GetHeuristic(key));
 				}
 			}
-			public void Reinitialize(TPosition source, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
+			public void Reset(TPosition source, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
 			{
 				HeuristicTarget = heuristicTarget;
 				buffer_reinitialize[0] = source;
-				Reinitialize(buffer_reinitialize, heuristicTarget, maxCost, maxheuristic);
+				Reset(buffer_reinitialize, heuristicTarget, maxCost, maxheuristic);
 			}
 			#endregion
 		}
@@ -184,6 +184,7 @@ namespace EthansGameKit.AStar
 		protected readonly int maxLinkCountPerNode;
 		readonly Dictionary<Type, CachePool<Pathfinder>> pools = new();
 		int changeFlag;
+		public abstract int NodeCount { get; }
 		/// <summary>
 		///     构造方法
 		/// </summary>
@@ -194,7 +195,7 @@ namespace EthansGameKit.AStar
 			if (!GetPool(typeof(T)).TryGenerate(out var pathfinder))
 				pathfinder = (Pathfinder)Activator.CreateInstance(typeof(T), true);
 			pathfinder.Space = this;
-			pathfinder.Initialize();
+			pathfinder.OnConstruction();
 			return (T)pathfinder;
 		}
 		/// <summary>
@@ -211,12 +212,6 @@ namespace EthansGameKit.AStar
 			return pool;
 		}
 		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
-		protected void Recycle(Pathfinder pathfinder)
-		{
-			if (pathfinder.Space != this) throw new ArgumentException("pathfinder.space != this");
-			var pool = GetPool(pathfinder.GetType());
-			pool.Recycle(pathfinder);
-		}
 		protected void MarkChanged() => ++changeFlag;
 		/// <summary>
 		///     获取这个点的所有连接
@@ -234,7 +229,7 @@ namespace EthansGameKit.AStar
 		/// <returns>玩法节点</returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected TPosition GetPosition(TKey key)
+		public TPosition GetPosition(TKey key)
 		{
 			if (!ContainsKey(key)) throw new ArgumentOutOfRangeException($"{key}");
 			return GetPositionUnverified(key);
@@ -246,7 +241,7 @@ namespace EthansGameKit.AStar
 		/// <returns>寻路节点</returns>
 		/// <exception cref="ArgumentOutOfRangeException"></exception>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected TKey GetKey(TPosition position)
+		public TKey GetKey(TPosition position)
 		{
 			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
 			return GetIndexUnverified(position);
@@ -258,7 +253,7 @@ namespace EthansGameKit.AStar
 		/// <param name="key">寻路节点</param>
 		/// <returns>玩法节点</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract TPosition GetPositionUnverified(TKey key);
+		public abstract TPosition GetPositionUnverified(TKey key);
 		/// <summary>
 		///     将玩法节点转换为寻路节点
 		/// </summary>
@@ -266,13 +261,19 @@ namespace EthansGameKit.AStar
 		/// <param name="position">玩法节点</param>
 		/// <returns>寻路节点</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract TKey GetIndexUnverified(TPosition position);
+		public abstract TKey GetIndexUnverified(TPosition position);
 		/// <summary>
 		///     是否包含寻路节点
 		/// </summary>
 		/// <param name="key">寻路节点</param>
 		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract bool ContainsKey(TKey key);
+		public abstract bool ContainsKey(TKey key);
+		void Recycle(Pathfinder pathfinder)
+		{
+			if (pathfinder.Space != this) throw new ArgumentException("pathfinder.space != this");
+			var pool = GetPool(pathfinder.GetType());
+			pool.Recycle(pathfinder);
+		}
 	}
 }
