@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace EthansGameKit.AStar.Common
+namespace EthansGameKit.AStar.General
 {
 	// ReSharper disable once ClassNeverInstantiated.Global
-	public sealed class CommonPathfinder : PathfindingSpace<Vector3, Vector3>.Pathfinder
+	public sealed class GeneralPathfinder : PathfindingSpace<Vector3, Vector3>.Pathfinder
 	{
 		readonly Dictionary<Vector3, float> costMap = new();
 		readonly Dictionary<Vector3, Vector3> flowMap = new();

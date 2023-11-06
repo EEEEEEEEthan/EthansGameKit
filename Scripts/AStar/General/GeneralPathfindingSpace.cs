@@ -3,15 +3,15 @@ using System.Runtime.CompilerServices;
 using EthansGameKit.CachePools;
 using UnityEngine;
 
-namespace EthansGameKit.AStar.Common
+namespace EthansGameKit.AStar.General
 {
-	public sealed class CommonPathfindingSpace : PathfindingSpace<Vector3, Vector3>
+	public sealed class GeneralPathfindingSpace : PathfindingSpace<Vector3, Vector3>
 	{
 		readonly HashSet<Vector3> allPositions = new();
 		readonly Dictionary<Vector3, Dictionary<Vector3, float>> links = new();
-		readonly CachePool<CommonPathfinder> pathfinderPool = new(0);
+		readonly CachePool<GeneralPathfinder> pathfinderPool = new(0);
 		public override int NodeCount => allPositions.Count;
-		public CommonPathfindingSpace(int maxLinkCountPerNode = 8) : base(maxLinkCountPerNode)
+		public GeneralPathfindingSpace(int maxLinkCountPerNode = 8) : base(maxLinkCountPerNode)
 		{
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
