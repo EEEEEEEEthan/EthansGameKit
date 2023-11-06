@@ -17,7 +17,7 @@ namespace EthansGameKit.AStar
 			space.SetLink(new(0, 1), RectPathfindingSpace.DirectionEnum.Right, 1);
 			space.SetLink(new(0, 1), RectPathfindingSpace.DirectionEnum.Down, 1);
 			// 生成pathfinder. pathfinder继承于IDisposable，可以在Dispose时回收至内存池
-			using var pathfinder = RectPathfindingSpace.RectPathfinder.Create(space);
+			using var pathfinder = space.CreatePathfinder<RectPathfindingSpace.RectPathfinder>();
 			{
 				// 情景1: 移动至制定目标
 				var target = new Vector2Int(0, 1);
@@ -29,7 +29,7 @@ namespace EthansGameKit.AStar
 					if (!pathfinder.MoveNext(out var nextPosition)) break; // 返回false表示寻路已经遍历完成
 					if (nextPosition == target) break; // 到达目标
 				}
-				pathfinder.TryGetPath(target, out var path);
+				var path = pathfinder.GetPath(target);
 				// path即路径
 			}
 			{
@@ -44,7 +44,7 @@ namespace EthansGameKit.AStar
 					set.Add(nextStep);
 				}
 				var destination = set.RandomPick();
-				pathfinder.TryGetPath(destination, out var path);
+				var path = pathfinder.GetPath(destination);
 				// path即路径
 			}
 			{
@@ -88,7 +88,7 @@ namespace EthansGameKit.AStar
 				NEXT_LOOP:
 					await TaskQueue.AwaitFreeFrame();
 				}
-				pathfinder.TryGetPath(target, out var path);
+				var path = pathfinder.GetPath(target);
 			}
 		}
 	}

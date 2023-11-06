@@ -18,33 +18,28 @@ namespace EthansGameKit.AStar
 		/// </summary>
 		public abstract class Pathfinder : IDisposable
 		{
-			internal readonly PathfindingSpace<TPosition, TKey> space;
 			readonly Heap<TKey, float> openList = Heap<TKey, float>.Generate();
-			readonly TKey[] nodeBuffer;
-			readonly float[] floatBuffer;
+			TKey[] nodeBuffer;
+			float[] floatBuffer;
 			float maxCost = float.PositiveInfinity;
 			float maxHeuristic = float.PositiveInfinity;
 			int changeFlag;
+			public PathfindingSpace<TPosition, TKey> Space { get; internal set; }
 			/// <summary>
 			///     <para>过期.</para>
 			///     <para>如果space被修改过，pathfinder就会过期</para>
 			/// </summary>
-			public bool Expired => changeFlag != space.changeFlag;
+			public bool Expired => changeFlag != Space.changeFlag;
+			public abstract IReadOnlyDictionary<TPosition, float> CostMap { get; }
+			public abstract IReadOnlyDictionary<TPosition, TPosition> FlowMap { get; }
 			protected TPosition HeuristicTarget { get; private set; }
-			protected Pathfinder(PathfindingSpace<TPosition, TKey> space)
-			{
-				this.space = space;
-				changeFlag = space.changeFlag;
-				nodeBuffer = new TKey[space.maxLinkCountPerNode];
-				floatBuffer = new float[space.maxLinkCountPerNode];
-			}
 			/// <summary>
 			///     回收资源
 			/// </summary>
 			public void Dispose()
 			{
 				Clear();
-				space.Recycle(this);
+				Space.Recycle(this);
 			}
 			/// <summary>下一步寻路</summary>
 			/// <param name="current">下一步检索的节点</param>
@@ -53,7 +48,7 @@ namespace EthansGameKit.AStar
 			{
 				if (MoveNext(out TKey node))
 				{
-					current = space.GetPosition(node);
+					current = Space.GetPosition(node);
 					return true;
 				}
 				current = default;
@@ -67,9 +62,31 @@ namespace EthansGameKit.AStar
 			/// </summary>
 			public void Clear()
 			{
-				changeFlag = space.changeFlag;
+				changeFlag = Space.changeFlag;
 				openList.Clear();
 				OnClear();
+			}
+			/// <summary>尝试获取路径</summary>
+			/// <param name="target">目标</param>
+			/// <returns>
+			///     <para>路径.目标先入栈,起点最后入栈</para>
+			///     <para>若路径不存在,返回空.若起点与终点相同,栈长度为1</para>
+			/// </returns>
+			public Stack<TPosition> GetPath(TPosition target)
+			{
+				var flowMap = FlowMap;
+				if (!flowMap.ContainsKey(target)) return null;
+				var stack = StackPool<TPosition>.Generate();
+				var node = target;
+				stack.Push(target);
+				for (var i = 0; i < 10000; ++i)
+				{
+					var next = flowMap[node];
+					if (next.Equals(node)) return stack;
+					stack.Push(next);
+					node = next;
+				}
+				throw new("死循环");
 			}
 			/// <summary>启发函数</summary>
 			/// <remarks>调用频繁.如果计算量大，子类应当自行缓存</remarks>
@@ -100,32 +117,13 @@ namespace EthansGameKit.AStar
 			///     清理寻路缓存。在开始新的寻路时会触发
 			/// </summary>
 			protected abstract void OnClear();
-			/// <summary>尝试获取路径</summary>
-			/// <param name="target">目标</param>
-			/// <param name="path">
-			///     <para>一个栈表示路径。终点先入栈，起点最后入栈</para>
-			///     <para>若路径不存在，得到null</para>
-			///     <para>若起点终点相同，则长度为1</para>
-			/// </param>
-			/// <returns>true-路径存在; false-路径不存在</returns>
-			protected bool TryGetPath(TKey target, out Stack<TKey> path)
+			protected abstract void OnInitialize();
+			internal void Initialize()
 			{
-				if (!GetCachedParentNode(target, out var fromNode))
-				{
-					path = null;
-					return false;
-				}
-				path = StackPool<TKey>.Generate();
-				path.Push(target);
-				if (fromNode.Equals(target)) return true;
-				while (true)
-				{
-					path.Push(fromNode);
-					GetCachedParentNode(fromNode, out var parent);
-					if (parent.Equals(fromNode)) break;
-					fromNode = parent;
-				}
-				return true;
+				changeFlag = Space.changeFlag;
+				nodeBuffer = new TKey[Space.maxLinkCountPerNode];
+				floatBuffer = new float[Space.maxLinkCountPerNode];
+				OnInitialize();
 			}
 			bool MoveNext(out TKey current)
 			{
@@ -136,7 +134,7 @@ namespace EthansGameKit.AStar
 				}
 				current = openList.Pop();
 				GetCachedTotalCost(current, out var currentCost);
-				var linkCount = space.GetLinks(current, nodeBuffer, floatBuffer);
+				var linkCount = Space.GetLinks(current, nodeBuffer, floatBuffer);
 				var toNodes = nodeBuffer;
 				var basicCosts = floatBuffer;
 				for (var i = linkCount; i-- > 0;)
@@ -168,7 +166,7 @@ namespace EthansGameKit.AStar
 				HeuristicTarget = heuristicTarget;
 				foreach (var source in sources)
 				{
-					var key = space.GetKey(source);
+					var key = Space.GetKey(source);
 					CacheParentNode(key, key);
 					CacheTotalCost(key, 0);
 					openList.AddOrUpdate(key, GetHeuristic(key));
@@ -191,6 +189,14 @@ namespace EthansGameKit.AStar
 		/// </summary>
 		/// <param name="maxLinkCountPerNode">每个节点最大连接数量</param>
 		protected PathfindingSpace(int maxLinkCountPerNode) => this.maxLinkCountPerNode = maxLinkCountPerNode;
+		public T CreatePathfinder<T>() where T : Pathfinder
+		{
+			if (!GetPool(typeof(T)).TryGenerate(out var pathfinder))
+				pathfinder = (Pathfinder)Activator.CreateInstance(typeof(T), true);
+			pathfinder.Space = this;
+			pathfinder.Initialize();
+			return (T)pathfinder;
+		}
 		/// <summary>
 		///     验证是否包含某节点
 		/// </summary>
@@ -207,7 +213,7 @@ namespace EthansGameKit.AStar
 		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
 		protected void Recycle(Pathfinder pathfinder)
 		{
-			if (pathfinder.space != this) throw new ArgumentException("pathfinder.space != this");
+			if (pathfinder.Space != this) throw new ArgumentException("pathfinder.space != this");
 			var pool = GetPool(pathfinder.GetType());
 			pool.Recycle(pathfinder);
 		}

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
-using EthansGameKit.CachePools;
 using EthansGameKit.Collections.Wrappers;
 using UnityEngine;
 
@@ -22,35 +21,29 @@ namespace EthansGameKit.AStar
 				public int Recover(Vector2Int newItem) => space.GetIndexUnverified(newItem);
 			}
 
-			protected new readonly RectPathfindingSpace space;
-			protected readonly float[] costMap;
-			protected readonly int[] flowMap;
-			readonly IndexToPositionConverter converter;
-			public IReadOnlyDictionary<Vector2Int, float> CostMap
+			protected RectPathfindingSpace space;
+			protected float[] costMap;
+			protected int[] flowMap;
+			IReadOnlyDictionary<Vector2Int, float> costDict;
+			IReadOnlyDictionary<Vector2Int, Vector2Int> flowDict;
+			IndexToPositionConverter converter;
+			public override IReadOnlyDictionary<Vector2Int, float> CostMap => costDict;
+			public override IReadOnlyDictionary<Vector2Int, Vector2Int> FlowMap => flowDict;
+			protected override void OnInitialize()
 			{
-				get
-				{
-					var wrappedList = costMap.WrapAsDictionary();
-					var dict = wrappedList.WrapAsConvertedDictionary(converter, IValueConverter<float, float>.Default);
-					return dict;
-				}
-			}
-			public IReadOnlyDictionary<Vector2Int, Vector2Int> FlowMap
-			{
-				get
-				{
-					var flowDict = flowMap.WrapAsDictionary();
-					var dict = flowDict.WrapAsConvertedDictionary(converter, converter);
-					var result = dict.WrapAsFilteredDictionary(k => flowMap[space.GetIndexUnverified(k)] >= 0);
-					return result;
-				}
-			}
-			protected RectPathfinderBase(RectPathfindingSpace space) : base(space)
-			{
-				this.space = space;
+				space = (RectPathfindingSpace)Space;
 				costMap = new float[space.nodeCount];
 				flowMap = new int[space.nodeCount];
 				converter = new(space);
+				{
+					var wrappedList = costMap.WrapAsDictionary();
+					costDict = wrappedList.WrapAsConvertedDictionary(converter, IValueConverter<float, float>.Default);
+				}
+				{
+					var flowDict = flowMap.WrapAsDictionary();
+					var dict = flowDict.WrapAsConvertedDictionary(converter, converter);
+					this.flowDict = dict.WrapAsFilteredDictionary(k => flowMap[space.GetIndexUnverified(k)] >= 0);
+				}
 				Clear();
 			}
 			protected override void OnClear()
@@ -58,37 +51,11 @@ namespace EthansGameKit.AStar
 				costMap.MemSet(float.MaxValue);
 				flowMap.MemSet(-1);
 			}
-			/// <summary>尝试获取路径</summary>
-			/// <param name="target">目标</param>
-			/// <param name="path">
-			///     <para>一个列表示路径。起点在0号元素</para>
-			///     <para>若路径不存在，得到null</para>
-			///     <para>若起点终点相同，则长度为1</para>
-			/// </param>
-			/// <returns>true-路径存在; false-路径不存在</returns>
-			public bool TryGetPath(Vector2Int target, out List<Vector2Int> path)
-			{
-				var intTarget = space.GetKey(target);
-				if (!base.TryGetPath(intTarget, out var intStack))
-				{
-					path = null;
-					return false;
-				}
-				path = ListPool<Vector2Int>.Generate();
-				while (intStack.TryPop(out var index))
-					path.Add(space.GetPosition(index));
-				return true;
-			}
 		}
 
 		public sealed class RectPathfinder : RectPathfinderBase
 		{
-			public static RectPathfinder Create(RectPathfindingSpace space)
-			{
-				if (space.GetPool(typeof(RectPathfinder)).TryGenerate(out var pathfinder)) return (RectPathfinder)pathfinder;
-				return new(space);
-			}
-			RectPathfinder(RectPathfindingSpace space) : base(space)
+			RectPathfinder()
 			{
 			}
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
