@@ -130,6 +130,25 @@ namespace EthansGameKit.AStar
 			var fromIndex = GetKey(fromNode);
 			costs[GetLinkIndex(fromIndex, direction)] = basicCost;
 		}
+		public float GetCost(Vector2Int fromNode, DirectionEnum direction)
+		{
+			var fromIndex = GetKey(fromNode);
+			return costs[GetLinkIndex(fromIndex, direction)];
+		}
+		public float GetCost(Vector2Int fromNode, params DirectionEnum[] directions)
+		{
+			if (directions is null) return -1;
+			var index = GetKey(fromNode);
+			var result = 0f;
+			foreach (var direction in directions)
+			{
+				var toIndex = GetLinkIndex(index, direction);
+				var cost = costs[toIndex];
+				if (cost < 0) return -1;
+				result += cost;
+			}
+			return result;
+		}
 		int GetLinkIndex(int fromNode, DirectionEnum direction)
 		{
 			var fromPosition = GetPosition(fromNode);

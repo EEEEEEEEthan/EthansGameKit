@@ -53,7 +53,7 @@ namespace EthansGameKit.Components
 
 		Tilemap _tilemap;
 		[SerializeField] bool allowDiagonal;
-		[SerializeField] StepCost[] costMap = { };
+		[SerializeField] StepCost[] tile2cost = { };
 		public RectPathfindingSpace Space { get; private set; }
 		public Tilemap Tilemap
 		{
@@ -74,7 +74,7 @@ namespace EthansGameKit.Components
 		{
 			if (!enabled) return;
 			if (Space is null) return;
-			Gizmos.color = new(0, 1, 1, 0.2f);
+			Gizmos.color = new(0, 1, 1, 0.05f);
 			{
 				var halfCell = new Vector2(0.5f, 0.5f);
 				var grid = Tilemap.layoutGrid;
@@ -82,7 +82,7 @@ namespace EthansGameKit.Components
 				{
 					var fromPos = grid.CellToLocalInterpolated(from + halfCell);
 					var toPos = grid.CellToLocalInterpolated(to + halfCell);
-					var shortten = (toPos - fromPos).normalized * 0.3f;
+					var shortten = (toPos - fromPos).normalized * 0.1f;
 					GizmosEx.DrawArrow(fromPos + shortten, toPos - shortten, 0.1f);
 				}
 			}
@@ -104,18 +104,17 @@ namespace EthansGameKit.Components
 				Vector2Int.down + Vector2Int.left,
 				Vector2Int.up + Vector2Int.left,
 			};
-			var maxDirection = Space.allowDiagonal ? 8 : 4;
 			foreach (var fromPosition in Space.RawRect.allPositionsWithin)
 			{
 				var fromTile = Tilemap.GetTile((Vector3Int)fromPosition);
-				foreach (var step in costMap)
+				foreach (var step in tile2cost)
 				{
 					if (step.tile != fromTile) continue;
-					for (var dir = 0; dir < maxDirection; ++dir)
+					for (var dir = 0; dir < 4; ++dir)
 					{
 						var toPosition = fromPosition + neighbors[dir];
 						var toTile = Tilemap.GetTile((Vector3Int)toPosition);
-						foreach (var step2 in costMap)
+						foreach (var step2 in tile2cost)
 						{
 							if (step2.tile != toTile) continue;
 							Space.SetLink(fromPosition, (RectPathfindingSpace.DirectionEnum)dir, step2.cost);
@@ -123,6 +122,37 @@ namespace EthansGameKit.Components
 						}
 					}
 					break;
+				}
+			}
+			if (allowDiagonal)
+			{
+				foreach (var fromPosition in Space.RawRect.allPositionsWithin)
+				{
+					const float rate = 0.70710678118654752440084436210485f;
+					{
+						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Up, RectPathfindingSpace.DirectionEnum.Right);
+						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Right, RectPathfindingSpace.DirectionEnum.Up);
+						if (cost1 > 0 && cost2 > 0)
+							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.UpRight, (cost1 + cost2) * rate);
+					}
+					{
+						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Down, RectPathfindingSpace.DirectionEnum.Right);
+						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Right, RectPathfindingSpace.DirectionEnum.Down);
+						if (cost1 > 0 && cost2 > 0)
+							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.DownRight, (cost1 + cost2) * rate);
+					}
+					{
+						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Down, RectPathfindingSpace.DirectionEnum.Left);
+						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Left, RectPathfindingSpace.DirectionEnum.Down);
+						if (cost1 > 0 && cost2 > 0)
+							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.DownLeft, (cost1 + cost2) * rate);
+					}
+					{
+						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Up, RectPathfindingSpace.DirectionEnum.Left);
+						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Left, RectPathfindingSpace.DirectionEnum.Up);
+						if (cost1 > 0 && cost2 > 0)
+							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.UpLeft, (cost1 + cost2) * rate);
+					}
 				}
 			}
 		}
