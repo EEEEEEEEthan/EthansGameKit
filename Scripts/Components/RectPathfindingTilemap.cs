@@ -1,4 +1,6 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using EthansGameKit.AStar;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -8,23 +10,8 @@ namespace EthansGameKit.Components
 	[ExecuteAlways, RequireComponent(typeof(Tilemap))]
 	public class RectPathfindingTilemap : MonoBehaviour
 	{
-#if UNITY_EDITOR
-		[UnityEditor.CustomEditor(typeof(RectPathfindingTilemap))]
-		class Editor : UnityEditor.Editor
-		{
-			public override void OnInspectorGUI()
-			{
-				base.OnInspectorGUI();
-				var tilemap = (RectPathfindingTilemap)target;
-				if (GUILayout.Button("Bake"))
-				{
-					tilemap.Bake();
-				}
-			}
-		}
-#endif
 		[Serializable]
-		struct StepCost
+		public struct StepCost
 		{
 #if UNITY_EDITOR
 			[UnityEditor.CustomPropertyDrawer(typeof(StepCost))]
@@ -50,10 +37,32 @@ namespace EthansGameKit.Components
 			[SerializeField] public TileBase tile;
 			[SerializeField] public float cost;
 		}
-
+#if UNITY_EDITOR
+		[UnityEditor.CustomEditor(typeof(RectPathfindingTilemap))]
+		class Editor : UnityEditor.Editor
+		{
+			public override void OnInspectorGUI()
+			{
+				base.OnInspectorGUI();
+				var tilemap = (RectPathfindingTilemap)target;
+				if (GUILayout.Button("Bake"))
+				{
+					tilemap.Bake();
+				}
+			}
+		}
+#endif
 		Tilemap _tilemap;
 		[SerializeField] bool allowDiagonal;
 		[SerializeField] StepCost[] tile2cost = { };
+		/// <summary>
+		///     bake后生效
+		/// </summary>
+		public IReadOnlyList<StepCost> Tile2Cost
+		{
+			get => tile2cost;
+			set => tile2cost = value.ToArray();
+		}
 		public RectPathfindingSpace Space { get; private set; }
 		public Tilemap Tilemap
 		{
