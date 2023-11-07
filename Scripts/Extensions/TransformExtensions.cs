@@ -1,11 +1,10 @@
-﻿// ReSharper disable once CheckNamespace
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using EthansGameKit.CachePools;
 using EthansGameKit.Internal;
 using UnityEngine;
 
+// ReSharper disable once CheckNamespace
 namespace EthansGameKit
 {
 	public static partial class Extensions
@@ -37,10 +36,7 @@ namespace EthansGameKit
 		/// <param name="this"></param>
 		/// <param name="includeSelf"></param>
 		/// <returns></returns>
-		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf)
-		{
-			return DfsTransformAccessor.Generate(@this, includeSelf);
-		}
+		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf) => new DfsTransformAccessor(@this, includeSelf);
 		/// <summary>
 		///     所有子节点,不包括自己
 		/// </summary>
@@ -49,11 +45,9 @@ namespace EthansGameKit
 		/// </remarks>
 		/// <param name="this"></param>
 		/// <param name="includeSelf"></param>
+		/// <param name="valid">验证失败的节点和他的子节点将被剔除</param>
 		/// <returns></returns>
-		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf, Func<Transform, bool> prune)
-		{
-			return DfsTransformAccessor.Generate(@this, includeSelf);
-		}
+		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf, Func<Transform, bool> valid) => new DfsTransformAccessor(@this, includeSelf, valid);
 		public static bool TryGetHierarchyPath(this Transform @this, Transform parent, out string path)
 		{
 			path = null;
@@ -100,5 +94,6 @@ namespace EthansGameKit
 			}
 			return transform;
 		}
+		public static Transform FindOrAdd(this Transform @this, string path) => @this.FindOrAdd(path, out _);
 	}
 }
