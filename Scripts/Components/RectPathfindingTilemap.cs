@@ -74,12 +74,32 @@ namespace EthansGameKit.Components
 		{
 			if (!enabled) return;
 			if (Space is null) return;
-			Gizmos.color = new(1, 1, 0, 0.1f);
-			GizmosEx.DrawWiredRect(Space.rawRect);
-			Gizmos.color = new(0, 1, 1, 0.05f);
+			var grid = Tilemap.layoutGrid;
 			{
+				Gizmos.color = new(1, 1, 0, 0.3f);
+				var xMin = Space.rawRect.xMin;
+				var yMin = Space.rawRect.yMin;
+				var xMax = Space.rawRect.xMax;
+				var yMax = Space.rawRect.yMax;
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMin, yMin)), grid.CellToLocalInterpolated(new(xMin, yMax)));
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMin, yMax)), grid.CellToLocalInterpolated(new(xMax, yMax)));
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMax, yMax)), grid.CellToLocalInterpolated(new(xMax, yMin)));
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMax, yMin)), grid.CellToLocalInterpolated(new(xMin, yMin)));
+			}
+			{
+				Gizmos.color = new(1, 0, 0, 0.5f);
+				var xMin = Space.fullRect.xMin;
+				var yMin = Space.fullRect.yMin;
+				var xMax = Space.fullRect.xMax;
+				var yMax = Space.fullRect.yMax;
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMin, yMin)), grid.CellToLocalInterpolated(new(xMin, yMax)));
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMin, yMax)), grid.CellToLocalInterpolated(new(xMax, yMax)));
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMax, yMax)), grid.CellToLocalInterpolated(new(xMax, yMin)));
+				Gizmos.DrawLine(grid.CellToLocalInterpolated(new(xMax, yMin)), grid.CellToLocalInterpolated(new(xMin, yMin)));
+			}
+			{
+				Gizmos.color = new(0, 1, 1, 0.05f);
 				var halfCell = new Vector2(0.5f, 0.5f);
-				var grid = Tilemap.layoutGrid;
 				foreach (var (from, to, cost) in Space.GetLinks())
 				{
 					var fromPos = grid.CellToLocalInterpolated(from + halfCell);
@@ -91,6 +111,15 @@ namespace EthansGameKit.Components
 		}
 		public void Bake()
 		{
+			float getCost(Vector2Int position)
+			{
+				var tile = Tilemap.GetTile((Vector3Int)position);
+				foreach (var t2c in tile2cost)
+					if (tile == t2c.tile)
+						return t2c.cost;
+				return -1;
+			}
+
 			var tilemap = Tilemap;
 			var bounds = tilemap.cellBounds;
 			var rect = new RectInt(bounds.xMin, bounds.yMin, bounds.size.x, bounds.size.y);
@@ -108,36 +137,30 @@ namespace EthansGameKit.Components
 			};
 			foreach (var fromPosition in Space.rawRect.allPositionsWithin)
 			{
-				var fromTile = Tilemap.GetTile((Vector3Int)fromPosition);
-				foreach (var step in tile2cost)
+				var cost1 = getCost(fromPosition);
+				if (cost1 <= 0) continue;
+				for (var dir = 0; dir < 4; ++dir)
 				{
-					if (step.tile != fromTile) continue;
-					for (var dir = 0; dir < 4; ++dir)
-					{
-						var toPosition = fromPosition + neighbors[dir];
-						var toTile = Tilemap.GetTile((Vector3Int)toPosition);
-						foreach (var step2 in tile2cost)
-						{
-							if (step2.tile != toTile) continue;
-							Space.SetLink(fromPosition, (RectPathfindingSpace.DirectionEnum)dir, step2.cost);
-							break;
-						}
-					}
-					break;
+					var toPosition = fromPosition + neighbors[dir];
+					var cost2 = getCost(toPosition);
+					if (cost2 <= 0) continue;
+					Space.SetLink(fromPosition, (RectPathfindingSpace.DirectionEnum)dir, (cost1 + cost2) * 0.5f);
 				}
 			}
-			if (allowDiagonal) 
+			if (allowDiagonal)
 			{
 				foreach (var fromPosition in Space.rawRect.allPositionsWithin)
 				{
-					const float rate = 0.70710678118654752440084436210485f;
+					var costa = getCost(fromPosition);
+					if (costa <= 0) continue;
+					//const float rate = 0.70710678118654752440084436210485f;
+					const float rate = 0.70710678118654752440084436210485f * 0.5f;
 					{
 						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Up, RectPathfindingSpace.DirectionEnum.Right);
 						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Right, RectPathfindingSpace.DirectionEnum.Up);
 						if (cost1 > 0 && cost2 > 0)
 							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.UpRight, (cost1 + cost2) * rate);
 					}
-					/*
 					{
 						var cost1 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Down, RectPathfindingSpace.DirectionEnum.Right);
 						var cost2 = Space.GetCost(fromPosition, RectPathfindingSpace.DirectionEnum.Right, RectPathfindingSpace.DirectionEnum.Down);
@@ -156,7 +179,6 @@ namespace EthansGameKit.Components
 						if (cost1 > 0 && cost2 > 0)
 							Space.SetLink(fromPosition, RectPathfindingSpace.DirectionEnum.UpLeft, (cost1 + cost2) * rate);
 					}
-					*/
 				}
 			}
 		}

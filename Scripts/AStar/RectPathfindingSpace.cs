@@ -144,7 +144,7 @@ namespace EthansGameKit.AStar
 			{
 				if (!TryGetLinkIndex(index, direction, out var linkIndex)) return -1;
 				var cost = costs[linkIndex];
-				if (cost < 0) return -1;
+				if (cost <= 0) return -1;
 				result += cost;
 				index = GetNeighborIndexUnverified(index, (int)direction);
 			}
