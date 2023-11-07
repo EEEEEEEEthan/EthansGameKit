@@ -75,6 +75,7 @@ namespace EthansGameKit.Components
 			if (!enabled) return;
 			if (Space is null) return;
 			var grid = Tilemap.layoutGrid;
+			if (!grid) return;
 			{
 				Gizmos.color = new(1, 1, 0, 0.3f);
 				var xMin = Space.rawRect.xMin;
