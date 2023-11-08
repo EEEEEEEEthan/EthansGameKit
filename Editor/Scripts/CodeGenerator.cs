@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
 using UnityEngine;
@@ -40,53 +39,13 @@ namespace EthansGameKit.Editor
 			}
 		}
 
-		static string Replace(string @this, string startMark, string endMark, string replace, int ident = 0)
-		{
-			var oldCodeLines = @this.Split("\n");
-			var startIndex = -1;
-			var endIndex = -1;
-			for (var i = 0; i < oldCodeLines.Length; i++)
-			{
-				if (startIndex < 0)
-				{
-					var idx = oldCodeLines[i].IndexOf(startMark, StringComparison.Ordinal);
-					if (idx > 0)
-					{
-						startIndex = i + 1;
-					}
-				}
-				if (oldCodeLines[i].Contains(endMark))
-				{
-					endIndex = i;
-					break;
-				}
-			}
-			if (startIndex != -1 && endIndex != -1)
-			{
-				var newLines = new List<string>();
-				var lines = replace.Split("\n");
-				foreach (var t in lines)
-				{
-					var trimed = t.TrimEnd();
-					if (trimed.IsNullOrEmpty()) continue;
-					newLines.Add($"{new string('\t', ident)}{trimed}");
-				}
-				var newCodeLines = new string[oldCodeLines.Length - (endIndex - startIndex - 1) + newLines.Count - 1];
-				Array.Copy(oldCodeLines, 0, newCodeLines, 0, startIndex);
-				newLines.CopyTo(newCodeLines, startIndex);
-				Array.Copy(oldCodeLines, endIndex, newCodeLines, startIndex + newLines.Count, oldCodeLines.Length - endIndex);
-				return string.Join(Environment.NewLine, newCodeLines);
-			}
-			Debug.LogError("Start and/or end marks not found.");
-			return @this;
-		}
 		[SerializeField] TextAsset script;
 		[SerializeField] string regionName;
 		protected void Replace()
 		{
 			var startMark = $"#region {regionName}";
 			var endMark = $"#endregion {regionName}";
-			var newCode = Replace(script.text, startMark, endMark, Generate(), 2);
+			var newCode = script.text.ReplaceAsCode(startMark, endMark, Generate(), "\r\n", 2);
 			Debug.Log(newCode);
 			File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
@@ -96,7 +55,7 @@ namespace EthansGameKit.Editor
 		{
 			var startMark = $"#region {regionName}";
 			var endMark = $"#endregion {regionName}";
-			var newCode = Replace(script.text, startMark, endMark, "", 2);
+			var newCode = script.text.ReplaceAsCode(startMark, endMark, "", "\r\n", 2);
 			File.WriteAllText(AssetDatabase.GetAssetPath(script), newCode);
 			AssetDatabase.Refresh();
 		}

@@ -95,5 +95,23 @@ namespace EthansGameKit
 			return transform;
 		}
 		public static Transform FindOrAdd(this Transform @this, string path) => @this.FindOrAdd(path, out _);
+		/// <summary>
+		///     获取从parent到这个节点的深度.当@this与parent相等时,深度是0.当@this是parent的子节点时,深度是1.
+		/// </summary>
+		/// <param name="this"></param>
+		/// <param name="parent"></param>
+		/// <returns></returns>
+		public static int GetDepth(this Transform @this, Transform parent = null)
+		{
+			var start = @this;
+			var depth = 0;
+			while (@this != parent)
+			{
+				if (@this is null) throw new ArgumentException($"Transform {start} is not a child of {parent}");
+				depth++;
+				@this = @this.parent;
+			}
+			return depth;
+		}
 	}
 }

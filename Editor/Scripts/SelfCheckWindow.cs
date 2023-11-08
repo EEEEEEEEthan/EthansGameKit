@@ -10,10 +10,10 @@ namespace EthansGameKit.Editor
 	class SelfCheckWindow : EditorWindow
 	{
 		// F5快捷键
-		[MenuItem("Tools/" + PackageDefines.packageName + "/自检 &F5")]
+		[MenuItem("Tools/" + PackageDefines.packageName + "/Self Check &F5")]
 		static void ShowWindow()
 		{
-			var window = GetWindow<SelfCheckWindow>("自检");
+			var window = GetWindow<SelfCheckWindow>("Self Check");
 			window.checkedOnce = false;
 		}
 		[SerializeField] List<Problem> problems = new();
@@ -24,7 +24,7 @@ namespace EthansGameKit.Editor
 		}
 		void OnGUI()
 		{
-			if (GUILayout.Button("自检") || !checkedOnce)
+			if (GUILayout.Button("Self Check") || !checkedOnce)
 			{
 				SelfCheck();
 			}
@@ -60,7 +60,7 @@ namespace EthansGameKit.Editor
 				EditorGUILayout.LabelField(problem.details);
 				EditorGUILayout.BeginHorizontal();
 				GUILayout.FlexibleSpace();
-				if (GUILayout.Button("带我看看", GUILayout.Width(70)))
+				if (GUILayout.Button("Show me", GUILayout.Width(70)))
 					EditorGUIUtility.PingObject(problem.context);
 				EditorGUILayout.EndHorizontal();
 			}
@@ -91,11 +91,11 @@ namespace EthansGameKit.Editor
 			}
 			// 提示完成
 			if (exceptionOccured)
-				ShowNotification(new("自检完成并伴有异常"), 1);
+				ShowNotification(new("Completed with exceptions."), 1);
 			else if (problems.Count == 0)
-				ShowNotification(new("自检完成，未发现问题"), 1);
+				ShowNotification(new("Completed."), 1);
 			else
-				ShowNotification(new("自检完成，发现问题"), 1);
+				ShowNotification(new("Completed with problems."), 1);
 		}
 	}
 }
