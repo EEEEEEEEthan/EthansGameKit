@@ -6,6 +6,44 @@ using UnityEngine;
 
 namespace EthansGameKit.AStar
 {
+	public static class DirectionEnumExtensions
+	{
+		public static Vector2Int ToVector2(this RectPathfindingSpace.DirectionEnum @this)
+		{
+			return @this switch
+			{
+				RectPathfindingSpace.DirectionEnum.Up => Vector2Int.up,
+				RectPathfindingSpace.DirectionEnum.Right => Vector2Int.right,
+				RectPathfindingSpace.DirectionEnum.Down => Vector2Int.down,
+				RectPathfindingSpace.DirectionEnum.Left => Vector2Int.left,
+				RectPathfindingSpace.DirectionEnum.UpRight => Vector2Int.up + Vector2Int.right,
+				RectPathfindingSpace.DirectionEnum.DownRight => Vector2Int.down + Vector2Int.right,
+				RectPathfindingSpace.DirectionEnum.DownLeft => Vector2Int.down + Vector2Int.left,
+				RectPathfindingSpace.DirectionEnum.UpLeft => Vector2Int.up + Vector2Int.left,
+				_ => throw new ArgumentOutOfRangeException(nameof(@this), @this, null),
+			};
+		}
+		public static bool IsDiagonal(this RectPathfindingSpace.DirectionEnum @this)
+		{
+			return (int)@this >= 4;
+		}
+		public static RectPathfindingSpace.DirectionEnum Opposite(this RectPathfindingSpace.DirectionEnum @this)
+		{
+			return @this switch
+			{
+				RectPathfindingSpace.DirectionEnum.Up => RectPathfindingSpace.DirectionEnum.Down,
+				RectPathfindingSpace.DirectionEnum.Right => RectPathfindingSpace.DirectionEnum.Left,
+				RectPathfindingSpace.DirectionEnum.Down => RectPathfindingSpace.DirectionEnum.Up,
+				RectPathfindingSpace.DirectionEnum.Left => RectPathfindingSpace.DirectionEnum.Right,
+				RectPathfindingSpace.DirectionEnum.UpRight => RectPathfindingSpace.DirectionEnum.DownLeft,
+				RectPathfindingSpace.DirectionEnum.DownRight => RectPathfindingSpace.DirectionEnum.UpLeft,
+				RectPathfindingSpace.DirectionEnum.DownLeft => RectPathfindingSpace.DirectionEnum.UpRight,
+				RectPathfindingSpace.DirectionEnum.UpLeft => RectPathfindingSpace.DirectionEnum.DownRight,
+				_ => throw new ArgumentOutOfRangeException(nameof(@this), @this, null),
+			};
+		}
+	}
+
 	/// <summary>
 	///     针对四邻域深度优化的寻路空间
 	/// </summary>
@@ -24,6 +62,8 @@ namespace EthansGameKit.AStar
 		}
 
 		public readonly bool allowDiagonal;
+		public readonly RectInt rawRect;
+		public readonly RectInt fullRect;
 		readonly int width;
 		readonly int xMin;
 		readonly int yMin;
@@ -32,8 +72,6 @@ namespace EthansGameKit.AStar
 		readonly int linkBits;
 		readonly int linkCount;
 		readonly int widthPower;
-		public readonly RectInt rawRect;
-		public readonly RectInt fullRect;
 		public override int NodeCount { get; }
 		public RectPathfindingSpace(RectInt rect, bool allowDiagonal) : base(allowDiagonal ? 8 : 4)
 		{
@@ -63,7 +101,10 @@ namespace EthansGameKit.AStar
 			};
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool ContainsPosition(Vector2Int position) => fullRect.Contains(position);
+		public override bool ContainsPosition(Vector2Int position)
+		{
+			return fullRect.Contains(position);
+		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetIndexUnverified(Vector2Int position)
 		{
@@ -94,7 +135,10 @@ namespace EthansGameKit.AStar
 			return new(x + xMin, y + yMin);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override bool ContainsKey(int key) => key >= 0 && key < NodeCount;
+		protected override bool ContainsKey(int key)
+		{
+			return key >= 0 && key < NodeCount;
+		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override int GetLinks(int node, int[] toNodes, float[] basicCosts)
 		{
@@ -223,9 +267,15 @@ namespace EthansGameKit.AStar
 			return GetLinkIndexUnverified(fromNode, (int)direction);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		int GetNeighborIndexUnverified(int fromNode, int direction) => fromNode + neighborIndexOffsetSequence[direction];
+		int GetNeighborIndexUnverified(int fromNode, int direction)
+		{
+			return fromNode + neighborIndexOffsetSequence[direction];
+		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		int GetLinkIndexUnverified(int fromNode, int direction) => (GetNeighborIndexUnverified(fromNode, direction) << linkBits) | direction;
+		int GetLinkIndexUnverified(int fromNode, int direction)
+		{
+			return (GetNeighborIndexUnverified(fromNode, direction) << linkBits) | direction;
+		}
 		#region gizmos
 		static int[] toNodeBuffer = new int[8];
 		static float[] costBuffer = new float[8];
