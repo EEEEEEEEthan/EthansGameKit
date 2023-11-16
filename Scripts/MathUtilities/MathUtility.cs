@@ -96,8 +96,12 @@ namespace EthansGameKit.MathUtilities
 			var z = Mathf.Sqrt(-2f * Mathf.Log(u1)) * Mathf.Cos(2f * Mathf.PI * u2);
 			return z;
 		}
-		
-		public static int GetOne(int input)
+		/// <summary>
+		/// 获得二进制数中1的数量
+		/// </summary>
+		/// <param name="input"></param>
+		/// <returns></returns>
+		public static int GetBitCount(int input)
 		{
 			var count = 0;
 			while (input != 0)
@@ -107,7 +111,12 @@ namespace EthansGameKit.MathUtilities
 			}
 			return count;
 		}
-
+		/// <summary>
+		/// 获得二进制数中1的位置
+		/// </summary>
+		/// <param name="input"></param>
+		/// <param name="array"></param>
+		/// <returns></returns>
 		public static int FindBits(int input, int[] array)
 		{
 			var count = 0;
@@ -116,43 +125,15 @@ namespace EthansGameKit.MathUtilities
 				var minusOne = input - 1;
 				var andValue = minusOne & input;
 				var orValue = minusOne | input;
-				var rightmostBit = (andValue ^ orValue) + 1;
+				var rightmost = (andValue ^ orValue) + 1;
 				input = andValue;
-				array[count++] = rightmostBit switch
-				{
-					1 << 0 => 0,
-					1 << 1 => 1,
-					1 << 2 => 2,
-					1 << 3 => 3,
-					1 << 4 => 4,
-					1 << 5 => 5,
-					1 << 6 => 6,
-					1 << 7 => 7,
-					1 << 8 => 8,
-					1 << 9 => 9,
-					1 << 10 => 10,
-					1 << 11 => 11,
-					1 << 12 => 12,
-					1 << 13 => 13,
-					1 << 14 => 14,
-					1 << 15 => 15,
-					1 << 16 => 16,
-					1 << 17 => 17,
-					1 << 18 => 18,
-					1 << 19 => 19,
-					1 << 20 => 20,
-					1 << 21 => 21,
-					1 << 22 => 22,
-					1 << 23 => 23,
-					1 << 24 => 24,
-					1 << 25 => 25,
-					1 << 26 => 26,
-					1 << 27 => 27,
-					1 << 28 => 28,
-					1 << 29 => 29,
-					1 << 30 => 30,
-					1 << 31 => 31,
-				};
+				var index = 0;
+				if ((rightmost & 0b_11111111_11111111_00000000_00000000) != 0) index += 16;
+				if ((rightmost & 0b_11111111_00000000_11111111_00000000) != 0) index += 8;
+				if ((rightmost & 0b_11110000_11110000_11110000_11110000) != 0) index += 4;
+				if ((rightmost & 0b_11001100_11001100_11001100_11001100) != 0) index += 2;
+				if ((rightmost & 0b_10101010_10101010_10101010_10101010) != 0) index += 1;
+				array[count++] = index;
 			}
 			return count;
 		}

@@ -8,6 +8,7 @@ namespace EthansGameKit.AStar
 {
 	public static class DirectionEnumExtensions
 	{
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static Vector2Int ToVector2(this RectPathfindingSpace.DirectionEnum @this)
 		{
 			return @this switch
@@ -23,10 +24,12 @@ namespace EthansGameKit.AStar
 				_ => throw new ArgumentOutOfRangeException(nameof(@this), @this, null),
 			};
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static bool IsDiagonal(this RectPathfindingSpace.DirectionEnum @this)
 		{
 			return (int)@this >= 4;
 		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static RectPathfindingSpace.DirectionEnum Opposite(this RectPathfindingSpace.DirectionEnum @this)
 		{
 			return @this switch
@@ -63,7 +66,7 @@ namespace EthansGameKit.AStar
 
 		public readonly bool allowDiagonal;
 		public readonly RectInt rawRect;
-		public readonly RectInt fullRect;
+		public RectInt fullRect;
 		readonly int width;
 		readonly int xMin;
 		readonly int yMin;
