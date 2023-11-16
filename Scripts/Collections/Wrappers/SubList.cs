@@ -2,7 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace Game.Gameplay.TileObjects
+namespace EthansGameKit.Collections.Wrappers
 {
 	public readonly struct SubList<T> : IList<T>, IReadOnlyList<T>
 	{
