@@ -19,8 +19,7 @@ namespace EthansGameKit.Collections.Wrappers
 			}
 			public bool MoveNext()
 			{
-				if (++currentIndex >= list.count) return false;
-				return true;
+				return ++currentIndex < list.count;
 			}
 			public void Reset()
 			{
