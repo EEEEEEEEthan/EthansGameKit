@@ -56,7 +56,10 @@ namespace EthansGameKit.AStar
 			}
 			/// <summary>下一步寻路</summary>
 			/// <returns>true-寻路继续; false-寻路程序已经遍历了整个地图</returns>
-			public bool MoveNext() => MoveNext(out TKey _);
+			public bool MoveNext()
+			{
+				return MoveNext(out TKey _);
+			}
 			/// <summary>尝试获取路径</summary>
 			/// <param name="target">目标</param>
 			/// <returns>
@@ -171,7 +174,7 @@ namespace EthansGameKit.AStar
 				HeuristicTarget = heuristicTarget;
 				foreach (var source in sources)
 				{
-					if (!Space.ContainsPosition(source)) continue;
+					if (!Space.FullAreaContainsPosition(source)) continue;
 					var key = Space.GetKey(source);
 					CacheParentNode(key, key);
 					CacheTotalCost(key, 0);
@@ -205,13 +208,6 @@ namespace EthansGameKit.AStar
 			return (T)pathfinder;
 		}
 		/// <summary>
-		///     验证是否包含某节点
-		/// </summary>
-		/// <param name="position"></param>
-		/// <returns></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public abstract bool ContainsPosition(TPosition position);
-		/// <summary>
 		///     将寻路节点转换为玩法节点
 		/// </summary>
 		/// <remarks>这个方法不进行数据验证,以提高寻路计算速度</remarks>
@@ -227,11 +223,6 @@ namespace EthansGameKit.AStar
 		/// <returns>寻路节点</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public abstract TKey GetIndexUnverified(TPosition position);
-		public TKey GetIndex(TPosition position)
-		{
-			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
-			return GetIndexUnverified(position);
-		}
 		public abstract List<TPosition> GetLinkSources();
 		public List<(TPosition to, float cost)> GetLinks(TPosition position)
 		{
@@ -264,6 +255,33 @@ namespace EthansGameKit.AStar
 			links.ClearAndRecycle();
 			return result;
 		}
+		public bool ContainsPosition(TPosition position, bool safeAreaOnly = true)
+		{
+			if (safeAreaOnly) return SafeAreaContainsPosition(position);
+			return FullAreaContainsPosition(position);
+		}
+		/// <summary>
+		///     验证是否包含某节点
+		/// </summary>
+		/// <param name="position"></param>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected internal abstract bool FullAreaContainsPosition(TPosition position);
+		/// <summary>
+		///     验证安全区域是否包含某节点
+		/// </summary>
+		/// <param name="position"></param>
+		/// <returns></returns>
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected virtual bool SafeAreaContainsPosition(TPosition position)
+		{
+			return FullAreaContainsPosition(position);
+		}
+		protected TKey GetIndex(TPosition position)
+		{
+			if (!FullAreaContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
+			return GetIndexUnverified(position);
+		}
 		/// <summary>
 		///     是否包含寻路节点
 		/// </summary>
@@ -292,11 +310,17 @@ namespace EthansGameKit.AStar
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected TKey GetKey(TPosition position)
 		{
-			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
+			if (!FullAreaContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
 			return GetIndexUnverified(position);
 		}
-		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder => GetPool(typeof(TPathfinder));
-		protected void MarkChanged() => ++changeFlag;
+		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder
+		{
+			return GetPool(typeof(TPathfinder));
+		}
+		protected void MarkChanged()
+		{
+			++changeFlag;
+		}
 		/// <summary>
 		///     获取这个点的所有连接
 		/// </summary>

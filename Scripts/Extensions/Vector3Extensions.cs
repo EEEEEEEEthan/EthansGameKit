@@ -17,15 +17,15 @@ namespace EthansGameKit
 		{
 			return Vector3Int.CeilToInt(@this);
 		}
-		public static Vector2 ToXZ(this Vector3 @this)
+		public static Vector2 XZ(this Vector3 @this)
 		{
 			return new(@this.x, @this.z);
 		}
-		public static Vector2 ToXY(this Vector3 @this)
+		public static Vector2 XY(this Vector3 @this)
 		{
 			return new(@this.x, @this.y);
 		}
-		public static Vector2 ToYZ(this Vector3 @this)
+		public static Vector2 YZ(this Vector3 @this)
 		{
 			return new(@this.y, @this.z);
 		}

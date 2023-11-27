@@ -104,11 +104,6 @@ namespace EthansGameKit.AStar
 			};
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public override bool ContainsPosition(Vector2Int position)
-		{
-			return fullRect.Contains(position);
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public override int GetIndexUnverified(Vector2Int position)
 		{
 			var x = position.x - xMin;
@@ -136,6 +131,15 @@ namespace EthansGameKit.AStar
 			var x = key & (width - 1);
 			var y = key >> widthPower;
 			return new(x + xMin, y + yMin);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected internal override bool FullAreaContainsPosition(Vector2Int position)
+		{
+			return fullRect.Contains(position);
+		}
+		protected override bool SafeAreaContainsPosition(Vector2Int position)
+		{
+			return rawRect.Contains(position);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override bool ContainsKey(int key)
