@@ -7,7 +7,7 @@ using UnityEngine;
 namespace EthansGameKit.Collections
 {
 	[Serializable]
-	public class Bidictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable, IDisposable
+	public class Bidictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable<KeyValuePair<TKey, TValue>>, IDisposable
 	{
 		[Serializable]
 		struct Data
@@ -28,6 +28,10 @@ namespace EthansGameKit.Collections
 		public int Count => key2Value.Count;
 		Bidictionary()
 		{
+		}
+		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
+		{
+			return key2Value.GetEnumerator();
 		}
 		void IDisposable.Dispose()
 		{
