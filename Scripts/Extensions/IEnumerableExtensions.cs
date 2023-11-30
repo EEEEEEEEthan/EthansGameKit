@@ -28,7 +28,7 @@ namespace EthansGameKit
 			using var heap = Heap<T, float>.Generate();
 			foreach (var item in @this)
 			{
-				var weight = float.MaxValue;
+				float weight;
 				try
 				{
 					weight = weightGetter(item);

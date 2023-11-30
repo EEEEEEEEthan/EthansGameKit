@@ -66,7 +66,7 @@ namespace EthansGameKit.AStar
 
 		public readonly bool allowDiagonal;
 		public readonly RectInt rawRect;
-		public RectInt fullRect;
+		public readonly RectInt fullRect;
 		readonly int width;
 		readonly int xMin;
 		readonly int yMin;

@@ -128,6 +128,7 @@ namespace EthansGameKit.VText
 			///     Creates the sides and or bevel mesh of glyph mesh.
 			///     in submesh.
 			/// </summary>
+			/// <param name="mesh"></param>
 			/// <param name="p">VTextParameter</param>
 			void CreateSides(Mesh mesh, VTextParameter p)
 			{
@@ -620,6 +621,7 @@ namespace EthansGameKit.VText
 			///     realize the mesh.
 			/// </summary>
 			/// <returns>The mesh.</returns>
+			/// <param name="mesh"></param>
 			/// <param name="shift"></param>
 			/// <param name="size"></param>
 			/// <param name="parameter"></param>

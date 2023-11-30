@@ -110,7 +110,7 @@ namespace EthansGameKit.Components
 			{
 				Gizmos.color = new(0, 1, 1, 0.05f);
 				var halfCell = new Vector2(0.5f, 0.5f);
-				foreach (var (from, to, cost) in Space.GetLinks())
+				foreach (var (from, to, _) in Space.GetLinks())
 				{
 					var fromPos = grid.CellToLocalInterpolated(from + halfCell);
 					var toPos = grid.CellToLocalInterpolated(to + halfCell);

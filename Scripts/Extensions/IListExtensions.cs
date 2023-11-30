@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using EthansGameKit.Collections;
 using UnityEngine;
 
 // ReSharper disable once CheckNamespace
