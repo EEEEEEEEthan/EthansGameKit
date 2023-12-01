@@ -4,56 +4,40 @@ namespace EthansGameKit.SmoothedValues
 {
 	public struct SmoothedQuaternion
 	{
-		Quaternion preferred;
 		float remainingSeconds;
 		Quaternion current;
 		float lastTime;
-		public Quaternion PreferredValue
-		{
-			get => preferred;
-			set
-			{
-				_ = Value;
-				preferred = value;
-			}
-		}
+		public Quaternion PreferredValue { get; private set; }
 		public Quaternion Value
 		{
 			get
 			{
-				var currentTime = Time.time;
-				if (lastTime == currentTime) return current;
-				var deltaTime = currentTime - lastTime;
-				lastTime = currentTime;
-				var t = deltaTime / remainingSeconds;
-				remainingSeconds -= deltaTime;
-				return current = Quaternion.Slerp(current, preferred, deltaTime / remainingSeconds);
-			}
-			set
-			{
-				_ = value;
-				current = value;
-			}
-		}
-		public float RemainingSeconds
-		{
-			get
-			{
-				_ = Value;
-				return remainingSeconds;
-			}
-			set
-			{
-				_ = Value;
-				remainingSeconds = value;
+				Update();
+				return current;
 			}
 		}
 		public SmoothedQuaternion(Quaternion preferred)
 		{
-			this.preferred = preferred;
+			PreferredValue = preferred;
 			remainingSeconds = 0;
 			current = preferred;
-			lastTime = Time.time;
+			lastTime = Time.realtimeSinceStartup;
+		}
+		public void Smooth(Quaternion preferredValue, float smoothTime)
+		{
+			PreferredValue = preferredValue;
+			remainingSeconds = smoothTime;
+			lastTime = Time.realtimeSinceStartup;
+			Update();
+		}
+		void Update()
+		{
+			var currentTime = Time.realtimeSinceStartup;
+			var deltaTime = currentTime - lastTime;
+			lastTime = currentTime;
+			var t = deltaTime / remainingSeconds;
+			remainingSeconds -= deltaTime;
+			current = remainingSeconds <= 0 ? PreferredValue : Quaternion.Slerp(current, PreferredValue, t);
 		}
 	}
 }

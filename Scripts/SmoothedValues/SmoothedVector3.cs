@@ -13,7 +13,7 @@ namespace EthansGameKit.SmoothedValues
 		{
 			get
 			{
-				if (lastTime != Time.time) Update();
+				Update();
 				return velocity;
 			}
 		}
@@ -22,7 +22,7 @@ namespace EthansGameKit.SmoothedValues
 		{
 			get
 			{
-				if (lastTime != Time.time) Update();
+				Update();
 				return current;
 			}
 		}
@@ -31,14 +31,14 @@ namespace EthansGameKit.SmoothedValues
 			PreferredValue = this.current = current;
 			velocity = Vector3.zero;
 			smoothTime = 0;
-			lastTime = Time.time;
+			lastTime = Time.realtimeSinceStartup;
 			maxSpeed = float.PositiveInfinity;
 		}
 		public void Smooth(Vector3 target, float smoothTime, float maxSpeed = float.PositiveInfinity)
 		{
 			PreferredValue = target;
 			this.smoothTime = smoothTime;
-			lastTime = Time.time;
+			lastTime = Time.realtimeSinceStartup;
 			this.maxSpeed = maxSpeed;
 			Update();
 		}
@@ -48,11 +48,11 @@ namespace EthansGameKit.SmoothedValues
 			current = Value;
 			smoothTime = 0;
 			velocity = default;
-			lastTime = Time.time;
+			lastTime = Time.realtimeSinceStartup;
 		}
 		void Update()
 		{
-			var currentTime = Time.time;
+			var currentTime = Time.realtimeSinceStartup;
 			var deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
 			current = Vector3.SmoothDamp(current, PreferredValue, ref velocity, smoothTime, maxSpeed, deltaTime);

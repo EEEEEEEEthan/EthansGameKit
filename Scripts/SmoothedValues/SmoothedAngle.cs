@@ -1,15 +1,17 @@
+using EthansGameKit.MathUtilities;
 using UnityEngine;
 
 namespace EthansGameKit.SmoothedValues
 {
-	public struct SmoothedSingle
+	public struct SmoothedAngle
 	{
-		float current;
+		Angle current;
 		float smoothTime;
 		float velocity;
 		float maxSpeed;
 		float lastTime;
-		public float Value
+		public Angle PreferredValue { get; private set; }
+		public Angle Value
 		{
 			get
 			{
@@ -25,8 +27,7 @@ namespace EthansGameKit.SmoothedValues
 				return velocity;
 			}
 		}
-		public float PreferredValue { get; private set; }
-		public SmoothedSingle(float current)
+		public SmoothedAngle(Angle current)
 		{
 			PreferredValue = this.current = current;
 			smoothTime = 0;
@@ -34,15 +35,20 @@ namespace EthansGameKit.SmoothedValues
 			maxSpeed = float.PositiveInfinity;
 			lastTime = Time.realtimeSinceStartup;
 		}
-		public void Smooth(float target, float smoothTime, float maxSpeed = float.PositiveInfinity)
+		public void Smooth(Angle target, float smoothTime, float maxSpeed = float.PositiveInfinity)
 		{
-			PreferredValue = target;
+			var left = target.MaxAngleLessOrEquals(current);
+			var right = target.MinAngleLargerOrEquals(current);
+			var rightDiff = right.deg - target.deg;
+			var leftDiff = target.deg - left.deg;
+			PreferredValue = rightDiff < leftDiff ? right : left;
+			//Debug.LogError($"{current.deg}->({target})({left.deg}/{leftDiff})({right.deg}/{rightDiff})");
 			this.smoothTime = smoothTime;
 			this.maxSpeed = maxSpeed;
 			lastTime = Time.realtimeSinceStartup;
 			Update();
 		}
-		public void Flash(float target)
+		public void Flash(Angle target)
 		{
 			PreferredValue = target;
 			current = target;
@@ -55,7 +61,7 @@ namespace EthansGameKit.SmoothedValues
 			var currentTime = Time.realtimeSinceStartup;
 			var deltaTime = currentTime - lastTime;
 			lastTime = currentTime;
-			current = Mathf.SmoothDamp(current, PreferredValue, ref velocity, smoothTime, maxSpeed, deltaTime);
+			current = Angle.FromDeg(Mathf.SmoothDamp(current.deg, PreferredValue.deg, ref velocity, smoothTime, maxSpeed, deltaTime));
 		}
 	}
 }

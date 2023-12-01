@@ -97,7 +97,7 @@ namespace EthansGameKit.MathUtilities
 			return z;
 		}
 		/// <summary>
-		/// 获得二进制数中1的数量
+		///     获得二进制数中1的数量
 		/// </summary>
 		/// <param name="input"></param>
 		/// <returns></returns>
@@ -112,7 +112,7 @@ namespace EthansGameKit.MathUtilities
 			return count;
 		}
 		/// <summary>
-		/// 获得二进制数中1的位置
+		///     获得二进制数中1的位置
 		/// </summary>
 		/// <param name="input"></param>
 		/// <param name="array"></param>
