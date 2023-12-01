@@ -1,90 +1,60 @@
-using EthansGameKit.MathUtilities;
 using UnityEngine;
 
 namespace EthansGameKit.Components
 {
 	public class SmoothedTransform : MonoBehaviour
 	{
-		Vector3 worldPreferredPosition;
-		Vector3 worldVelocity;
-		Quaternion worldPreferredRotation;
-		Transform parent;
+		Vector3 preferredPosition;
+		Vector3 velocity;
+		Quaternion preferredRotation;
 		float remainingSeconds;
 		void OnEnable()
 		{
 			var transform = this.transform;
-			worldPreferredPosition = transform.position;
-			worldPreferredRotation = transform.rotation;
-			worldVelocity = default;
+			preferredPosition = transform.localPosition;
+			preferredRotation = transform.localRotation;
+			velocity = default;
 			remainingSeconds = 0;
 		}
 		void Update()
 		{
 			var deltaTime = Time.deltaTime;
 			var remainingSeconds = this.remainingSeconds - deltaTime;
-			Vector3 preferredPosition;
-			Vector3 currentPosition;
-			Quaternion preferredRotation;
-			Quaternion currentRotation;
-			Vector3 velocity;
 			var transform = this.transform;
-			if (parent)
-			{
-				preferredPosition = parent.InverseTransformPoint(worldPreferredPosition);
-				currentPosition = parent.InverseTransformPoint(transform.position);
-				var parentRotation = parent.rotation;
-				preferredRotation = parentRotation * worldPreferredRotation;
-				currentRotation = parentRotation * transform.rotation;
-				velocity = parent.InverseTransformVector(worldVelocity);
-			}
-			else
-			{
-				preferredPosition = worldPreferredPosition;
-				currentPosition = transform.position;
-				preferredRotation = worldPreferredRotation;
-				currentRotation = transform.rotation;
-				velocity = worldVelocity;
-			}
-			if (remainingSeconds <= 0)
+			var preferredPosition = this.preferredPosition;
+			var currentPosition = transform.localPosition;
+			var preferredRotation = this.preferredRotation;
+			var currentRotation = transform.localRotation;
+			var velocity = this.velocity;
+			currentPosition = Vector3.SmoothDamp(
+				currentPosition,
+				preferredPosition,
+				ref velocity,
+				this.remainingSeconds,
+				float.PositiveInfinity,
+				deltaTime
+			);
+			currentRotation = Quaternion.Slerp(currentRotation, preferredRotation, remainingSeconds);
+			this.remainingSeconds = remainingSeconds;
+			if (
+				remainingSeconds <= 0 &&
+				(preferredPosition - currentPosition).sqrMagnitude < 0.0001f &&
+				Quaternion.Angle(preferredRotation, currentRotation) < 0.0001f)
 			{
 				currentPosition = preferredPosition;
 				currentRotation = preferredRotation;
 				velocity = default;
 				enabled = false;
 			}
-			else
-			{
-				MathUtility.Hermite(
-					pos0: currentPosition,
-					weight0: velocity,
-					pos1: preferredPosition,
-					weight1: default,
-					progress: deltaTime / this.remainingSeconds,
-					point: out currentPosition,
-					weight: out velocity
-				);
-				currentRotation = Quaternion.Slerp(currentRotation, preferredRotation, remainingSeconds);
-				this.remainingSeconds = remainingSeconds;
-			}
-			if (parent)
-			{
-				transform.position = parent.TransformPoint(currentPosition);
-				transform.rotation = parent.rotation * currentRotation;
-				worldVelocity = parent.TransformVector(velocity);
-			}
-			else
-			{
-				transform.position = currentPosition;
-				transform.rotation = currentRotation;
-				worldVelocity = velocity;
-			}
+			transform.localPosition = currentPosition;
+			transform.localRotation = currentRotation;
+			this.velocity = velocity;
 		}
-		public void LookAt(Vector3 target, Quaternion rotation, float distance, float duration, Transform parent)
+		public void LookAt(Vector3 target, Quaternion rotation, float distance, float duration)
 		{
 			enabled = true;
-			this.parent = parent;
-			worldPreferredPosition = target - rotation.Forward().normalized * distance;
-			worldPreferredRotation = rotation;
+			preferredPosition = target - rotation.Forward().normalized * distance;
+			preferredRotation = rotation;
 			remainingSeconds = duration;
 			Update();
 		}
