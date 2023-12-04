@@ -30,12 +30,6 @@ namespace EthansGameKit.Awaitable
 				if (!awaitable.IsCompleted) signal.Set();
 			}
 		}
-		[Obsolete("Use Constructor instead")]
-		public static AwaitableValue Create(out AwaiterSignal signal)
-		{
-			var awaiter = Awaiter.Create();
-			return new(awaiter, out signal);
-		}
 		readonly AwaiterContainer awaiterContainer;
 		public bool IsCompleted => awaiterContainer.Expired || awaiterContainer.Awaiter.IsCompleted;
 		public float Progress
@@ -49,9 +43,13 @@ namespace EthansGameKit.Awaitable
 			}
 		}
 		internal Awaiter Awaiter => awaiterContainer.Awaiter;
-		public AwaitableValue(out AwaiterSignal signal) : this(Awaiter.Create(), out signal)
+		public AwaitableValue(out AwaiterSignal signal)
 		{
+			var awaiter = Awaiter.Create();
+			awaiterContainer = new(awaiter);
+			signal = new(awaiter);
 		}
+		[Obsolete]
 		internal AwaitableValue(Awaiter awaiter, out AwaiterSignal handle)
 		{
 			awaiterContainer = new(awaiter);
@@ -67,20 +65,28 @@ namespace EthansGameKit.Awaitable
 		}
 	}
 
-	public readonly struct AwaitableEntity<T> : IDisposable
+	public readonly struct AwaitableValue<T> : IDisposable
 	{
-		public static AwaitableEntity<T> Create(out AwaiterSignal<T> signal)
+		[Obsolete("Use Constructor instead")]
+		public static AwaitableValue<T> Create(out AwaiterSignal<T> signal)
 		{
 			var awaiter = Awaiter<T>.Create();
 			return new(awaiter, out signal);
 		}
-		public static implicit operator AwaitableValue(AwaitableEntity<T> awaitableEntity)
+		public static implicit operator AwaitableValue(AwaitableValue<T> awaitableValue)
 		{
-			return new(awaitableEntity.Awaiter, out _);
+			return new(awaitableValue.Awaiter, out _);
 		}
 		readonly AwaiterContainer<T> awaiterContainer;
 		internal Awaiter<T> Awaiter => awaiterContainer.Awaiter;
-		internal AwaitableEntity(Awaiter<T> awaiter, out AwaiterSignal<T> handle)
+		public AwaitableValue(out AwaiterSignal<T> signal)
+		{
+			var awaiter = Awaiter<T>.Create();
+			awaiterContainer = new(awaiter);
+			signal = new(awaiter);
+		}
+		[Obsolete]
+		internal AwaitableValue(Awaiter<T> awaiter, out AwaiterSignal<T> handle)
 		{
 			awaiterContainer = new(awaiter);
 			handle = new(awaiter);
