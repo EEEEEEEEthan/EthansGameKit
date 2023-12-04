@@ -39,10 +39,9 @@ namespace EthansGameKit.SmoothedValues
 		{
 			var left = target.MaxAngleLessOrEquals(current);
 			var right = target.MinAngleLargerOrEquals(current);
-			var rightDiff = right.deg - target.deg;
-			var leftDiff = target.deg - left.deg;
+			var rightDiff = right.deg - current.deg;
+			var leftDiff = current.deg - left.deg;
 			PreferredValue = rightDiff < leftDiff ? right : left;
-			//Debug.LogError($"{current.deg}->({target})({left.deg}/{leftDiff})({right.deg}/{rightDiff})");
 			this.smoothTime = smoothTime;
 			this.maxSpeed = maxSpeed;
 			lastTime = Time.realtimeSinceStartup;
