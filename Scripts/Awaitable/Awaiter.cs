@@ -26,7 +26,7 @@ namespace EthansGameKit.Awaitable
 				progress.Clamp(0, 1);
 			}
 		}
-		internal uint RecycleFalg { get; private set; }
+		internal uint RecycleFlag { get; private set; }
 		public void OnCompleted(Action callback)
 		{
 			if (IsCompleted)
@@ -44,7 +44,7 @@ namespace EthansGameKit.Awaitable
 		}
 		public void Dispose()
 		{
-			++RecycleFalg;
+			++RecycleFlag;
 			result = default;
 			IsCompleted = false;
 			Recycle();

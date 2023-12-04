@@ -4,7 +4,7 @@ namespace EthansGameKit.Awaitable
 	{
 		readonly Awaiter awaiter;
 		readonly uint recycleFlag;
-		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool Expired => awaiter.RecycleFlag != recycleFlag;
 		public Awaiter Awaiter
 		{
 			get
@@ -16,7 +16,7 @@ namespace EthansGameKit.Awaitable
 		public AwaiterContainer(Awaiter awaiter)
 		{
 			this.awaiter = awaiter;
-			recycleFlag = this.awaiter.RecycleFalg;
+			recycleFlag = this.awaiter.RecycleFlag;
 		}
 	}
 
@@ -24,7 +24,7 @@ namespace EthansGameKit.Awaitable
 	{
 		readonly Awaiter<T> awaiter;
 		readonly uint recycleFlag;
-		public bool Expired => awaiter.RecycleFalg != recycleFlag;
+		public bool Expired => awaiter.RecycleFlag != recycleFlag;
 		public Awaiter<T> Awaiter
 		{
 			get
@@ -36,7 +36,7 @@ namespace EthansGameKit.Awaitable
 		public AwaiterContainer(Awaiter<T> awaiter)
 		{
 			this.awaiter = awaiter;
-			recycleFlag = this.awaiter.RecycleFalg;
+			recycleFlag = this.awaiter.RecycleFlag;
 		}
 	}
 }

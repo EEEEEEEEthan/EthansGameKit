@@ -2,13 +2,13 @@ using System;
 
 namespace EthansGameKit.Awaitable
 {
-	public readonly struct AwaitableEntity : IDisposable
+	public readonly struct AwaitableValue : IDisposable
 	{
-		public static AwaitableEntity operator &(AwaitableEntity a, AwaitableEntity b)
+		public static AwaitableValue operator &(AwaitableValue a, AwaitableValue b)
 		{
 			if (a.IsCompleted) return b;
 			if (b.IsCompleted) return a;
-			var awaitable = Create(out var signal);
+			var awaitable = new AwaitableValue(out var signal);
 			a.GetAwaiter().OnCompleted(onComplete);
 			b.GetAwaiter().OnCompleted(onComplete);
 			return awaitable;
@@ -17,11 +17,11 @@ namespace EthansGameKit.Awaitable
 				if (a.IsCompleted && b.IsCompleted) signal.Set();
 			}
 		}
-		public static AwaitableEntity operator |(AwaitableEntity a, AwaitableEntity b)
+		public static AwaitableValue operator |(AwaitableValue a, AwaitableValue b)
 		{
 			if (a.IsCompleted) return a;
 			if (b.IsCompleted) return b;
-			var awaitable = Create(out var signal);
+			var awaitable = new AwaitableValue(out var signal);
 			a.GetAwaiter().OnCompleted(onComplete);
 			b.GetAwaiter().OnCompleted(onComplete);
 			return awaitable;
@@ -30,7 +30,8 @@ namespace EthansGameKit.Awaitable
 				if (!awaitable.IsCompleted) signal.Set();
 			}
 		}
-		public static AwaitableEntity Create(out AwaiterSignal signal)
+		[Obsolete("Use Constructor instead")]
+		public static AwaitableValue Create(out AwaiterSignal signal)
 		{
 			var awaiter = Awaiter.Create();
 			return new(awaiter, out signal);
@@ -48,7 +49,10 @@ namespace EthansGameKit.Awaitable
 			}
 		}
 		internal Awaiter Awaiter => awaiterContainer.Awaiter;
-		internal AwaitableEntity(Awaiter awaiter, out AwaiterSignal handle)
+		public AwaitableValue(out AwaiterSignal signal) : this(Awaiter.Create(), out signal)
+		{
+		}
+		internal AwaitableValue(Awaiter awaiter, out AwaiterSignal handle)
 		{
 			awaiterContainer = new(awaiter);
 			handle = new(awaiter);
@@ -70,7 +74,7 @@ namespace EthansGameKit.Awaitable
 			var awaiter = Awaiter<T>.Create();
 			return new(awaiter, out signal);
 		}
-		public static implicit operator AwaitableEntity(AwaitableEntity<T> awaitableEntity)
+		public static implicit operator AwaitableValue(AwaitableEntity<T> awaitableEntity)
 		{
 			return new(awaitableEntity.Awaiter, out _);
 		}

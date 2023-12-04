@@ -47,16 +47,16 @@ namespace EthansGameKit
 			CancelInvoke(ref id);
 			id = InvokeAfterUnscaled(delay, callback, crossScene);
 		}
-		public static AwaitableEntity Await(double seconds, bool crossScene = false)
+		public static AwaitableValue Await(double seconds, bool crossScene = false)
 		{
-			var awaitable = AwaitableEntity.Create(out var handle);
-			InvokeAfter(seconds, handle.Set, crossScene);
+			var awaitable = new AwaitableValue(out var signal);
+			InvokeAfter(seconds, signal.Set, crossScene);
 			return awaitable;
 		}
-		public static AwaitableEntity AwaitUnscaled(double seconds, bool crossScene = false)
+		public static AwaitableValue AwaitUnscaled(double seconds, bool crossScene = false)
 		{
-			var awaitable = AwaitableEntity.Create(out var handle);
-			InvokeAfterUnscaled(seconds, handle.Set, crossScene);
+			var awaitable = new AwaitableValue(out var signal);
+			InvokeAfterUnscaled(seconds, signal.Set, crossScene);
 			return awaitable;
 		}
 		/// <param name="id">定时器id.尽量避免CancelInvoke一个非零的无效id，因为这样需要遍历所有定时器</param>

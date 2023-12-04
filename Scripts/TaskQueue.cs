@@ -25,21 +25,21 @@ namespace EthansGameKit
 		{
 			InvokeAtFreeFrame(callback, TaskQueuePriorities.Unimportant, crossScene);
 		}
-		public static AwaitableEntity AwaitFreeFrame(TaskQueuePriorities priorities, bool crossScene)
+		public static AwaitableValue AwaitFreeFrame(TaskQueuePriorities priorities, bool crossScene)
 		{
-			var awaitable = AwaitableEntity.Create(out var signal);
+			var awaitable = new AwaitableValue(out var signal);
 			InvokeAtFreeFrame(signal.Set, priorities, crossScene);
 			return awaitable;
 		}
-		public static AwaitableEntity AwaitFreeFrame(TaskQueuePriorities priorities)
+		public static AwaitableValue AwaitFreeFrame(TaskQueuePriorities priorities)
 		{
 			return AwaitFreeFrame(priorities, false);
 		}
-		public static AwaitableEntity AwaitFreeFrame(bool crossScene)
+		public static AwaitableValue AwaitFreeFrame(bool crossScene)
 		{
 			return AwaitFreeFrame(TaskQueuePriorities.Unimportant, crossScene);
 		}
-		public static AwaitableEntity AwaitFreeFrame()
+		public static AwaitableValue AwaitFreeFrame()
 		{
 			return AwaitFreeFrame(TaskQueuePriorities.Unimportant, false);
 		}
