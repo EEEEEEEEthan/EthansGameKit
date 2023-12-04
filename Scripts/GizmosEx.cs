@@ -55,6 +55,7 @@ namespace EthansGameKit
 		}
 		public static void DrawArrow(Vector3 from, Vector3 to, float capSize)
 		{
+			if (from == to) return;
 			Gizmos.DrawLine(from, to);
 			var rotation = Quaternion.LookRotation(to - from);
 			Gizmos.DrawRay(to, ((from - to).normalized + rotation.Right()) * capSize);

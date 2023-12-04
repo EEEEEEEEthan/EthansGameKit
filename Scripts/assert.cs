@@ -19,7 +19,7 @@ public static class assert
 			}
 			catch (Exception e)
 			{
-				Debug.LogError(e);
+				Debug.LogException(e);
 			}
 		}
 	}
