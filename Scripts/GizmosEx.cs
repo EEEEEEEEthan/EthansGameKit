@@ -53,6 +53,14 @@ namespace EthansGameKit
 			}
 			Gizmos.matrix = matrix;
 		}
+		public static void DrawCross(Vector3 position, Vector3 up, Vector3 forward, float size)
+		{
+			up = up.normalized * size;
+			forward = forward.normalized * size;
+			var right = Vector3.Cross(forward, up).normalized * size;
+			Gizmos.DrawLine(position + forward, position - forward);
+			Gizmos.DrawLine(position - right, position + right);
+		}
 		public static void DrawArrow(Vector3 from, Vector3 to, float capSize)
 		{
 			if (from == to) return;

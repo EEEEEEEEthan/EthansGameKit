@@ -29,13 +29,21 @@ namespace EthansGameKit
 			}
 			return true;
 		}
-		public static float Clamp(ref this float @this, float min, float max)
+		public static void Clamp(ref this float @this, float min, float max)
 		{
-			return @this = Mathf.Clamp(@this, min, max);
+			@this = Mathf.Clamp(@this, min, max);
 		}
 		public static float Clamped(this float @this, float min, float max)
 		{
 			return Mathf.Clamp(@this, min, max);
+		}
+		public static float Modulated(this float @this, float mod)
+		{
+			return @this - Mathf.Floor(@this / mod) * mod;
+		}
+		public static void Modular(ref this float @this, float mod)
+		{
+			@this -= Mathf.Floor(@this / mod) * mod;
 		}
 		public static float InverseLerp(this float @this, float min, float max)
 		{
