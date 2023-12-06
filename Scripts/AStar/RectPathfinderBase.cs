@@ -10,10 +10,17 @@ namespace EthansGameKit.AStar
 		{
 			readonly PathfindingSpace<Vector2Int, int> space;
 			public IndexToPositionConverter(PathfindingSpace<Vector2Int, int> space) => this.space = space;
-			public Vector2Int Convert(int oldItem) => space.GetPositionUnverified(oldItem);
-			public int Recover(Vector2Int newItem) => space.GetIndexUnverified(newItem);
+			public Vector2Int Convert(int oldItem)
+			{
+				return space.GetPositionUnverified(oldItem);
+			}
+			public int Recover(Vector2Int newItem)
+			{
+				return space.GetIndexUnverified(newItem);
+			}
 		}
 
+		public new readonly RectPathfindingSpace space;
 		protected float[] costMap;
 		protected int[] flowMap;
 		IReadOnlyDictionary<Vector2Int, float> costDict;
@@ -21,9 +28,10 @@ namespace EthansGameKit.AStar
 		IndexToPositionConverter converter;
 		public override IReadOnlyDictionary<Vector2Int, float> CostMap => costDict;
 		public override IReadOnlyDictionary<Vector2Int, Vector2Int> FlowMap => flowDict;
+		protected RectPathfinderBase(RectPathfindingSpace space) : base(space) => this.space = space;
 		protected override void OnInitialize()
 		{
-			var space = Space;
+			var space = base.space;
 			costMap = new float[space.NodeCount];
 			flowMap = new int[space.NodeCount];
 			converter = new(space);

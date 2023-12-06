@@ -16,30 +16,27 @@ namespace EthansGameKit.AStar
 		/// <summary>
 		///     寻路器,对<see cref="PathfindingSpace{TPosition, TNode}" />具有强依赖
 		/// </summary>
-		public abstract class Pathfinder : IDisposable
+		public abstract class Pathfinder
 		{
+			public readonly PathfindingSpace<TPosition, TKey> space;
 			readonly Heap<TKey, float> openList = Heap<TKey, float>.Generate();
 			TKey[] nodeBuffer;
 			float[] floatBuffer;
 			float maxCost = float.PositiveInfinity;
 			float maxHeuristic = float.PositiveInfinity;
 			int changeFlag;
-			public PathfindingSpace<TPosition, TKey> Space { get; internal set; }
 			/// <summary>
 			///     <para>过期.</para>
 			///     <para>如果space被修改过，pathfinder就会过期</para>
 			/// </summary>
-			public bool Expired => changeFlag != Space.changeFlag;
+			public bool Expired => changeFlag != space.changeFlag;
 			public abstract IReadOnlyDictionary<TPosition, float> CostMap { get; }
 			public abstract IReadOnlyDictionary<TPosition, TPosition> FlowMap { get; }
 			protected TPosition HeuristicTarget { get; private set; }
-			/// <summary>
-			///     回收资源
-			/// </summary>
-			public void Dispose()
+			protected Pathfinder(PathfindingSpace<TPosition, TKey> space)
 			{
-				Clear();
-				Space.Recycle(this);
+				this.space = space;
+				OnConstruction();
 			}
 			/// <summary>下一步寻路</summary>
 			/// <param name="current">下一步检索的节点</param>
@@ -48,7 +45,7 @@ namespace EthansGameKit.AStar
 			{
 				if (MoveNext(out TKey node))
 				{
-					current = Space.GetPosition(node);
+					current = space.GetPosition(node);
 					return true;
 				}
 				current = default;
@@ -87,7 +84,7 @@ namespace EthansGameKit.AStar
 			/// </summary>
 			protected void Clear()
 			{
-				changeFlag = Space.changeFlag;
+				changeFlag = space.changeFlag;
 				openList.Clear();
 				OnClear();
 			}
@@ -128,9 +125,9 @@ namespace EthansGameKit.AStar
 			protected abstract void OnInitialize();
 			internal void OnConstruction()
 			{
-				changeFlag = Space.changeFlag;
-				nodeBuffer = new TKey[Space.maxLinkCountPerNode];
-				floatBuffer = new float[Space.maxLinkCountPerNode];
+				changeFlag = space.changeFlag;
+				nodeBuffer = new TKey[space.maxLinkCountPerNode];
+				floatBuffer = new float[space.maxLinkCountPerNode];
 				OnInitialize();
 			}
 			bool MoveNext(out TKey current)
@@ -142,7 +139,7 @@ namespace EthansGameKit.AStar
 				}
 				current = openList.Pop();
 				GetCachedTotalCost(current, out var currentCost);
-				var linkCount = Space.GetLinks(current, nodeBuffer, floatBuffer);
+				var linkCount = space.GetLinks(current, nodeBuffer, floatBuffer);
 				var toNodes = nodeBuffer;
 				var basicCosts = floatBuffer;
 				for (var i = linkCount; i-- > 0;)
@@ -174,8 +171,8 @@ namespace EthansGameKit.AStar
 				HeuristicTarget = heuristicTarget;
 				foreach (var source in sources)
 				{
-					if (!Space.FullAreaContainsPosition(source)) continue;
-					var key = Space.GetKey(source);
+					if (!space.FullAreaContainsPosition(source)) continue;
+					var key = space.GetKey(source);
 					CacheParentNode(key, key);
 					CacheTotalCost(key, 0);
 					openList.AddOrUpdate(key, GetHeuristic(key));
@@ -199,14 +196,6 @@ namespace EthansGameKit.AStar
 		/// </summary>
 		/// <param name="maxLinkCountPerNode">每个节点最大连接数量</param>
 		protected PathfindingSpace(int maxLinkCountPerNode) => this.maxLinkCountPerNode = maxLinkCountPerNode;
-		public T CreatePathfinder<T>() where T : Pathfinder
-		{
-			if (!GetPool(typeof(T)).TryGenerate(out var pathfinder))
-				pathfinder = (Pathfinder)Activator.CreateInstance(typeof(T), true);
-			pathfinder.Space = this;
-			pathfinder.OnConstruction();
-			return (T)pathfinder;
-		}
 		/// <summary>
 		///     将寻路节点转换为玩法节点
 		/// </summary>
@@ -338,7 +327,7 @@ namespace EthansGameKit.AStar
 		}
 		void Recycle(Pathfinder pathfinder)
 		{
-			if (pathfinder.Space != this) throw new ArgumentException("pathfinder.space != this");
+			if (pathfinder.space != this) throw new ArgumentException("pathfinder.space != this");
 			var pool = GetPool(pathfinder.GetType());
 			pool.Recycle(pathfinder);
 		}
