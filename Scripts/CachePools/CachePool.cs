@@ -44,7 +44,8 @@ namespace EthansGameKit.CachePools
 			autoReleasing = true;
 			while (list.Count > keepCount)
 			{
-				await Timers.Await(Random.Range(0f, 2f));
+				using var awaitable = Timers.Await(Random.Range(0f, 2f));
+				await awaitable;
 				var needRelease = Mathf.CeilToInt((list.Count - keepCount) * 0.01f);
 				for (var i = 0; i < needRelease; i++)
 				{
