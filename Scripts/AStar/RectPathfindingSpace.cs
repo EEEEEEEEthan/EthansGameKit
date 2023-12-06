@@ -64,6 +64,7 @@ namespace EthansGameKit.AStar
 			UpLeft,
 		}
 
+		const float unreachable = 0;
 		public readonly bool allowDiagonal;
 		public readonly RectInt rawRect;
 		public readonly RectInt fullRect;
@@ -140,7 +141,9 @@ namespace EthansGameKit.AStar
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override bool ContainsKey(int key)
 		{
-			return key >= 0 && key < NodeCount;
+			if (key < 0 || key >= NodeCount) return false;
+			var position = GetPosition(key);
+			return rawRect.Contains(position);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected override int GetLinks(int node, int[] toNodes, float[] basicCosts)
@@ -161,13 +164,14 @@ namespace EthansGameKit.AStar
 		public void ClearLinks()
 		{
 			MarkChanged();
-			costs.MemSet(0);
+			costs.MemSet(unreachable);
 		}
 		public void RemoveLink(Vector2Int fromNode, DirectionEnum direction)
 		{
-			MarkChanged();
+			if (!ContainsPosition(fromNode)) throw new ArgumentOutOfRangeException();
 			var fromIndex = GetKey(fromNode);
-			costs[GetLinkIndexUnverified(fromIndex, (int)direction)] = 0;
+			MarkChanged();
+			costs[GetLinkIndexUnverified(fromIndex, (int)direction)] = unreachable;
 		}
 		public void SetLink(Vector2Int fromNode, DirectionEnum direction, float basicCost)
 		{
