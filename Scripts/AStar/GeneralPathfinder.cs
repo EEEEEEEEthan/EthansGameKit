@@ -15,27 +15,27 @@ namespace EthansGameKit.AStar
 		protected override void OnInitialize()
 		{
 		}
-		protected override float GetHeuristic(Vector3 node)
+		protected override float GetHeuristicUnverified(Vector3 node)
 		{
 			return Vector3.Distance(node, HeuristicTarget);
 		}
-		protected override float GetStepCost(Vector3 fromNode, Vector3 toNode, float basicCost)
+		protected override float GetStepCostUnverified(Vector3 fromNode, Vector3 toNode, float basicCost)
 		{
 			return basicCost;
 		}
-		protected override bool GetCachedTotalCost(Vector3 node, out float cost)
+		protected override bool GetTotalCostUnverified(Vector3 node, out float cost)
 		{
 			return costMap.TryGetValue(node, out cost);
 		}
-		protected override void CacheTotalCost(Vector3 node, float cost)
+		protected override void SetTotalCostUnverified(Vector3 node, float cost)
 		{
 			costMap[node] = cost;
 		}
-		protected override bool GetCachedParentNode(Vector3 node, out Vector3 fromNode)
+		protected override bool GetParentNodeUnverified(Vector3 node, out Vector3 fromNode)
 		{
 			return flowMap.TryGetValue(node, out fromNode);
 		}
-		protected override void CacheParentNode(Vector3 node, Vector3 fromNode)
+		protected override void SetParentNodeUnverified(Vector3 node, Vector3 fromNode)
 		{
 			flowMap[node] = fromNode;
 		}

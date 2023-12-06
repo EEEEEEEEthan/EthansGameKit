@@ -9,34 +9,34 @@ namespace EthansGameKit.AStar
 		{
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float GetHeuristic(int node)
+		protected override float GetHeuristicUnverified(int node)
 		{
 			var position = space.GetPositionUnverified(node);
 			return (position - HeuristicTarget).sqrMagnitude;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override float GetStepCost(int fromNode, int toNode, float basicCost)
+		protected override float GetStepCostUnverified(int fromNode, int toNode, float basicCost)
 		{
 			return basicCost;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override bool GetCachedTotalCost(int node, out float cost)
+		protected override bool GetTotalCostUnverified(int node, out float cost)
 		{
 			cost = costMap[node];
 			return true;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override void CacheTotalCost(int node, float cost)
+		protected override void SetTotalCostUnverified(int node, float cost)
 		{
 			costMap[node] = cost;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override bool GetCachedParentNode(int node, out int parent)
+		protected override bool GetParentNodeUnverified(int node, out int parent)
 		{
 			return (parent = flowMap[node]) >= 0;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected override void CacheParentNode(int node, int parent)
+		protected override void SetParentNodeUnverified(int node, int parent)
 		{
 			flowMap[node] = parent;
 		}

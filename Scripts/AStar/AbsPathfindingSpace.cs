@@ -93,7 +93,7 @@ namespace EthansGameKit.AStar
 			/// <param name="node">节点坐标</param>
 			/// <returns>启发值,越小越优先</returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			protected abstract float GetHeuristic(TKey node);
+			protected abstract float GetHeuristicUnverified(TKey node);
 			/// <summary>获取单步消耗</summary>
 			/// <remarks>
 			///     <para>基类调用保证存在从<paramref name="fromNode" />到<paramref name="toNode" />的连接.</para>
@@ -104,20 +104,20 @@ namespace EthansGameKit.AStar
 			/// <param name="basicCost">基础消耗值</param>
 			/// <returns>计算过不同寻路器加成的单步消耗 例如toNode是水，不会游泳的动物返回float.MaxValue等</returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			protected abstract float GetStepCost(TKey fromNode, TKey toNode, float basicCost);
+			protected abstract float GetStepCostUnverified(TKey fromNode, TKey toNode, float basicCost);
 			/// <summary>获取移动至这个位置的总消耗</summary>
 			/// <returns>true-有记录; false-还没有记录</returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			protected abstract bool GetCachedTotalCost(TKey node, out float cost);
+			protected abstract bool GetTotalCostUnverified(TKey node, out float cost);
 			/// <summary>缓存移动至这个位置的总消耗</summary>
-			protected abstract void CacheTotalCost(TKey node, float cost);
+			protected abstract void SetTotalCostUnverified(TKey node, float cost);
 			/// <summary>获取移动至这个位置的母节点</summary>
 			/// <returns>true-有记录; false-还没有记录</returns>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			protected abstract bool GetCachedParentNode(TKey node, out TKey parent);
+			protected abstract bool GetParentNodeUnverified(TKey node, out TKey parent);
 			/// <summary>缓存移动至这个位置的母节点</summary>
 			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			protected abstract void CacheParentNode(TKey node, TKey parent);
+			protected abstract void SetParentNodeUnverified(TKey node, TKey parent);
 			/// <summary>
 			///     清理寻路缓存。在开始新的寻路时会触发
 			/// </summary>
@@ -138,7 +138,7 @@ namespace EthansGameKit.AStar
 					return false;
 				}
 				current = openList.Pop();
-				GetCachedTotalCost(current, out var currentCost);
+				GetTotalCostUnverified(current, out var currentCost);
 				var linkCount = space.GetLinks(current, nodeBuffer, floatBuffer);
 				var toNodes = nodeBuffer;
 				var basicCosts = floatBuffer;
@@ -146,16 +146,16 @@ namespace EthansGameKit.AStar
 				{
 					var toNode = toNodes[i];
 					var basicCost = basicCosts[i];
-					var stepCost = GetStepCost(current, toNode, basicCost);
+					var stepCost = GetStepCostUnverified(current, toNode, basicCost);
 					if (stepCost is float.PositiveInfinity or <= 0) continue;
 					var newCost = currentCost + stepCost;
 					if (newCost > maxCost) continue;
-					var heuristic = GetHeuristic(toNode);
+					var heuristic = GetHeuristicUnverified(toNode);
 					if (heuristic > maxHeuristic) continue;
-					if (!GetCachedTotalCost(toNode, out var oldCost) || newCost < oldCost)
+					if (!GetTotalCostUnverified(toNode, out var oldCost) || newCost < oldCost)
 					{
-						CacheTotalCost(toNode, newCost);
-						CacheParentNode(toNode, current);
+						SetTotalCostUnverified(toNode, newCost);
+						SetParentNodeUnverified(toNode, current);
 						openList.AddOrUpdate(toNode, newCost + heuristic);
 					}
 				}
@@ -173,9 +173,9 @@ namespace EthansGameKit.AStar
 				{
 					if (!space.FullAreaContainsPosition(source)) continue;
 					var key = space.GetKey(source);
-					CacheParentNode(key, key);
-					CacheTotalCost(key, 0);
-					openList.AddOrUpdate(key, GetHeuristic(key));
+					SetParentNodeUnverified(key, key);
+					SetTotalCostUnverified(key, 0);
+					openList.AddOrUpdate(key, GetHeuristicUnverified(key));
 				}
 			}
 			public void Reset(TPosition source, TPosition heuristicTarget, float maxCost = float.MaxValue, float maxheuristic = float.MaxValue)
@@ -188,7 +188,6 @@ namespace EthansGameKit.AStar
 		}
 
 		protected readonly int maxLinkCountPerNode;
-		readonly Dictionary<Type, CachePool<Pathfinder>> pools = new();
 		int changeFlag;
 		public abstract int NodeCount { get; }
 		/// <summary>
@@ -302,10 +301,7 @@ namespace EthansGameKit.AStar
 			if (!FullAreaContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
 			return GetIndexUnverified(position);
 		}
-		protected CachePool<Pathfinder> GetPool<TPathfinder>() where TPathfinder : Pathfinder
-		{
-			return GetPool(typeof(TPathfinder));
-		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected void MarkChanged()
 		{
 			++changeFlag;
@@ -319,17 +315,5 @@ namespace EthansGameKit.AStar
 		/// <returns>连接数量</returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract int GetLinks(TKey node, TKey[] toNodes, float[] basicCosts);
-		CachePool<Pathfinder> GetPool(Type pathfinderType)
-		{
-			if (!pools.TryGetValue(pathfinderType, out var pool))
-				pool = pools[pathfinderType] = new(0);
-			return pool;
-		}
-		void Recycle(Pathfinder pathfinder)
-		{
-			if (pathfinder.space != this) throw new ArgumentException("pathfinder.space != this");
-			var pool = GetPool(pathfinder.GetType());
-			pool.Recycle(pathfinder);
-		}
 	}
 }
