@@ -26,7 +26,7 @@ namespace EthansGameKit.AStar
 			return ListPool<Vector3>.Generate(links.Keys);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected internal override bool FullAreaContainsPosition(Vector3 position)
+		public override bool ContainsPosition(Vector3 position)
 		{
 			return allPositions.Contains(position);
 		}

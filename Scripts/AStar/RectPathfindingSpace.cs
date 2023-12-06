@@ -133,11 +133,7 @@ namespace EthansGameKit.AStar
 			return new(x + xMin, y + yMin);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected internal override bool FullAreaContainsPosition(Vector2Int position)
-		{
-			return fullRect.Contains(position);
-		}
-		protected override bool SafeAreaContainsPosition(Vector2Int position)
+		public override bool ContainsPosition(Vector2Int position)
 		{
 			return rawRect.Contains(position);
 		}

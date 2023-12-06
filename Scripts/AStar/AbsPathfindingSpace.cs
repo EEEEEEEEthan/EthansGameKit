@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EthansGameKit.CachePools;
 using EthansGameKit.Collections;
+using JetBrains.Annotations;
 
 namespace EthansGameKit.AStar
 {
@@ -171,7 +172,7 @@ namespace EthansGameKit.AStar
 				HeuristicTarget = heuristicTarget;
 				foreach (var source in sources)
 				{
-					if (!space.FullAreaContainsPosition(source)) continue;
+					if (!space.ContainsPosition(source)) continue;
 					var key = space.GetKey(source);
 					SetParentNodeUnverified(key, key);
 					SetTotalCostUnverified(key, 0);
@@ -243,31 +244,11 @@ namespace EthansGameKit.AStar
 			links.ClearAndRecycle();
 			return result;
 		}
-		public bool ContainsPosition(TPosition position, bool safeAreaOnly = true)
-		{
-			if (safeAreaOnly) return SafeAreaContainsPosition(position);
-			return FullAreaContainsPosition(position);
-		}
-		/// <summary>
-		///     验证是否包含某节点
-		/// </summary>
-		/// <param name="position"></param>
-		/// <returns></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected internal abstract bool FullAreaContainsPosition(TPosition position);
-		/// <summary>
-		///     验证安全区域是否包含某节点
-		/// </summary>
-		/// <param name="position"></param>
-		/// <returns></returns>
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected virtual bool SafeAreaContainsPosition(TPosition position)
-		{
-			return FullAreaContainsPosition(position);
-		}
+		public abstract bool ContainsPosition(TPosition position);
 		protected TKey GetIndex(TPosition position)
 		{
-			if (!FullAreaContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
+			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
 			return GetIndexUnverified(position);
 		}
 		/// <summary>
@@ -298,7 +279,7 @@ namespace EthansGameKit.AStar
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected TKey GetKey(TPosition position)
 		{
-			if (!FullAreaContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
+			if (!ContainsPosition(position)) throw new ArgumentOutOfRangeException($"{position}");
 			return GetIndexUnverified(position);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
