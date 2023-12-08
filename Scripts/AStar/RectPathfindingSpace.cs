@@ -142,7 +142,7 @@ namespace EthansGameKit.AStar
 		protected override bool ContainsKey(int key)
 		{
 			if (key < 0 || key >= NodeCount) return false;
-			var position = GetPosition(key);
+			var position = GetPositionUnverified(key);
 			return rawRect.Contains(position);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]

@@ -7,32 +7,6 @@ namespace EthansGameKit.AStar
 {
 	public abstract class RectPathfinderBase : PathfindingSpace<Vector2Int, int>.Pathfinder
 	{
-		class CostDict : IReadOnlyDictionary<Vector2Int, float>
-		{
-			readonly RectPathfinderBase pathfinder;
-			public int Count => pathfinder.space.NodeCount;
-			public IEnumerable<Vector2Int> Keys => throw new System.NotImplementedException();
-			public IEnumerable<float> Values => throw new System.NotImplementedException();
-			public CostDict(RectPathfinderBase pathfinder) => this.pathfinder = pathfinder;
-			public IEnumerator<KeyValuePair<Vector2Int, float>> GetEnumerator()
-			{
-				throw new System.NotImplementedException();
-			}
-			public bool ContainsKey(Vector2Int key)
-			{
-				return pathfinder.space.ContainsPosition(key);
-			}
-			public bool TryGetValue(Vector2Int key, out float value)
-			{
-				throw new System.NotImplementedException();
-			}
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return GetEnumerator();
-			}
-			public float this[Vector2Int key] => throw new System.NotImplementedException();
-		}
-
 		readonly struct IndexToPositionConverter : IValueConverter<int, Vector2Int>
 		{
 			readonly PathfindingSpace<Vector2Int, int> space;
