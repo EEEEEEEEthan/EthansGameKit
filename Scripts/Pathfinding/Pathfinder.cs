@@ -13,7 +13,7 @@ namespace EthansGameKit.Pathfinding
 		float maxCost;
 		float maxHeuristic;
 		int changeFlag;
-		public bool Dirty => changeFlag != space.ChangeFlag;
+		public bool Expired => changeFlag != space.ChangeFlag;
 		protected Pathfinder(PathfindingSpace<T> space)
 		{
 			this.space = space;
