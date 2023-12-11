@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using EthansGameKit.MathUtilities;
@@ -13,6 +14,8 @@ namespace EthansGameKit.Pathfinding.Rect
 		readonly float[] costMap;
 		readonly float[] heuristicMap;
 		readonly Stack<int> pathBuffer = new();
+		readonly List<int> sourceBuffer = new();
+		IPathfindingParams @params;
 		public RectPathfinder(RectPathfindingSpace space) : base(space)
 		{
 			this.space = space;
@@ -55,10 +58,34 @@ namespace EthansGameKit.Pathfinding.Rect
 			var heuristic = heuristicMap[node];
 			if (heuristic < 0)
 			{
-				var position = calculator.GetPosition(node);
-				heuristic = heuristicMap[node] = Vector2.Distance(position, space.gridIndexCalculator.GetPosition(node));
+				var position = calculator.GetPositionUnverified(node);
+				try
+				{
+					heuristic = @params.GetHeuristic((Vector3Int)position);
+				}
+				catch (Exception e)
+				{
+					heuristic = float.PositiveInfinity;
+					Debug.LogException(e);
+				}
+				heuristicMap[node] = heuristic;
 			}
 			return heuristic;
+		}
+		protected override float GetStepCostUnverified(int from, int to, byte costType)
+		{
+			var abs = Mathf.Abs(from - to);
+			var isDiagonal = abs != 1 && abs != calculator.width;
+			return @params.CostType2TrueCosts[costType] * (isDiagonal ? 1.4142135623730950488016887242097f : 1);
+		}
+		public void Reset(IPathfindingParams @params)
+		{
+			sourceBuffer.Clear();
+			this.@params = @params;
+			foreach (var source in @params.Sources)
+				sourceBuffer.Add(calculator.GetIndex(source.RoundToInt().XY()));
+			base.Reset(sourceBuffer, @params.MaxCost, @params.MaxHeuristic);
+			sourceBuffer.Clear();
 		}
 		public bool Reached(Vector2Int position)
 		{

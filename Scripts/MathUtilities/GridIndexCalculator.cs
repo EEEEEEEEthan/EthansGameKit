@@ -65,6 +65,22 @@ namespace EthansGameKit.MathUtilities
 			return GetIndex(position.x, position.y);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetIndex(int x, int y, out int index)
+		{
+			if (Contains(x, y))
+			{
+				index = GetIndexUnverified(x, y);
+				return true;
+			}
+			index = default;
+			return false;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetIndex(Vector2Int position, out int index)
+		{
+			return TryGetIndex(position.x, position.y, out index);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetXUnverified(int index)
 		{
 			return (index & widthMask) + xMin;
@@ -76,6 +92,17 @@ namespace EthansGameKit.MathUtilities
 			return GetXUnverified(index);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetX(int index, out int x)
+		{
+			if (Contains(index))
+			{
+				x = GetXUnverified(index);
+				return true;
+			}
+			x = default;
+			return false;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetYUnverified(int index)
 		{
 			return (index >> widthPower) + yMin;
@@ -85,6 +112,17 @@ namespace EthansGameKit.MathUtilities
 		{
 			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
 			return GetYUnverified(index);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetY(int index, out int y)
+		{
+			if (Contains(index))
+			{
+				y = GetYUnverified(index);
+				return true;
+			}
+			y = default;
+			return false;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void GetPositionUnverified(int index, out int x, out int y)
@@ -108,6 +146,29 @@ namespace EthansGameKit.MathUtilities
 		{
 			GetPosition(index, out var x, out var y);
 			return new(x, y);
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetPosition(int index, out int x, out int y)
+		{
+			if (Contains(index))
+			{
+				GetPositionUnverified(index, out x, out y);
+				return true;
+			}
+			x = default;
+			y = default;
+			return false;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetPosition(int index, out Vector2Int position)
+		{
+			if (Contains(index))
+			{
+				position = GetPositionUnverified(index);
+				return true;
+			}
+			position = default;
+			return false;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetNeighborIndexUnverified(int index, GridDirections direction)

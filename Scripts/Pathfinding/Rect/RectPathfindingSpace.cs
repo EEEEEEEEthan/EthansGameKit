@@ -5,52 +5,57 @@ namespace EthansGameKit.Pathfinding.Rect
 {
 	public class RectPathfindingSpace : PathfindingSpace<int>
 	{
-		public readonly bool allowDiagonal;
 		internal readonly GridIndexCalculator gridIndexCalculator;
-		readonly float[] costMap;
-		readonly int directionBits;
+		readonly long[] costMap;
+		public readonly bool allowDiagonal;
+		readonly GridDirections[] directionSequence =
+		{
+			GridDirections.Forward,
+			GridDirections.Right,
+			GridDirections.Backward,
+			GridDirections.Left,
+			GridDirections.ForwardRight,
+			GridDirections.BackwardRight,
+			GridDirections.BackwardLeft,
+			GridDirections.ForwardLeft,
+		};
 		public RectPathfindingSpace(RectInt area, bool allowDiagonal) : base(allowDiagonal ? 8 : 4)
 		{
 			gridIndexCalculator = new(area);
 			this.allowDiagonal = allowDiagonal;
-			directionBits = this.allowDiagonal ? 3 : 2;
-			costMap = new float[gridIndexCalculator.count << directionBits];
+			costMap = new long[gridIndexCalculator.count];
 		}
-		protected internal override int GetLinks(int fromNode, int[] toNodes, float[] costs)
+		protected internal override int GetLinks(int fromNode, int[] toNodes, byte[] costTypes)
 		{
 			var count = 0;
 			for (var i = 0; i < maxLinkCountPerNode; ++i)
 			{
-				var linkIndex = (fromNode << directionBits) + i;
-				var cost = costMap[linkIndex];
-				if (cost <= 0) continue;
-				toNodes[count] = linkIndex;
-				costs[count] = cost;
+				var direction = directionSequence[i];
+				var costType = GetLinkType(fromNode, direction);
+				if (costType <= 0) continue;
+				toNodes[count] = gridIndexCalculator.GetNeighborIndexUnverified(fromNode, direction);
+				costTypes[count] = costType;
 				++count;
 			}
 			return count;
 		}
-		/// <param name="fromNode"></param>
+		/// <param name="from"></param>
 		/// <param name="direction"></param>
-		/// <returns>result &lt;= 0 means no link</returns>
-		public float GetStepCost(int fromNode, GridDirections direction)
+		/// <param name="costType">cost &lt;= 0 means no link</param>
+		public void SetLink(Vector2Int from, GridDirections direction, byte costType)
 		{
-			var directionIndex = allowDiagonal ? (int)direction : (int)direction / 2;
-			var linkIndex = (fromNode << directionBits) + directionIndex;
-			return costMap[linkIndex];
+			var index = gridIndexCalculator.GetIndexUnverified(from);
+			SetLink(index, direction, costType);
 		}
-		/// <param name="fromNode"></param>
-		/// <param name="direction"></param>
-		/// <param name="cost">cost &lt;= 0 means no link</param>
-		public void SetStepCost(int fromNode, GridDirections direction, float cost)
+		void SetLink(int index, GridDirections direction, byte costType)
 		{
-			var directionIndex = allowDiagonal ? (int)direction : (int)direction / 2;
-			var linkIndex = (fromNode << directionBits) + directionIndex;
-			if (costMap[linkIndex] != cost)
-			{
-				costMap[linkIndex] = cost;
-				MarkDirty();
-			}
+			var cost = costMap[index];
+			cost.SetBits((int)direction * 8, 8, costType);
+			costMap[index] = cost;
+		}
+		byte GetLinkType(int index, GridDirections direction)
+		{
+			return (byte)costMap[index].GetBits((int)direction * 8, 8);
 		}
 	}
 }

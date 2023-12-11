@@ -37,6 +37,17 @@ namespace EthansGameKit
 		{
 			@this = Clamped(@this, min, max);
 		}
+		public static void SetBits(ref this long @this, int start, int length, long value)
+		{
+			var mask = (1L << length) - 1;
+			@this &= ~(mask << start);
+			@this |= (value & mask) << start;
+		}
+		public static long GetBits(this long @this, int start, int length)
+		{
+			var mask = (1L << length) - 1;
+			return (@this >> start) & mask;
+		}
 		static long GreatestCommonDivisorWith(this long a, long b)
 		{
 			if (a < b)

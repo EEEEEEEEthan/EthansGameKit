@@ -9,17 +9,18 @@ namespace EthansGameKit.Pathfinding
 		public readonly PathfindingSpace<T> space;
 		readonly Heap<T, float> heap;
 		readonly T[] tBuffer;
-		readonly float[] singleBuffer;
+		readonly byte[] byteBuffer;
 		float maxCost;
 		float maxHeuristic;
 		int changeFlag;
+		float[] costType2Cost = new float[128];
 		public bool Dirty => changeFlag != space.ChangeFlag;
 		protected Pathfinder(PathfindingSpace<T> space)
 		{
 			this.space = space;
 			heap = Heap<T, float>.Generate();
 			tBuffer = new T[space.maxLinkCountPerNode];
-			singleBuffer = new float[space.maxLinkCountPerNode];
+			byteBuffer = new byte[space.maxLinkCountPerNode];
 		}
 		protected void Reset(IEnumerable<T> sources, float maxCost, float maxHeuristic)
 		{
@@ -44,11 +45,12 @@ namespace EthansGameKit.Pathfinding
 			}
 			currentNode = heap.Pop();
 			TryGetTotalCostUnverified(currentNode, out var currentCost);
-			var count = space.GetLinks(currentNode, tBuffer, singleBuffer);
+			var count = space.GetLinks(currentNode, tBuffer, byteBuffer);
 			for (var i = 0; i < count; ++i)
 			{
 				var toNode = tBuffer[i];
-				var stepCost = OverrideStepCost(currentNode, toNode, singleBuffer[i]);
+				var stepCost = GetStepCostUnverified(currentNode, toNode, byteBuffer[i]);
+				if (stepCost <= 0) continue;
 				var newCost = currentCost + stepCost;
 				if (newCost >= maxCost) continue;
 				if (TryGetTotalCostUnverified(toNode, out var oldCost) && newCost < oldCost)
@@ -72,10 +74,7 @@ namespace EthansGameKit.Pathfinding
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected abstract float GetHeuristicUnverified(T node);
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected virtual float OverrideStepCost(T from, T to, float basicCost)
-		{
-			return basicCost;
-		}
+		protected abstract float GetStepCostUnverified(T from, T to, byte costType);
 		/// <summary>
 		///     获取从起点(含)到终点(含)的路径，起点先出栈
 		/// </summary>

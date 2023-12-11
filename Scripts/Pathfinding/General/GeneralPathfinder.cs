@@ -11,7 +11,6 @@ namespace EthansGameKit.Pathfinding.General
 		readonly Dictionary<Vector3, Vector3> flowMap = new();
 		readonly Dictionary<Vector3, float> heuristicMap = new();
 		Func<Vector3, float> heuristicGetter;
-		Vector3 destination;
 		public GeneralPathfinder(GeneralPathfindingSpace space) : base(space) => this.space = space;
 		protected override void Clear()
 		{
@@ -41,6 +40,10 @@ namespace EthansGameKit.Pathfinding.General
 				heuristicMap[node] = heuristic = heuristicGetter(node);
 			return heuristic;
 		}
+		protected override float GetStepCostUnverified(Vector3 from, Vector3 to, byte costType)
+		{
+			return costType * (to - from).magnitude;
+		}
 		public float GetCost(Vector3 position)
 		{
 			return costMap.GetValueOrDefault(position, float.PositiveInfinity);
@@ -49,9 +52,8 @@ namespace EthansGameKit.Pathfinding.General
 		{
 			return TryGetParentNodeUnverified(position, out parent);
 		}
-		public void Reset(IEnumerable<Vector3> sources, Vector3 target, float maxCost, float maxHeuristic)
+		public void Reset(IEnumerable<Vector3> sources, float maxCost, float maxHeuristic)
 		{
-			destination = target;
 			base.Reset(sources, maxCost, maxHeuristic);
 		}
 		public bool MoveNext(out Vector3 currentNode)
