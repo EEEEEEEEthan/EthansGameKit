@@ -30,6 +30,7 @@ namespace EthansGameKit.Pathfinding.General
 				links.Add(fromNode, dict);
 			}
 			dict.Add(toNode, cost);
+			MarkDirty();
 		}
 		public bool RemoveLink(Vector3 fromNode, Vector3 toNode)
 		{
@@ -37,6 +38,7 @@ namespace EthansGameKit.Pathfinding.General
 			if (dict.Remove(toNode))
 			{
 				if (dict.Count == 0) DictionaryPool<Vector3, float>.ClearAndRecycle(ref dict);
+				MarkDirty();
 				return true;
 			}
 			return false;

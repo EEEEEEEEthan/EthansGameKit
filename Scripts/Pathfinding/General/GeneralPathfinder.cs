@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -9,6 +10,7 @@ namespace EthansGameKit.Pathfinding.General
 		readonly Dictionary<Vector3, float> costMap = new();
 		readonly Dictionary<Vector3, Vector3> flowMap = new();
 		readonly Dictionary<Vector3, float> heuristicMap = new();
+		Func<Vector3, float> heuristicGetter;
 		Vector3 destination;
 		public GeneralPathfinder(GeneralPathfindingSpace space) : base(space) => this.space = space;
 		protected override void Clear()
@@ -17,30 +19,35 @@ namespace EthansGameKit.Pathfinding.General
 			flowMap.Clear();
 			heuristicMap.Clear();
 		}
-		protected override bool TryGetTotalCost(Vector3 node, out float cost)
+		protected override bool TryGetTotalCostUnverified(Vector3 node, out float cost)
 		{
 			return costMap.TryGetValue(node, out cost);
 		}
-		protected override void SetTotalCost(Vector3 node, float cost)
+		protected override void SetTotalCostUnverified(Vector3 node, float cost)
 		{
 			costMap[node] = cost;
 		}
-		protected override bool TryGetParentNode(Vector3 node, out Vector3 parent)
+		protected override bool TryGetParentNodeUnverified(Vector3 node, out Vector3 parent)
 		{
 			return flowMap.TryGetValue(node, out parent);
 		}
-		protected override void SetParentNode(Vector3 node, Vector3 parent)
+		protected override void SetParentNodeUnverified(Vector3 node, Vector3 parent)
 		{
 			flowMap[node] = parent;
 		}
-		protected override float GetHeuristic(Vector3 node)
+		protected override float GetHeuristicUnverified(Vector3 node)
 		{
 			if (!heuristicMap.TryGetValue(node, out var heuristic))
-			{
-				heuristic = Vector3.Distance(node, destination);
-				heuristicMap[node] = heuristic;
-			}
+				heuristicMap[node] = heuristic = heuristicGetter(node);
 			return heuristic;
+		}
+		public float GetCost(Vector3 position)
+		{
+			return costMap.GetValueOrDefault(position, float.PositiveInfinity);
+		}
+		public bool TryGetParent(Vector3 position, out Vector3 parent)
+		{
+			return TryGetParentNodeUnverified(position, out parent);
 		}
 		public void Reset(IEnumerable<Vector3> sources, Vector3 target, float maxCost, float maxHeuristic)
 		{
