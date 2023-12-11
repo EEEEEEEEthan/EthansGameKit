@@ -1,16 +1,15 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace EthansGameKit.Pathfinding.General
 {
-	class GeneralPathfinder : Pathfinder<Vector3>
+	public sealed class GeneralPathfinder : Pathfinder<Vector3>
 	{
 		public new readonly GeneralPathfindingSpace space;
 		readonly Dictionary<Vector3, float> costMap = new();
 		readonly Dictionary<Vector3, Vector3> flowMap = new();
 		readonly Dictionary<Vector3, float> heuristicMap = new();
-		Func<Vector3, float> heuristicGetter;
+		IPathfindingParams @params;
 		public GeneralPathfinder(GeneralPathfindingSpace space) : base(space) => this.space = space;
 		protected override void Clear()
 		{
@@ -37,12 +36,12 @@ namespace EthansGameKit.Pathfinding.General
 		protected override float GetHeuristicUnverified(Vector3 node)
 		{
 			if (!heuristicMap.TryGetValue(node, out var heuristic))
-				heuristicMap[node] = heuristic = heuristicGetter(node);
+				heuristicMap[node] = heuristic = @params.GetHeuristic(node);
 			return heuristic;
 		}
 		protected override float GetStepCostUnverified(Vector3 from, Vector3 to, byte costType)
 		{
-			return costType * (to - from).magnitude;
+			return @params.GetStepCost(costType) * (to - from).magnitude;
 		}
 		public float GetCost(Vector3 position)
 		{
@@ -52,9 +51,10 @@ namespace EthansGameKit.Pathfinding.General
 		{
 			return TryGetParentNodeUnverified(position, out parent);
 		}
-		public void Reset(IEnumerable<Vector3> sources, float maxCost, float maxHeuristic)
+		public void Reset(IPathfindingParams @params)
 		{
-			base.Reset(sources, maxCost, maxHeuristic);
+			base.Reset(@params.Sources, @params.MaxCost, @params.MaxHeuristic);
+			this.@params = @params;
 		}
 		public bool MoveNext(out Vector3 currentNode)
 		{

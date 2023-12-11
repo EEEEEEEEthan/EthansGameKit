@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Pathfinding.General
 {
-	class GeneralPathfindingSpace : PathfindingSpace<Vector3>
+	public sealed class GeneralPathfindingSpace : PathfindingSpace<Vector3>
 	{
 		readonly Dictionary<Vector3, Dictionary<Vector3, byte>> links = new();
 		public GeneralPathfindingSpace(int maxLinkCountPerNode) : base(maxLinkCountPerNode)

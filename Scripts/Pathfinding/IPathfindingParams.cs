@@ -18,9 +18,9 @@ namespace EthansGameKit.Pathfinding
 		/// </summary>
 		float MaxHeuristic { get; }
 		/// <summary>
-		///     消耗类型到消耗值的映射。下标是消耗类型
+		///     获取某一消耗类型的真实消耗
 		/// </summary>
-		IReadOnlyList<float> CostType2TrueCosts { get; }
+		float GetStepCost(byte costType);
 		/// <summary>
 		///     获取某一位置的启发值
 		/// </summary>

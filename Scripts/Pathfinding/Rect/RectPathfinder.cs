@@ -76,7 +76,7 @@ namespace EthansGameKit.Pathfinding.Rect
 		{
 			var abs = Mathf.Abs(from - to);
 			var isDiagonal = abs != 1 && abs != calculator.width;
-			return @params.CostType2TrueCosts[costType] * (isDiagonal ? 1.4142135623730950488016887242097f : 1);
+			return @params.GetStepCost(costType) * (isDiagonal ? 1.4142135623730950488016887242097f : 1);
 		}
 		public void Reset(IPathfindingParams @params)
 		{
