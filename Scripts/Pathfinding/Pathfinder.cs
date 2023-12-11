@@ -36,6 +36,7 @@ namespace EthansGameKit.Pathfinding
 			}
 		}
 		protected abstract void Clear();
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected bool Next(out T currentNode)
 		{
 			if (heap.Count <= 0)

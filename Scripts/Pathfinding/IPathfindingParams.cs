@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 
 namespace EthansGameKit.Pathfinding
@@ -18,14 +19,14 @@ namespace EthansGameKit.Pathfinding
 		/// </summary>
 		float MaxHeuristic { get; }
 		/// <summary>
-		///     获取某一消耗类型的真实消耗
+		///     获取某一消耗类型的真实消耗.高频调用,建议inline
 		/// </summary>
-		float GetStepCost(byte costType);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)] float GetStepCost(byte costType);
 		/// <summary>
-		///     获取某一位置的启发值
+		///     获取某一位置的启发值.高频调用,建议inline
 		/// </summary>
 		/// <param name="position"></param>
 		/// <returns></returns>
-		float GetHeuristic(Vector3 position);
+		[MethodImpl(MethodImplOptions.AggressiveInlining)] float GetHeuristic(Vector3 position);
 	}
 }
