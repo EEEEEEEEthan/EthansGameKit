@@ -7,7 +7,7 @@ namespace EthansGameKit
 	/// <summary>
 	///     颜色序列生成器。生成与已有颜色差异最大的颜色
 	/// </summary>
-	class ColorSequenceGenerator
+	public class ColorSequenceGenerator
 	{
 		readonly List<Color> colors = new();
 		readonly Func<Color, bool> colorFilter;

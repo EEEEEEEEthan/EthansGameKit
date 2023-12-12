@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using EthansGameKit.CachePools;
 using EthansGameKit.MathUtilities;
 using UnityEngine;
 
@@ -83,5 +84,17 @@ namespace EthansGameKit.Pathfinding.Rect
 		{
 			return costMap[GetLinkIndex(index, direction)];
 		}
+		#region pool
+		readonly CachePool<RectPathfinder> pool = new(0);
+		public RectPathfinder CreatePathfinder()
+		{
+			if (!pool.TryGenerate(out var pathfinder)) pathfinder = new(this);
+			return pathfinder;
+		}
+		internal void Recycle(RectPathfinder pathfinder)
+		{
+			pool.Recycle(pathfinder);
+		}
+		#endregion pool
 	}
 }

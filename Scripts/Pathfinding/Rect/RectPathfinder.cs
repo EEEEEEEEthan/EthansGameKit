@@ -14,7 +14,7 @@ namespace EthansGameKit.Pathfinding.Rect
 	///         <item>支持多起点</item>
 	///     </list>
 	/// </summary>
-	public sealed class RectPathfinder : Pathfinder<int>
+	public sealed class RectPathfinder : Pathfinder<int>, IDisposable
 	{
 		public new readonly RectPathfindingSpace space;
 		readonly GridIndexCalculator calculator;
@@ -27,7 +27,7 @@ namespace EthansGameKit.Pathfinding.Rect
 		IRectPathfindingParams @params;
 		int currentNode;
 		public Vector2Int Current => calculator.GetPosition(currentNode);
-		public RectPathfinder(RectPathfindingSpace space) : base(space)
+		internal RectPathfinder(RectPathfindingSpace space) : base(space)
 		{
 			this.space = space;
 			calculator = space.gridIndexCalculator;
@@ -119,9 +119,19 @@ namespace EthansGameKit.Pathfinding.Rect
 			}
 			return stepCost;
 		}
+		public void Dispose()
+		{
+			Reset();
+			space.Recycle(this);
+		}
 		public bool MoveNext()
 		{
 			return base.MoveNext(out currentNode);
+		}
+		public void Reset()
+		{
+			sourceBuffer.Clear();
+			base.Reset(sourceBuffer, default, default);
 		}
 		public void Reset(IRectPathfindingParams @params)
 		{
