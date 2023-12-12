@@ -36,7 +36,7 @@ namespace EthansGameKit.Pathfinding
 		}
 		protected abstract void Clear();
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected bool Next(out T currentNode)
+		protected bool MoveNext(out T currentNode)
 		{
 			if (heap.Count <= 0)
 			{
@@ -53,11 +53,12 @@ namespace EthansGameKit.Pathfinding
 				if (stepCost <= 0) continue;
 				var newCost = currentCost + stepCost;
 				if (newCost >= maxCost) continue;
-				if (TryGetTotalCostUnverified(toNode, out var oldCost) && newCost < oldCost)
+				if (!TryGetTotalCostUnverified(toNode, out var oldCost) || newCost < oldCost)
 				{
 					var heuristic = GetHeuristicUnverified(toNode);
 					if (heuristic >= maxHeuristic) continue;
 					SetTotalCostUnverified(toNode, newCost);
+					SetParentNodeUnverified(toNode, currentNode);
 					heap.AddOrUpdate(toNode, newCost + heuristic);
 				}
 			}

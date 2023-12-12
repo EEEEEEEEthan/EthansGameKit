@@ -1,8 +1,11 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using EthansGameKit.Internal;
 using EthansGameKit.MathUtilities;
 using UnityEngine;
+using Debug = UnityEngine.Debug;
 
 namespace EthansGameKit.Pathfinding.Rect
 {
@@ -11,35 +14,40 @@ namespace EthansGameKit.Pathfinding.Rect
 		public new readonly RectPathfindingSpace space;
 		readonly GridIndexCalculator calculator;
 		readonly int[] flowMap;
-		readonly float[] costMap;
+		readonly float[] totalCostMap;
 		readonly float[] heuristicMap;
+		readonly float[] stepCostMap;
 		readonly Stack<int> pathBuffer = new();
 		readonly List<int> sourceBuffer = new();
-		IPathfindingParams @params;
+		IRectPathfindingParams @params;
+		int currentNode;
+		public Vector2Int Current => calculator.GetPosition(currentNode);
 		public RectPathfinder(RectPathfindingSpace space) : base(space)
 		{
 			this.space = space;
 			calculator = space.gridIndexCalculator;
 			flowMap = new int[calculator.count];
-			costMap = new float[calculator.count];
+			totalCostMap = new float[calculator.count];
 			heuristicMap = new float[calculator.count];
+			stepCostMap = new float[calculator.count << (space.allowDiagonal ? 3 : 2)];
 		}
 		protected override void Clear()
 		{
 			flowMap.MemSet(-1);
-			costMap.MemSet(0);
+			totalCostMap.MemSet(0);
 			heuristicMap.MemSet(-1);
+			stepCostMap.MemSet(0);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected sealed override bool TryGetTotalCostUnverified(int node, out float cost)
 		{
-			cost = costMap[node];
+			cost = totalCostMap[node];
 			return cost > 0;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected sealed override void SetTotalCostUnverified(int node, float cost)
 		{
-			costMap[node] = cost;
+			totalCostMap[node] = cost;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected sealed override bool TryGetParentNodeUnverified(int node, out int parent)
@@ -61,7 +69,7 @@ namespace EthansGameKit.Pathfinding.Rect
 				var position = calculator.GetPositionUnverified(node);
 				try
 				{
-					heuristic = @params.GetHeuristic((Vector3Int)position);
+					heuristic = @params.CalculateHeuristic(position);
 				}
 				catch (Exception e)
 				{
@@ -74,22 +82,70 @@ namespace EthansGameKit.Pathfinding.Rect
 		}
 		protected override float GetStepCostUnverified(int from, int to, byte costType)
 		{
-			var abs = Mathf.Abs(from - to);
-			var isDiagonal = abs != 1 && abs != calculator.width;
-			return @params.GetStepCost(costType) * (isDiagonal ? 1.4142135623730950488016887242097f : 1);
+			GridDirections direction;
+			var sub = to - from;
+			var width = calculator.width;
+			switch (sub)
+			{
+				case 1:
+					direction = GridDirections.Right;
+					break;
+				case -1:
+					direction = GridDirections.Left;
+					break;
+				default:
+				{
+					if (sub == width) direction = GridDirections.Forward;
+					else if (sub == -width) direction = GridDirections.Backward;
+					else if (sub == width + 1) direction = GridDirections.ForwardRight;
+					else if (sub == width - 1) direction = GridDirections.ForwardLeft;
+					else if (sub == -width - 1) direction = GridDirections.BackwardLeft;
+					else if (sub == -width + 1) direction = GridDirections.BackwardRight;
+					else throw new ArgumentException();
+					break;
+				}
+			}
+			var linkIndex = space.GetLinkIndex(from, direction);
+			var stepCost = stepCostMap[linkIndex];
+			if (stepCost <= 0)
+			{
+				var fromPosition = calculator.GetPositionUnverified(from);
+				stepCostMap[linkIndex] = stepCost = @params.CalculateStepCost(fromPosition, direction, costType);
+			}
+			return stepCost;
 		}
-		public void Reset(IPathfindingParams @params)
+		public bool MoveNext()
+		{
+			return base.MoveNext(out currentNode);
+		}
+		public void Reset(IRectPathfindingParams @params)
 		{
 			sourceBuffer.Clear();
 			this.@params = @params;
 			foreach (var source in @params.Sources)
-				sourceBuffer.Add(calculator.GetIndex(source.RoundToInt().XY()));
+				sourceBuffer.Add(calculator.GetIndex(source));
+			foreach (var (pos, dir, costType) in @params.OverrideLinks)
+			{
+				var index = calculator.GetIndex(pos);
+				stepCostMap[space.GetLinkIndex(index, dir)] = costType;
+			}
 			base.Reset(sourceBuffer, @params.MaxCost, @params.MaxHeuristic);
 			sourceBuffer.Clear();
 		}
 		public bool Reached(Vector2Int position)
 		{
 			return flowMap[calculator.GetIndex(position)] >= 0;
+		}
+		public bool TryGetParent(Vector2Int position, out Vector2Int parent)
+		{
+			var parentIndex = flowMap[calculator.GetIndex(position)];
+			if (parentIndex >= 0)
+			{
+				parent = calculator.GetPosition(parentIndex);
+				return true;
+			}
+			parent = default;
+			return false;
 		}
 		/// <summary>
 		///     获取从起点(含)到终点(含)的路径

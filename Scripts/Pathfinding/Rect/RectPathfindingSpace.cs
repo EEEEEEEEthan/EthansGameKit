@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using EthansGameKit.MathUtilities;
 using UnityEngine;
 
@@ -5,10 +6,8 @@ namespace EthansGameKit.Pathfinding.Rect
 {
 	public class RectPathfindingSpace : PathfindingSpace<int>
 	{
-		internal readonly GridIndexCalculator gridIndexCalculator;
-		readonly long[] costMap;
-		public readonly bool allowDiagonal;
-		readonly GridDirections[] directionSequence =
+		static readonly int[] directionIndex = { 0, 4, 1, 5, 2, 6, 3, 7 };
+		static readonly GridDirections[] directionSequence =
 		{
 			GridDirections.Forward,
 			GridDirections.Right,
@@ -19,11 +18,20 @@ namespace EthansGameKit.Pathfinding.Rect
 			GridDirections.BackwardLeft,
 			GridDirections.ForwardLeft,
 		};
+		public readonly bool allowDiagonal;
+		public readonly RectInt rect;
+		internal readonly GridIndexCalculator gridIndexCalculator;
+		readonly byte[] costMap;
+		readonly int directionBits;
+		readonly int[] neighborIndexBuffer;
 		public RectPathfindingSpace(RectInt area, bool allowDiagonal) : base(allowDiagonal ? 8 : 4)
 		{
+			rect = area;
 			gridIndexCalculator = new(area);
 			this.allowDiagonal = allowDiagonal;
-			costMap = new long[gridIndexCalculator.count];
+			directionBits = allowDiagonal ? 3 : 2;
+			costMap = new byte[gridIndexCalculator.count << directionBits];
+			neighborIndexBuffer = new int[maxLinkCountPerNode];
 		}
 		protected internal override int GetLinks(int fromNode, int[] toNodes, byte[] costTypes)
 		{
@@ -44,18 +52,29 @@ namespace EthansGameKit.Pathfinding.Rect
 		/// <param name="costType">cost &lt;= 0 means no link</param>
 		public void SetLink(Vector2Int from, GridDirections direction, byte costType)
 		{
-			var index = gridIndexCalculator.GetIndexUnverified(from);
+			var index = gridIndexCalculator.GetIndex(from);
 			SetLink(index, direction, costType);
+		}
+		public int GetLinks(Vector2Int from, Vector2Int[] toNodes, byte[] costTypes)
+		{
+			var index = gridIndexCalculator.GetIndex(from);
+			var count = GetLinks(index, neighborIndexBuffer, costTypes);
+			for (var i = 0; i < count; ++i)
+				toNodes[i] = gridIndexCalculator.GetPosition(neighborIndexBuffer[i]);
+			return count;
+		}
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		internal int GetLinkIndex(int nodeIndex, GridDirections direction)
+		{
+			return (nodeIndex << directionBits) | directionIndex[(int)direction];
 		}
 		void SetLink(int index, GridDirections direction, byte costType)
 		{
-			var cost = costMap[index];
-			cost.SetBits((int)direction * 8, 8, costType);
-			costMap[index] = cost;
+			costMap[GetLinkIndex(index, direction)] = costType;
 		}
 		byte GetLinkType(int index, GridDirections direction)
 		{
-			return (byte)costMap[index].GetBits((int)direction * 8, 8);
+			return costMap[GetLinkIndex(index, direction)];
 		}
 	}
 }

@@ -9,7 +9,7 @@ namespace EthansGameKit.Pathfinding.General
 		readonly Dictionary<Vector3, float> costMap = new();
 		readonly Dictionary<Vector3, Vector3> flowMap = new();
 		readonly Dictionary<Vector3, float> heuristicMap = new();
-		IPathfindingParams @params;
+		IGeneralPathfindingParams @params;
 		public GeneralPathfinder(GeneralPathfindingSpace space) : base(space) => this.space = space;
 		protected override void Clear()
 		{
@@ -41,7 +41,7 @@ namespace EthansGameKit.Pathfinding.General
 		}
 		protected override float GetStepCostUnverified(Vector3 from, Vector3 to, byte costType)
 		{
-			return @params.GetStepCost(costType) * (to - from).magnitude;
+			return @params.GetStepCost(from, to, costType) * (to - from).magnitude;
 		}
 		public float GetCost(Vector3 position)
 		{
@@ -51,14 +51,14 @@ namespace EthansGameKit.Pathfinding.General
 		{
 			return TryGetParentNodeUnverified(position, out parent);
 		}
-		public void Reset(IPathfindingParams @params)
+		public void Reset(IGeneralPathfindingParams @params)
 		{
 			base.Reset(@params.Sources, @params.MaxCost, @params.MaxHeuristic);
 			this.@params = @params;
 		}
 		public bool MoveNext(out Vector3 currentNode)
 		{
-			return Next(out currentNode);
+			return base.MoveNext(out currentNode);
 		}
 	}
 }

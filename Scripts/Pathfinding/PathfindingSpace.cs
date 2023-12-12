@@ -22,6 +22,13 @@ namespace EthansGameKit.Pathfinding
 			pathfinder = default;
 			return false;
 		}
+		public static void RecyclePathfinder<TPathfinder>(ref TPathfinder pathfinder) where TPathfinder : Pathfinder<T>
+		{
+			if (!pools.TryGetValue(typeof(TPathfinder), out var pool))
+				pool = pools[typeof(TPathfinder)] = new(0);
+			pool.Recycle(pathfinder);
+			pathfinder = null;
+		}
 		public readonly int maxLinkCountPerNode;
 		internal int ChangeFlag { get; private set; }
 		protected PathfindingSpace(int maxLinkCountPerNode) => this.maxLinkCountPerNode = maxLinkCountPerNode;
