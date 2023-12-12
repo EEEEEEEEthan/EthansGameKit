@@ -4,6 +4,9 @@ using UnityEngine;
 
 namespace EthansGameKit.Pathfinding.Rect
 {
+	/// <summary>
+	///     寻路器的寻路参数
+	/// </summary>
 	public interface IRectPathfindingParams
 	{
 		/// <summary>
@@ -25,6 +28,9 @@ namespace EthansGameKit.Pathfinding.Rect
 		/// <summary>
 		///     获取某一消耗类型的真实消耗.高频调用,建议inline
 		/// </summary>
+		/// <remarks>
+		///     尽可能把计算量放在costType里.SEE:<see cref="RectPathfindingSpace.SetLink" />
+		/// </remarks>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)] float CalculateStepCost(Vector2Int from, GridDirections direction, byte costType);
 		/// <summary>
 		///     获取某一位置的启发值.高频调用,建议inline

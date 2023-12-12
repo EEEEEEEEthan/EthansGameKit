@@ -4,7 +4,14 @@ using UnityEngine;
 
 namespace EthansGameKit.Pathfinding.Rect
 {
-	public class RectPathfindingSpace : PathfindingSpace<int>
+	/// <summary>
+	///     <para>针对四边形网格深度优化的寻路空间</para>
+	///     <list type="bullet">
+	///         <item>支持四邻或八邻网格</item>
+	///         <item>支持单向移动配置</item>
+	///     </list>
+	/// </summary>
+	public sealed class RectPathfindingSpace : PathfindingSpace<int>
 	{
 		static readonly int[] directionIndex = { 0, 4, 1, 5, 2, 6, 3, 7 };
 		static readonly GridDirections[] directionSequence =

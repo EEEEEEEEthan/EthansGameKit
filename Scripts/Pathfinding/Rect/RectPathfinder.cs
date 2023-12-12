@@ -1,15 +1,20 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using EthansGameKit.Internal;
 using EthansGameKit.MathUtilities;
 using UnityEngine;
-using Debug = UnityEngine.Debug;
 
 namespace EthansGameKit.Pathfinding.Rect
 {
-	public class RectPathfinder : Pathfinder<int>
+	/// <summary>
+	///     <para>针对四边形网格深度优化的寻路器</para>
+	///     <list type="bullet">
+	///         <item>支持四邻或八邻网格</item>
+	///         <item>支持自定义移动消耗</item>
+	///         <item>支持多起点</item>
+	///     </list>
+	/// </summary>
+	public sealed class RectPathfinder : Pathfinder<int>
 	{
 		public new readonly RectPathfindingSpace space;
 		readonly GridIndexCalculator calculator;
@@ -39,24 +44,24 @@ namespace EthansGameKit.Pathfinding.Rect
 			stepCostMap.MemSet(0);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected sealed override bool TryGetTotalCostUnverified(int node, out float cost)
+		protected override bool TryGetTotalCostUnverified(int node, out float cost)
 		{
 			cost = totalCostMap[node];
 			return cost > 0;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected sealed override void SetTotalCostUnverified(int node, float cost)
+		protected override void SetTotalCostUnverified(int node, float cost)
 		{
 			totalCostMap[node] = cost;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected sealed override bool TryGetParentNodeUnverified(int node, out int parent)
+		protected override bool TryGetParentNodeUnverified(int node, out int parent)
 		{
 			parent = flowMap[node];
 			return parent >= 0;
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected sealed override void SetParentNodeUnverified(int node, int parent)
+		protected override void SetParentNodeUnverified(int node, int parent)
 		{
 			flowMap[node] = parent;
 		}
