@@ -21,6 +21,7 @@ namespace EthansGameKit.Editor
 			}
 		}
 		[SerializeField] DefaultAsset resourceFolder;
+		[SerializeField] bool withAllAssetList;
 		protected override string Generate()
 		{
 			var dir = AssetDatabase.GetAssetPath(resourceFolder);
@@ -52,16 +53,19 @@ namespace EthansGameKit.Editor
 				var type = asset.GetType();
 				var propertyName = $"{fileNameWithoutExtension}_{type.Name}";
 				builder.AppendLine($"{strIdent2}public static ITimedCache<{type.FullName}> {propertyName} {{ get; }} = new ResourceCache<{type.FullName}>(\"{fileUnderResource}\");");
-				allAssets.Add(propertyName);
-				var assets = Resources.LoadAll(fileUnderResource);
-				if (assets.Length > 1)
+				if (withAllAssetList)
 				{
-					var subPropertyName = $"{fileNameWithoutExtension}_AllAssets";
-					builder.AppendLine($"{strIdent2}public static ITimedCache<UnityEngine.Object[]> {subPropertyName} {{ get; }} = new ResourceGroupCache<UnityEngine.Object>(\"{fileUnderResource}\");");
-					allAssets.Add(subPropertyName);
+					allAssets.Add(propertyName);
+					var assets = Resources.LoadAll(fileUnderResource);
+					if (assets.Length > 1)
+					{
+						var subPropertyName = $"{fileNameWithoutExtension}_AllAssets";
+						builder.AppendLine($"{strIdent2}public static ITimedCache<UnityEngine.Object[]> {subPropertyName} {{ get; }} = new ResourceGroupCache<UnityEngine.Object>(\"{fileUnderResource}\");");
+						allAssets.Add(subPropertyName);
+					}
 				}
 			}
-			if (allAssets.Count > 0)
+			if (withAllAssetList && allAssets.Count > 0)
 			{
 				builder.AppendLine($"{strIdent2}public static IReadOnlyDictionary<string, ITimedCache> AllAssets {{ get; }} = new Dictionary<string, ITimedCache>");
 				builder.AppendLine($"{strIdent2}{{");

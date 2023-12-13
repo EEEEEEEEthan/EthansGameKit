@@ -40,10 +40,7 @@ namespace EthansGameKit
 			}
 		}
 		object ITimedCache.Value => source.Value;
-		public CacheConverter(ITimedCache source)
-		{
-			this.source = source;
-		}
+		public CacheConverter(ITimedCache source) => this.source = source;
 		public AwaitableValue LoadAsync()
 		{
 			return source.LoadAsync();
@@ -80,10 +77,7 @@ namespace EthansGameKit
 		}
 		T ITimedCache<T>.Value => Value;
 		object ITimedCache.Value => Value;
-		protected AbsTimedCache()
-		{
-			lastAccess = -keepSeconds;
-		}
+		protected AbsTimedCache() => lastAccess = -keepSeconds;
 		public AwaitableValue LoadAsync()
 		{
 			var awaitable = new AwaitableValue(out var signal);
@@ -146,6 +140,7 @@ namespace EthansGameKit
 	{
 		[SerializeField] string resourcePath;
 		public string ResourcePath => resourcePath;
+		public string AssetName => resourcePath[(resourcePath.LastIndexOf('/') + 1)..];
 		public ResourceCache(string resourcePath)
 		{
 			if (resourcePath.IsNullOrEmpty())
@@ -182,10 +177,7 @@ namespace EthansGameKit
 	public sealed class ResourceGroupCache<T> : AbsTimedCache<T[]> where T : Object
 	{
 		public readonly string resourcePath;
-		public ResourceGroupCache(string resourcePath)
-		{
-			this.resourcePath = resourcePath;
-		}
+		public ResourceGroupCache(string resourcePath) => this.resourcePath = resourcePath;
 		protected override T[] LoadValue()
 		{
 			return Resources.LoadAll<T>(resourcePath);
@@ -208,10 +200,7 @@ namespace EthansGameKit
 	public class EditorAssetCache<T> : AbsTimedCache<T> where T : Object
 	{
 		[SerializeField] string assetPath;
-		public EditorAssetCache(string resourcePath)
-		{
-			assetPath = resourcePath;
-		}
+		public EditorAssetCache(string resourcePath) => assetPath = resourcePath;
 		protected override T LoadValue()
 		{
 #if UNITY_EDITOR
