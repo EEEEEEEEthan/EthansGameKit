@@ -139,10 +139,14 @@ namespace EthansGameKit.Pathfinding.Rect
 			this.@params = @params;
 			foreach (var source in @params.Sources)
 				sourceBuffer.Add(calculator.GetIndex(source));
-			foreach (var (pos, dir, costType) in @params.OverrideLinks)
+			var overrideLinks = @params.OverrideLinks;
+			if (overrideLinks != null)
 			{
-				var index = calculator.GetIndex(pos);
-				stepCostMap[space.GetLinkIndex(index, dir)] = costType;
+				foreach (var (pos, dir, costType) in overrideLinks)
+				{
+					var index = calculator.GetIndex(pos);
+					stepCostMap[space.GetLinkIndex(index, dir)] = costType;
+				}
 			}
 			base.Reset(sourceBuffer, @params.MaxCost, @params.MaxHeuristic);
 			sourceBuffer.Clear();
