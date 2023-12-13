@@ -6,8 +6,22 @@ using UnityEngine;
 
 namespace EthansGameKit.Collections
 {
+	public interface IReadOnlyBidictionary<TKey, TValue> : IEnumerable<KeyValuePair<TKey, TValue>>, IDisposable
+	{
+		int Count { get; }
+		TValue this[TKey key] { get; }
+		TValue GetValue(TKey key);
+		TValue GetValueOrDefault(TKey key, TValue @default = default);
+		TKey GetKey(TValue value);
+		TKey GetKeyOrDefault(TValue value, TKey @default = default);
+		bool TryGetValue(TKey key, out TValue value);
+		bool TryGetKey(TValue value, out TKey key);
+		bool ContainsKey(TKey key);
+		bool ContainsValue(TValue value);
+	}
+
 	[Serializable]
-	public class Bidictionary<TKey, TValue> : ISerializationCallbackReceiver, IEnumerable<KeyValuePair<TKey, TValue>>, IDisposable
+	public class Bidictionary<TKey, TValue> : ISerializationCallbackReceiver, IReadOnlyBidictionary<TKey, TValue>
 	{
 		[Serializable]
 		struct Data
@@ -32,6 +46,38 @@ namespace EthansGameKit.Collections
 		public IEnumerator<KeyValuePair<TKey, TValue>> GetEnumerator()
 		{
 			return key2Value.GetEnumerator();
+		}
+		public TValue GetValue(TKey key)
+		{
+			return key2Value[key];
+		}
+		public TValue GetValueOrDefault(TKey key, TValue @default = default)
+		{
+			return key2Value.GetValueOrDefault(key);
+		}
+		public TKey GetKey(TValue value)
+		{
+			return value2Key[value];
+		}
+		public TKey GetKeyOrDefault(TValue value, TKey @default = default)
+		{
+			return value2Key.GetValueOrDefault(value, @default);
+		}
+		public bool TryGetValue(TKey key, out TValue value)
+		{
+			return key2Value.TryGetValue(key, out value);
+		}
+		public bool TryGetKey(TValue value, out TKey key)
+		{
+			return value2Key.TryGetValue(value, out key);
+		}
+		public bool ContainsKey(TKey key)
+		{
+			return key2Value.ContainsKey(key);
+		}
+		public bool ContainsValue(TValue value)
+		{
+			return value2Key.ContainsKey(value);
 		}
 		void IDisposable.Dispose()
 		{
@@ -75,38 +121,6 @@ namespace EthansGameKit.Collections
 			if (ContainsValue(value)) throw new ArgumentException($"Value {value} already exists");
 			key2Value.Add(key, value);
 			value2Key.Add(value, key);
-		}
-		public TValue GetValue(TKey key)
-		{
-			return key2Value[key];
-		}
-		public TValue GetValueOrDefault(TKey key, TValue @default = default)
-		{
-			return key2Value.GetValueOrDefault(key);
-		}
-		public TKey GetKey(TValue value)
-		{
-			return value2Key[value];
-		}
-		public TKey GetKeyOrDefault(TValue value, TKey @default = default)
-		{
-			return value2Key.GetValueOrDefault(value, @default);
-		}
-		public bool TryGetValue(TKey key, out TValue value)
-		{
-			return key2Value.TryGetValue(key, out value);
-		}
-		public bool TryGetKey(TValue value, out TKey key)
-		{
-			return value2Key.TryGetValue(value, out key);
-		}
-		public bool ContainsKey(TKey key)
-		{
-			return key2Value.ContainsKey(key);
-		}
-		public bool ContainsValue(TValue value)
-		{
-			return value2Key.ContainsKey(value);
 		}
 		public bool RemoveKey(TKey key)
 		{
