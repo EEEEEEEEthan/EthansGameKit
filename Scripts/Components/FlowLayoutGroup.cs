@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using EthansGameKit.Attributes;
 using UnityEngine;
@@ -39,10 +38,14 @@ namespace EthansGameKit.Components
 			rect.height -= padding.top + padding.bottom;
 			// 画出边框
 			Gizmos.color = Color.green;
-			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMin)), rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMin)));
-			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMin)), rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMax)));
-			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMax)), rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMax)));
-			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMax)), rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMin)));
+			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMin)),
+				rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMin)));
+			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMin)),
+				rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMax)));
+			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMax, rect.yMax)),
+				rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMax)));
+			Gizmos.DrawLine(rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMax)),
+				rectTransform.TransformPoint(new Vector2(rect.xMin, rect.yMin)));
 		}
 		public override void CalculateLayoutInputHorizontal()
 		{
@@ -58,38 +61,44 @@ namespace EthansGameKit.Components
 		public override void SetLayoutVertical()
 		{
 		}
+		List<(List<RectTransform> lineElements, Vector2 lineSize)> GetLines(out Vector2 fullSize, bool reverse)
+		{
+			var width = rectTransform.rect.width - padding.right - padding.left;
+			var lineElements = new List<RectTransform>();
+			var lineSize = new Vector2();
+			var result = new List<(List<RectTransform> lineElements, Vector2 lineSize)>();
+			fullSize = default;
+			if (reverse)
+				rectChildren.Reverse();
+			foreach (var child in rectChildren)
+			{
+				var sizeDelta = child.sizeDelta;
+				if (lineSize.x > 0 && lineSize.x + sizeDelta.x > width)
+				{
+					if (fixedLineHeight) lineSize.y = spacing.y;
+					if (reverse) lineElements.Reverse();
+					result.Add((lineElements, lineSize));
+					fullSize.x = Mathf.Max(fullSize.x, lineSize.x);
+					fullSize.y += lineSize.y + spacing.y;
+					lineElements = new();
+					lineSize = new();
+				}
+				lineElements.Add(child);
+				lineSize.x += sizeDelta.x + (lineSize.x <= 0 ? 0 : spacing.x);
+				lineSize.y = Mathf.Max(lineSize.y, sizeDelta.y);
+			}
+			result.Add((lineElements, lineSize));
+			if (reverse) result.Reverse();
+			fullSize.x = Mathf.Max(fullSize.x, lineSize.x);
+			fullSize.y += lineSize.y;
+			return result;
+		}
 		void CalculateLayoutInput()
 		{
-			List<(List<RectTransform> lineElements, Vector2 lineSize)> getLines(out Vector2 fullSize)
-			{
-				var width = rectTransform.rect.width - padding.right - padding.left;
-				var lineElements = new List<RectTransform>();
-				var lineSize = new Vector2();
-				var result = new List<(List<RectTransform> lineElements, Vector2 lineSize)>();
-				fullSize = default;
-				foreach (var child in rectChildren)
-				{
-					var sizeDelta = child.sizeDelta;
-					if (lineSize.x > 0 && lineSize.x + sizeDelta.x > width)
-					{
-						if (fixedLineHeight) lineSize.y = spacing.y;
-						result.Add((lineElements, lineSize));
-						fullSize.x = Mathf.Max(fullSize.x, lineSize.x);
-						fullSize.y += lineSize.y + spacing.y;
-						lineElements = new();
-						lineSize = new();
-					}
-					lineElements.Add(child);
-					lineSize.x += sizeDelta.x + (lineSize.x <= 0 ? 0 : spacing.x);
-					lineSize.y = Mathf.Max(lineSize.y, sizeDelta.y);
-				}
-				result.Add((lineElements, lineSize));
-				fullSize.x = Mathf.Max(fullSize.x, lineSize.x);
-				fullSize.y += lineSize.y;
-				return result;
-			}
 			base.CalculateLayoutInputHorizontal();
-			var list = getLines(out var fullSize);
+			var reverse = childAlignment == TextAnchor.LowerLeft || childAlignment == TextAnchor.LowerCenter ||
+						childAlignment == TextAnchor.LowerRight;
+			var list = GetLines(out var fullSize, reverse);
 			var myRect = rectTransform.rect;
 			switch (childAlignment)
 			{
@@ -156,7 +165,7 @@ namespace EthansGameKit.Components
 						foreach (var recTransform in lineElements)
 						{
 							SetChildAlongAxis(recTransform, 0, x);
-							SetChildAlongAxis(recTransform, 1, y);
+							SetChildAlongAxis(recTransform, 1, y + (lineSize.y - recTransform.sizeDelta.y) / 2);
 							x += recTransform.sizeDelta.x + spacing.x;
 						}
 						y += lineSize.y + spacing.y;
@@ -176,7 +185,7 @@ namespace EthansGameKit.Components
 						foreach (var recTransform in lineElements)
 						{
 							SetChildAlongAxis(recTransform, 0, x);
-							SetChildAlongAxis(recTransform, 1, y);
+							SetChildAlongAxis(recTransform, 1, y + (lineSize.y - recTransform.sizeDelta.y) / 2);
 							x += recTransform.sizeDelta.x + spacing.x;
 						}
 						y += lineSize.y + spacing.y;
@@ -196,7 +205,7 @@ namespace EthansGameKit.Components
 						foreach (var recTransform in lineElements)
 						{
 							SetChildAlongAxis(recTransform, 0, x);
-							SetChildAlongAxis(recTransform, 1, y);
+							SetChildAlongAxis(recTransform, 1, y + (lineSize.y - recTransform.sizeDelta.y) / 2);
 							x += recTransform.sizeDelta.x + spacing.x;
 						}
 						y += lineSize.y + spacing.y;
@@ -214,7 +223,7 @@ namespace EthansGameKit.Components
 						foreach (var recTransform in lineElements)
 						{
 							SetChildAlongAxis(recTransform, 0, x);
-							SetChildAlongAxis(recTransform, 1, y);
+							SetChildAlongAxis(recTransform, 1, y + (lineSize.y - recTransform.sizeDelta.y));
 							x += recTransform.sizeDelta.x + spacing.x;
 						}
 						y += lineSize.y + spacing.y;
@@ -234,7 +243,7 @@ namespace EthansGameKit.Components
 						foreach (var recTransform in lineElements)
 						{
 							SetChildAlongAxis(recTransform, 0, x);
-							SetChildAlongAxis(recTransform, 1, y);
+							SetChildAlongAxis(recTransform, 1, y + (lineSize.y - recTransform.sizeDelta.y));
 							x += recTransform.sizeDelta.x + spacing.x;
 						}
 						y += lineSize.y + spacing.y;
@@ -254,15 +263,13 @@ namespace EthansGameKit.Components
 						foreach (var recTransform in lineElements)
 						{
 							SetChildAlongAxis(recTransform, 0, x);
-							SetChildAlongAxis(recTransform, 1, y);
+							SetChildAlongAxis(recTransform, 1, y + (lineSize.y - recTransform.sizeDelta.y));
 							x += recTransform.sizeDelta.x + spacing.x;
 						}
 						y += lineSize.y + spacing.y;
 					}
 					break;
 				}
-				default:
-					throw new ArgumentOutOfRangeException();
 			}
 		}
 	}
