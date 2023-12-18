@@ -70,6 +70,38 @@ namespace EthansGameKit
 		{
 			return @this.GreatestCommonDivisorWith(other) == 1;
 		}
+		public static int GetRightmostBitPosition(this int @this)
+		{
+			if (@this == 0) return -1;
+			var rightMostBit = @this & ~(@this - 1);
+			var position = 0;
+			if ((rightMostBit & 0b_11111111_11111111_00000000_00000000) != 0) position += 16;
+			if ((rightMostBit & 0b_11111111_00000000_11111111_00000000) != 0) position += 8;
+			if ((rightMostBit & 0b_11110000_11110000_11110000_11110000) != 0) position += 4;
+			if ((rightMostBit & 0b_11001100_11001100_11001100_11001100) != 0) position += 2;
+			if ((rightMostBit & 0b_10101010_10101010_10101010_10101010) != 0) position += 1;
+			return position;
+		}
+		public static int GetBitPositions(this int @this, int[] positions)
+		{
+			var count = 0;
+			while (@this != 0)
+			{
+				var position = @this.GetRightmostBitPosition();
+				positions[count++] = position;
+				@this &= ~(1 << position);
+			}
+			return count;
+		}
+		public static void GetBitPositions(this int @this, List<int> positions)
+		{
+			while (@this != 0)
+			{
+				var position = @this.GetRightmostBitPosition();
+				positions.Add(position);
+				@this &= ~(1 << position);
+			}
+		}
 		static int GreatestCommonDivisorWith(this int a, int b)
 		{
 			if (a < b)
