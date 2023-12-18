@@ -11,20 +11,15 @@ namespace EthansGameKit
 	{
 		readonly List<Color> colors = new();
 		readonly Func<Color, bool> colorFilter;
-		readonly int sampleFreq;
 		/// <param name="firstColor">生成器中的第一个颜色</param>
-		/// <param name="sampleFreq">采样频率</param>
-		public ColorSequenceGenerator(Color firstColor, int sampleFreq)
+		public ColorSequenceGenerator(Color firstColor)
 		{
-			this.sampleFreq = sampleFreq.Clamped(0, 5);
 			colors.Add(firstColor);
 		}
 		/// <param name="firstColor">生成器中的第一个颜色</param>
-		/// <param name="sampleFreq">采样频率</param>
 		/// <param name="colorFilter">颜色筛选器</param>
-		public ColorSequenceGenerator(Color firstColor, int sampleFreq, Func<Color, bool> colorFilter)
+		public ColorSequenceGenerator(Color firstColor, Func<Color, bool> colorFilter)
 		{
-			this.sampleFreq = sampleFreq.Clamped(0, 5);
 			colors.Add(firstColor);
 			this.colorFilter = colorFilter;
 		}
@@ -51,7 +46,7 @@ namespace EthansGameKit
 		}
 		Color FindNextColor()
 		{
-			var stepCount = colors.Count << sampleFreq;
+			var stepCount = Mathf.Pow(colors.Count, 1 / 3f).CeilToInt() * 2;
 			var stepLength = 1f / stepCount;
 			var maxDistance = 0f;
 			var targetColor = Color.black;
