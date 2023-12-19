@@ -2,6 +2,7 @@ using System;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	public interface IValueConverter<TRawItem, TNewItem>
 	{
 		public static IValueConverter<TRawItem, TRawItem> DefaultKey => DefaultConverter<TRawItem>.Default;

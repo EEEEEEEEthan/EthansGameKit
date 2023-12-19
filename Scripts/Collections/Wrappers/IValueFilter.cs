@@ -2,6 +2,7 @@ using System;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	public interface IValueFilter<in T>
 	{
 		public static IValueFilter<T> Create(Func<T, bool> filter)
@@ -11,6 +12,7 @@ namespace EthansGameKit.Collections.Wrappers
 		bool Match(T item);
 	}
 
+	[Obsolete]
 	readonly struct ValueFilter<T> : IValueFilter<T>
 	{
 		readonly Func<T, bool> filter;

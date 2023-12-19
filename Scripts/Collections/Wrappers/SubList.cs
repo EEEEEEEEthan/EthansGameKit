@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	public readonly struct SubList<T> : IList<T>, IReadOnlyList<T>
 	{
 		struct Enumerator : IEnumerator<T>

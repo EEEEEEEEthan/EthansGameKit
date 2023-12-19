@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	readonly struct ListToDict<T> : IDictionary<int, T>, IReadOnlyDictionary<int, T>
 	{
 		readonly struct KeyToPair : IValueConverter<int, KeyValuePair<int, T>>

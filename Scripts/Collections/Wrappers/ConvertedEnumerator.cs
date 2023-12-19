@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	struct ConvertedEnumerator<TRawItem, TNewItem> : IEnumerator<TNewItem>
 	{
 		readonly IEnumerator<TRawItem> rawEnumerator;

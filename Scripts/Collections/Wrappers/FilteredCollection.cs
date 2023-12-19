@@ -4,6 +4,7 @@ using System.Collections.Generic;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	public readonly struct FilteredCollection<T> : ICollection<T>, IReadOnlyCollection<T>
 	{
 		readonly ICollection<T> rawCollection;

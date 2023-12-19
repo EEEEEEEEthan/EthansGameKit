@@ -1,8 +1,10 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 
 namespace EthansGameKit.Collections.Wrappers
 {
+	[Obsolete]
 	readonly struct ConvertedCollection<TOld, TNew> : ICollection<TNew>, IReadOnlyCollection<TNew>
 	{
 		readonly ICollection<TOld> rawCollection;
