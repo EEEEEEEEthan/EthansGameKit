@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
+﻿using System;
+using System.Collections.Generic;
+using EthansGameKit.Collections.Wrappers;
+using Random = UnityEngine.Random;
 
 // ReSharper disable once CheckNamespace
 namespace EthansGameKit
@@ -77,6 +79,14 @@ namespace EthansGameKit
 				var index = Random.Range(0, i + 1);
 				(@this[i], @this[index]) = (@this[index], @this[i]);
 			}
+		}
+		public static ListToDict<T> WrapAsDict<T>(this IList<T> @this, IFilter<int> filter = null)
+		{
+			return new(@this, filter);
+		}
+		public static ListToDict<T> WrapAsDict<T>(this IList<T> @this, Func<int, bool> filter)
+		{
+			return new(@this, IFilter<int>.FromFunc(filter));
 		}
 	}
 }

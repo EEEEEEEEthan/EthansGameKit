@@ -5,14 +5,14 @@ using System.Linq;
 
 namespace EthansGameKit.Collections.Wrappers
 {
-	public readonly struct Dict2Dict<TOldKey, TOldValue, TNewKey, TNewValue> : IDictionary<TNewKey, TNewValue>, IReadOnlyDictionary<TNewKey, TNewValue>
+	public readonly struct DictToDict<TOldKey, TOldValue, TNewKey, TNewValue> : IDictionary<TNewKey, TNewValue>, IReadOnlyDictionary<TNewKey, TNewValue>
 	{
 		readonly struct KeyCollection : ICollection<TNewKey>
 		{
-			readonly Dict2Dict<TOldKey, TOldValue, TNewKey, TNewValue> dict;
+			readonly DictToDict<TOldKey, TOldValue, TNewKey, TNewValue> dict;
 			public int Count => dict.Count;
 			public bool IsReadOnly => true;
-			public KeyCollection(Dict2Dict<TOldKey, TOldValue, TNewKey, TNewValue> dict) => this.dict = dict;
+			public KeyCollection(DictToDict<TOldKey, TOldValue, TNewKey, TNewValue> dict) => this.dict = dict;
 			public IEnumerator<TNewKey> GetEnumerator()
 			{
 				var d = dict;
@@ -50,10 +50,10 @@ namespace EthansGameKit.Collections.Wrappers
 
 		readonly struct ValueCollection : ICollection<TNewValue>
 		{
-			readonly Dict2Dict<TOldKey, TOldValue, TNewKey, TNewValue> dict;
+			readonly DictToDict<TOldKey, TOldValue, TNewKey, TNewValue> dict;
 			public int Count => dict.Count;
 			public bool IsReadOnly => true;
-			public ValueCollection(Dict2Dict<TOldKey, TOldValue, TNewKey, TNewValue> dict) => this.dict = dict;
+			public ValueCollection(DictToDict<TOldKey, TOldValue, TNewKey, TNewValue> dict) => this.dict = dict;
 			public IEnumerator<TNewValue> GetEnumerator()
 			{
 				var d = dict;
@@ -107,7 +107,7 @@ namespace EthansGameKit.Collections.Wrappers
 		bool ICollection<KeyValuePair<TNewKey, TNewValue>>.IsReadOnly => rawDict.IsReadOnly;
 		IEnumerable<TNewKey> IReadOnlyDictionary<TNewKey, TNewValue>.Keys => new KeyCollection(this);
 		IEnumerable<TNewValue> IReadOnlyDictionary<TNewKey, TNewValue>.Values => new ValueCollection(this);
-		public Dict2Dict(
+		public DictToDict(
 			IDictionary<TOldKey, TOldValue> rawDict,
 			IConverter<TOldKey, TNewKey> oldKey2NewKey,
 			IConverter<TNewKey, TOldKey> newKey2OldKey,

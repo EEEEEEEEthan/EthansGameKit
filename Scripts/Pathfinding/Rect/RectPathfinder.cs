@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EthansGameKit.Collections.Wrappers;
 using EthansGameKit.MathUtilities;
 using UnityEngine;
 
@@ -27,6 +28,32 @@ namespace EthansGameKit.Pathfinding.Rect
 		IRectPathfindingParams @params;
 		int currentNode;
 		public Vector2Int Current => calculator.GetPosition(currentNode);
+		public IReadOnlyDictionary<Vector2Int, Vector2Int> FromMap
+		{
+			get
+			{
+				var flowDict = flowMap.WrapAsDict(index => flowMap[index] >= 0);
+				return flowDict.WrapAsDict(
+					oldKey2NewKey: IConverter<int, Vector2Int>.FromFunc(index => calculator.GetPosition(index)),
+					oldValue2NewValue: IConverter<int, Vector2Int>.FromFunc(index => calculator.GetPosition(index)),
+					newKey2OldKey: IConverter<Vector2Int, int>.FromFunc(position => calculator.GetIndex(position)),
+					newValue2OldValue: IConverter<Vector2Int, int>.FromFunc(position => calculator.GetIndex(position))
+				);
+			}
+		}
+		public IReadOnlyDictionary<Vector2Int, float> TotalCostMap
+		{
+			get
+			{
+				var totalCostDict = totalCostMap.WrapAsDict(index => totalCostMap[index] > 0);
+				return totalCostDict.WrapAsDict(
+					oldKey2NewKey: IConverter<int, Vector2Int>.FromFunc(index => calculator.GetPosition(index)),
+					oldValue2NewValue: IConverter<float, float>.FromFunc(cost => cost),
+					newKey2OldKey: IConverter<Vector2Int, int>.FromFunc(position => calculator.GetIndex(position)),
+					newValue2OldValue: IConverter<float, float>.FromFunc(cost => cost)
+				);
+			}
+		}
 		internal RectPathfinder(RectPathfindingSpace space) : base(space)
 		{
 			this.space = space;
@@ -150,21 +177,6 @@ namespace EthansGameKit.Pathfinding.Rect
 			}
 			base.Reset(sourceBuffer, @params.MaxCost, @params.MaxHeuristic);
 			sourceBuffer.Clear();
-		}
-		public bool Reached(Vector2Int position)
-		{
-			return flowMap[calculator.GetIndex(position)] >= 0;
-		}
-		public bool TryGetParent(Vector2Int position, out Vector2Int parent)
-		{
-			var parentIndex = flowMap[calculator.GetIndex(position)];
-			if (parentIndex >= 0)
-			{
-				parent = calculator.GetPosition(parentIndex);
-				return true;
-			}
-			parent = default;
-			return false;
 		}
 		/// <summary>
 		///     获取从起点(含)到终点(含)的路径
