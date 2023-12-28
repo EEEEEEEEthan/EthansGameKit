@@ -34,10 +34,10 @@ namespace EthansGameKit.Pathfinding.Rect
 			{
 				var flowDict = flowMap.WrapAsDict(index => flowMap[index] >= 0);
 				return flowDict.WrapAsDict(
-					oldKey2NewKey: IConverter<int, Vector2Int>.FromFunc(index => calculator.GetPosition(index)),
-					oldValue2NewValue: IConverter<int, Vector2Int>.FromFunc(index => calculator.GetPosition(index)),
-					newKey2OldKey: IConverter<Vector2Int, int>.FromFunc(position => calculator.GetIndex(position)),
-					newValue2OldValue: IConverter<Vector2Int, int>.FromFunc(position => calculator.GetIndex(position))
+					oldKey2NewKey: IConverter.FromFunc<int, Vector2Int>(index => calculator.GetPosition(index)),
+					oldValue2NewValue: IConverter.FromFunc<int, Vector2Int>(index => calculator.GetPosition(index)),
+					newKey2OldKey: IConverter.FromFunc<Vector2Int, int>(position => calculator.GetIndex(position)),
+					newValue2OldValue: IConverter.FromFunc<Vector2Int, int>(position => calculator.GetIndex(position))
 				);
 			}
 		}
@@ -47,10 +47,10 @@ namespace EthansGameKit.Pathfinding.Rect
 			{
 				var totalCostDict = totalCostMap.WrapAsDict(index => totalCostMap[index] > 0);
 				return totalCostDict.WrapAsDict(
-					oldKey2NewKey: IConverter<int, Vector2Int>.FromFunc(index => calculator.GetPosition(index)),
-					oldValue2NewValue: IConverter<float, float>.FromFunc(cost => cost),
-					newKey2OldKey: IConverter<Vector2Int, int>.FromFunc(position => calculator.GetIndex(position)),
-					newValue2OldValue: IConverter<float, float>.FromFunc(cost => cost)
+					oldKey2NewKey: IConverter.FromFunc<int, Vector2Int>(index => calculator.GetPosition(index)),
+					oldValue2NewValue: IConverter.FromFunc<float, float>(cost => cost),
+					newKey2OldKey: IConverter.FromFunc<Vector2Int, int>(position => calculator.GetIndex(position)),
+					newValue2OldValue: IConverter.FromFunc<float, float>(cost => cost)
 				);
 			}
 		}

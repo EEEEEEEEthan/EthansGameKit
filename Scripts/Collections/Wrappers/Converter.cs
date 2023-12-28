@@ -2,12 +2,24 @@ using System;
 
 namespace EthansGameKit.Collections.Wrappers
 {
-	public interface IConverter<in TOld, out TNew>
+	public interface IConverter
 	{
-		public static IConverter<TOld, TNew> FromFunc(Func<TOld, TNew> converter)
+		public static IConverter<T, T> Default<T>()
 		{
-			return new DefaultConverter<TOld, TNew>(converter);
+			return new DefaultConverter<T>();
 		}
+		public static IConverter<TOld, TNew> FromTypes<TOld, TNew>()
+		{
+			return new DefaultConverter<TOld, TNew>();
+		}
+		public static IConverter<TOld, TNew> FromFunc<TOld, TNew>(Func<TOld, TNew> converter)
+		{
+			return new FuncConverter<TOld, TNew>(converter);
+		}
+	}
+
+	public interface IConverter<in TOld, out TNew> : IConverter
+	{
 		TNew Convert(TOld old);
 	}
 
@@ -20,10 +32,26 @@ namespace EthansGameKit.Collections.Wrappers
 		bool Filter(T value);
 	}
 
+	readonly struct DefaultConverter<T> : IConverter<T, T>
+	{
+		public T Convert(T old)
+		{
+			return old;
+		}
+	}
+
 	readonly struct DefaultConverter<TOld, TNew> : IConverter<TOld, TNew>
 	{
+		public TNew Convert(TOld old)
+		{
+			return (TNew)(object)old;
+		}
+	}
+
+	readonly struct FuncConverter<TOld, TNew> : IConverter<TOld, TNew>
+	{
 		readonly Func<TOld, TNew> converter;
-		public DefaultConverter(Func<TOld, TNew> converter) => this.converter = converter;
+		public FuncConverter(Func<TOld, TNew> converter) => this.converter = converter;
 		public TNew Convert(TOld old)
 		{
 			return converter(old);
