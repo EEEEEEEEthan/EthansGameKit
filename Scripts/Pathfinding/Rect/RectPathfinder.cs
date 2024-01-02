@@ -36,8 +36,8 @@ namespace EthansGameKit.Pathfinding.Rect
 				return flowDict.WrapAsDict(
 					oldKey2NewKey: IConverter.FromFunc<int, Vector2Int>(index => calculator.GetPosition(index)),
 					oldValue2NewValue: IConverter.FromFunc<int, Vector2Int>(index => calculator.GetPosition(index)),
-					newKey2OldKey: IConverter.FromFunc<Vector2Int, int>(position => calculator.GetIndex(position)),
-					newValue2OldValue: IConverter.FromFunc<Vector2Int, int>(position => calculator.GetIndex(position))
+					newKey2OldKey: null,
+					newValue2OldValue: null
 				);
 			}
 		}
@@ -48,9 +48,9 @@ namespace EthansGameKit.Pathfinding.Rect
 				var totalCostDict = totalCostMap.WrapAsDict(index => totalCostMap[index] > 0);
 				return totalCostDict.WrapAsDict(
 					oldKey2NewKey: IConverter.FromFunc<int, Vector2Int>(index => calculator.GetPosition(index)),
-					oldValue2NewValue: IConverter.FromFunc<float, float>(cost => cost),
-					newKey2OldKey: IConverter.FromFunc<Vector2Int, int>(position => calculator.GetIndex(position)),
-					newValue2OldValue: IConverter.FromFunc<float, float>(cost => cost)
+					oldValue2NewValue: IConverter.Default<float>(),
+					newKey2OldKey: null,
+					newValue2OldValue: null
 				);
 			}
 		}
@@ -142,7 +142,13 @@ namespace EthansGameKit.Pathfinding.Rect
 			if (stepCost <= 0)
 			{
 				var fromPosition = calculator.GetPositionUnverified(from);
-				stepCostMap[linkIndex] = stepCost = @params.CalculateStepCost(fromPosition, direction, costType);
+				stepCost = @params.CalculateStepCost(fromPosition, direction, costType);
+				if (stepCost <= 0)
+				{
+					Debug.LogError($"Step cost must be positive. {fromPosition}, dir:{direction.ToChar()}, costType: {costType}");
+					stepCost = float.PositiveInfinity;
+				}
+				stepCostMap[linkIndex] = stepCost;
 			}
 			return stepCost;
 		}

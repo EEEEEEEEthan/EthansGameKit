@@ -69,6 +69,21 @@ namespace EthansGameKit
 		{
 			return direction2Vector2Int[(int)@this];
 		}
+		public static char ToChar(this GridDirections @this)
+		{
+			return @this switch
+			{
+				GridDirections.Forward => '↑',
+				GridDirections.ForwardRight => '↗',
+				GridDirections.Right => '→',
+				GridDirections.BackwardRight => '↘',
+				GridDirections.Backward => '↓',
+				GridDirections.BackwardLeft => '↙',
+				GridDirections.Left => '←',
+				GridDirections.ForwardLeft => '↖',
+				_ => throw new NotImplementedException(),
+			};
+		}
 		public static bool IsDiagonal(this GridDirections @this)
 		{
 			return ((byte)@this & 1) == 1;

@@ -49,7 +49,6 @@ namespace EthansGameKit.Awaitable
 			awaiterContainer = new(awaiter);
 			signal = new(awaiter);
 		}
-		[Obsolete]
 		internal AwaitableValue(Awaiter awaiter, out AwaiterSignal handle)
 		{
 			awaiterContainer = new(awaiter);

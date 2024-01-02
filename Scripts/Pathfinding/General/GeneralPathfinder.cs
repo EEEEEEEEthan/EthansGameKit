@@ -56,7 +56,7 @@ namespace EthansGameKit.Pathfinding.General
 			base.Reset(@params.Sources, @params.MaxCost, @params.MaxHeuristic);
 			this.@params = @params;
 		}
-		public bool MoveNext(out Vector3 currentNode)
+		public new bool MoveNext(out Vector3 currentNode)
 		{
 			return base.MoveNext(out currentNode);
 		}
