@@ -17,5 +17,12 @@ namespace EthansGameKit.CachePools
 				return cache;
 			return new();
 		}
+		public static Queue<T> Generate(IEnumerable<T> sequence)
+		{
+			var queue = Generate();
+			foreach (var element in sequence)
+				queue.Enqueue(element);
+			return queue;
+		}
 	}
 }

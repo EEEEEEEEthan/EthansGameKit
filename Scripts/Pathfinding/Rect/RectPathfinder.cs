@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EthansGameKit.CachePools;
 using EthansGameKit.Collections.Wrappers;
 using EthansGameKit.MathUtilities;
 using UnityEngine;
@@ -222,6 +223,26 @@ namespace EthansGameKit.Pathfinding.Rect
 				return true;
 			}
 			assert.IsTrue(path.Count <= 0);
+			return false;
+		}
+		/// <summary>
+		///     获取从起点(含)到终点(含)的路径.起点先出队
+		/// </summary>
+		/// <param name="destination"></param>
+		/// <param name="path"></param>
+		/// <returns></returns>
+		public bool TryGetPath(Vector2Int destination, out Queue<Vector2Int> path)
+		{
+			assert.IsTrue(pathBuffer.Count <= 0);
+			var destinationIndex = calculator.GetIndex(destination);
+			if (base.TryGetPath(destinationIndex, pathBuffer))
+			{
+				path = QueuePool<Vector2Int>.Generate();
+				while (pathBuffer.TryPop(out var waypointIndex))
+					path.Enqueue(calculator.GetPosition(waypointIndex));
+				return true;
+			}
+			path = null;
 			return false;
 		}
 	}
