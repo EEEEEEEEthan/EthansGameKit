@@ -44,12 +44,14 @@ namespace EthansGameKit.Collections
 			Gizmos.DrawLine(max, new(min.x, max.y));
 			Gizmos.DrawLine(max, new(max.x, min.y));
 		}
-		public void Insert(T value, Rect rect)
+		public void InsertOrUpdate(T value, Rect rect)
 		{
+			if (rect.width <= 0 || rect.height <= 0)
+				throw new System.ArgumentException("rect.width <= 0 || rect.height <= 0");
 			if (Root is null)
 			{
-				var size = rect.max - rect.min;
-				var r = new Rect(rect.min - size, size * 3);
+				var size = (rect.max - rect.min).magnitude;
+				var r = new Rect(rect.center - size * Vector2.one * 0.5f, size * Vector2.one);
 				Root = new(r, this);
 				MinWidth = Mathf.Min(rect.width, rect.height);
 			}
