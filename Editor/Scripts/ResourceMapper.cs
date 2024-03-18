@@ -49,7 +49,7 @@ namespace EthansGameKit.Editor
 				var fileUnderResource = file[..^extension.Length].Replace(AssetDatabase.GetAssetPath(resourceFolder), "")[1..];
 				var asset = Resources.Load(fileUnderResource);
 				if (!asset) continue;
-				var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file);
+				var fileNameWithoutExtension = Path.GetFileNameWithoutExtension(file).Replace(' ', '_').Replace('-', '_');
 				var type = asset.GetType();
 				var propertyName = $"{fileNameWithoutExtension}_{type.Name}";
 				builder.AppendLine($"{strIdent2}public static ITimedCache<{type.FullName}> {propertyName} {{ get; }} = new ResourceCache<{type.FullName}>(\"{fileUnderResource}\");");

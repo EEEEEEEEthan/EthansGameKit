@@ -1,5 +1,4 @@
-﻿using EthansGameKit.DebugUtilities;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace EthansGameKit.Internal
 {
@@ -31,8 +30,6 @@ namespace EthansGameKit.Internal
 			gameObject.AddComponent<TimerUpdater>();
 			gameObject.AddComponent<TaskQueueUpdater>();
 			gameObject.AddComponent<RefreshableItemManager>();
-			gameObject.AddComponent<DebugGUIDrawer>();
-			gameObject.AddComponent<DebugMessageDrawerForGameView>();
 			gameObject.hideFlags = HideFlags.NotEditable | HideFlags.DontSave;
 		}
 		void Awake()
