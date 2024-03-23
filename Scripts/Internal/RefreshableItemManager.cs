@@ -13,6 +13,7 @@ namespace EthansGameKit.Internal
 		static readonly HashSet<IRefreshableItem> refreshing = new();
 		public static void Refresh(IRefreshableItem item, bool immediate)
 		{
+			if (item is null) throw new ArgumentNullException($"item is null");
 			if (immediate)
 			{
 				dirtyItems.Remove(item);

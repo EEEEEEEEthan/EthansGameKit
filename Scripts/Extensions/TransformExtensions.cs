@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using EthansGameKit.CachePools;
 using EthansGameKit.Internal;
 using UnityEngine;
+using Object = UnityEngine.Object;
 
 // ReSharper disable once CheckNamespace
 namespace EthansGameKit
@@ -36,7 +37,10 @@ namespace EthansGameKit
 		/// <param name="this"></param>
 		/// <param name="includeSelf"></param>
 		/// <returns></returns>
-		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf) => new DfsTransformAccessor(@this, includeSelf);
+		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf)
+		{
+			return new DfsTransformAccessor(@this, includeSelf);
+		}
 		/// <summary>
 		///     所有子节点,不包括自己
 		/// </summary>
@@ -47,7 +51,10 @@ namespace EthansGameKit
 		/// <param name="includeSelf"></param>
 		/// <param name="valid">验证失败的节点和他的子节点将被剔除</param>
 		/// <returns></returns>
-		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf, Func<Transform, bool> valid) => new DfsTransformAccessor(@this, includeSelf, valid);
+		public static IEnumerable<Transform> IterChildren(this Transform @this, bool includeSelf, Func<Transform, bool> valid)
+		{
+			return new DfsTransformAccessor(@this, includeSelf, valid);
+		}
 		public static bool TryGetHierarchyPath(this Transform @this, Transform parent, out string path)
 		{
 			path = null;
@@ -94,7 +101,10 @@ namespace EthansGameKit
 			}
 			return transform;
 		}
-		public static Transform FindOrAdd(this Transform @this, string path) => @this.FindOrAdd(path, out _);
+		public static Transform FindOrAdd(this Transform @this, string path)
+		{
+			return @this.FindOrAdd(path, out _);
+		}
 		/// <summary>
 		///     获取从parent到这个节点的深度.当@this与parent相等时,深度是0.当@this是parent的子节点时,深度是1.
 		/// </summary>
@@ -112,6 +122,20 @@ namespace EthansGameKit
 				@this = @this.parent;
 			}
 			return depth;
+		}
+		public static void DestroyChildren(this Transform @this, bool immediate = false)
+		{
+#if UNITY_EDITOR
+			if (!Application.isPlaying) immediate = true;
+#endif
+			for (var i = @this.childCount; i-- > 0;)
+			{
+				var child = @this.GetChild(i);
+				if (immediate)
+					Object.DestroyImmediate(child.gameObject);
+				else
+					Object.Destroy(child.gameObject);
+			}
 		}
 	}
 }
