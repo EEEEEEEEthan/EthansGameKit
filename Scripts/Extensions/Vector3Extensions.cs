@@ -17,6 +17,10 @@ namespace EthansGameKit
 		{
 			return Vector3Int.CeilToInt(@this);
 		}
+		public static Vector3 Cross(this Vector3 @this, Vector3 other)
+		{
+			return Vector3.Cross(@this, other);
+		}
 		public static Vector2 XZ(this Vector3 @this)
 		{
 			return new(@this.x, @this.z);
