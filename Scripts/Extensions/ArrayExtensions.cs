@@ -12,8 +12,7 @@ namespace EthansGameKit
 				Array.Clear(@this, index, length);
 				return;
 			}
-			if (index < 0 || index >= @this.Length) throw new ArgumentOutOfRangeException(nameof(index));
-			if (length < 0 || index + length > @this.Length) throw new ArgumentOutOfRangeException(nameof(length));
+			if (length < 0 || index + length > @this.Length) throw new ArgumentOutOfRangeException($"range=[0,{@this.Length}),index={index},length={length}");
 			if (length <= 0) return;
 			@this[index] = value;
 			var copiedLength = 1;
@@ -29,6 +28,9 @@ namespace EthansGameKit
 		{
 			@this.MemSet(0, @this.Length, value);
 		}
-		public static bool IsNullOrEmpty<T>(this T[] @this) => @this == null || @this.Length == 0;
+		public static bool IsNullOrEmpty<T>(this T[] @this)
+		{
+			return @this == null || @this.Length == 0;
+		}
 	}
 }
