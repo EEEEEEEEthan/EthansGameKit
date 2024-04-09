@@ -17,9 +17,9 @@ namespace EthansGameKit
 		{
 			return Vector2Int.CeilToInt(@this);
 		}
-		public static Vector3 XZ(this Vector2 @this)
+		public static Vector3 X_Z(this Vector2 @this, float y = 0)
 		{
-			return new(@this.x, 0, @this.y);
+			return new(@this.x, y, @this.y);
 		}
 	}
 }

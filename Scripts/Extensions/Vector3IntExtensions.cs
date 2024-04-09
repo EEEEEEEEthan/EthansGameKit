@@ -9,7 +9,7 @@ namespace EthansGameKit
 		{
 			return new(@this.x, @this.y);
 		}
-		public static Vector2Int XZ(this Vector3Int @this)
+		public static Vector2Int X_Z(this Vector3Int @this)
 		{
 			return new(@this.x, @this.z);
 		}
