@@ -20,9 +20,9 @@ namespace EthansGameKit
 		}
 		void IDisposable.Dispose()
 		{
-			if (stream.Position > endPosition)
+			if (stream.Position != endPosition)
 			{
-				throw new("ReaderBlockScope: stream.Position > endPosition");
+				throw new("ReaderBlockScope: stream.Position != endPosition");
 			}
 			stream.Position = endPosition;
 		}
