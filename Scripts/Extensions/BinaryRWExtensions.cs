@@ -50,6 +50,15 @@ namespace EthansGameKit
 
 	public static partial class Extensions
 	{
+		public static void Write(this BinaryWriter @this, Vector2 vector)
+		{
+			@this.Write(vector.x);
+			@this.Write(vector.y);
+		}
+		public static Vector2 ReadVector2(this BinaryReader @this)
+		{
+			return new(@this.ReadSingle(), @this.ReadSingle());
+		}
 		public static void Write(this BinaryWriter @this, Vector3 vector)
 		{
 			@this.Write(vector.x);
