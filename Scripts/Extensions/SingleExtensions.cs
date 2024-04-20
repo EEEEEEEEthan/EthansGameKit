@@ -16,5 +16,13 @@ namespace EthansGameKit
 		{
 			return (int)Math.Round(@this);
 		}
+		public static void Clamp(ref this float @this, float min, float max)
+		{
+			@this = Math.Clamp(@this, min, max);
+		}
+		public static float Clamped(this float @this, float min, float max)
+		{
+			return Math.Clamp(@this, min, max);
+		}
 	}
 }
