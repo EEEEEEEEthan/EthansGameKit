@@ -7,7 +7,7 @@ using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
-namespace EthansGameKit.Editor
+namespace EthansGameKit.Editor.Scripts
 {
 	[CreateAssetMenu(fileName = "ResourceMapper", menuName = "EthansGameKit/ResourceMapper")]
 	class ResourceMapper : ScriptableObject

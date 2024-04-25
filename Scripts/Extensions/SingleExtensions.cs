@@ -16,6 +16,10 @@ namespace EthansGameKit
 		{
 			return (int)Math.Round(@this);
 		}
+		public static float Sqrt(this float @this)
+		{
+			return (float)Math.Sqrt(@this);
+		}
 		public static void Clamp(ref this float @this, float min, float max)
 		{
 			@this = Math.Clamp(@this, min, max);
