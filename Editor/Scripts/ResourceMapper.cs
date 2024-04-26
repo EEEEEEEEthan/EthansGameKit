@@ -108,7 +108,7 @@ namespace EthansGameKit.Editor.Scripts
 				var resourceName = Path.GetFileNameWithoutExtension(resourcePath);
 				var extensionName = Path.GetExtension(resourcePath);
 				extensionName = char.ToUpper(extensionName[1]) + extensionName[2..];
-				var memberName = resourceName.Replace(" ", "") + extensionName;
+				var memberName = resourceName.Replace(" ", "").Replace("-", "") + extensionName;
 				if (string.IsNullOrEmpty(dir))
 					builder.AppendLine($"{indent}public const string {memberName} = \"{resourceName}\";");
 				else
