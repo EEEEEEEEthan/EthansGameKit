@@ -7,19 +7,22 @@ namespace EthansGameKit.Internal
 	/// <summary>
 	///     仅支持主线程
 	/// </summary>
-	class MainThreadRefreshCenter : MonoBehaviour
+	internal class MainThreadRefreshCenter : MonoBehaviour
 	{
 		static readonly HashSet<IRefreshableItem> dirtyItems = new();
+		static IRefreshableItem[] buffer = Array.Empty<IRefreshableItem>();
+
 		internal static void Add(IRefreshableItem refreshable)
 		{
 			dirtyItems.Add(refreshable);
 		}
+
 		internal static void Remove(IRefreshableItem refreshable)
 		{
 			dirtyItems.Remove(refreshable);
 		}
-		IRefreshableItem[] buffer = Array.Empty<IRefreshableItem>();
-		void Update()
+
+		static void FrameUpdate()
 		{
 			var count = dirtyItems.Count;
 			if (buffer.Length < count)
@@ -36,6 +39,21 @@ namespace EthansGameKit.Internal
 					Debug.LogException(e);
 				}
 			buffer.Clear(0, count);
+		}
+
+#if UNITY_EDITOR
+		[UnityEditor.InitializeOnLoadMethod]
+		static void InitForEditor()
+		{
+			UnityEditor.EditorApplication.update -= FrameUpdate;
+			if (Application.isPlaying) return;
+			UnityEditor.EditorApplication.update += FrameUpdate;
+		}
+#endif
+
+		void Update()
+		{
+			FrameUpdate();
 		}
 	}
 }
