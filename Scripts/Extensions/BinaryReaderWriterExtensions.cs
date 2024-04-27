@@ -19,7 +19,7 @@ namespace EthansGameKit
 		{
 			var actualKey = reader.ReadString();
 			if (actualKey != key)
-				throw new Exception($"Expected block key '{key}' but got '{actualKey}'");
+				throw new($"Expected block key '{key}' but got '{actualKey}'");
 			return new BlockReader(reader);
 		}
 
