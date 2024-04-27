@@ -1,3 +1,4 @@
 {
-	"name": "EthansGameKit.Editor"
+	"name": "EthansGameKit.Editor",
+	"references":[ "GUID:087646d4e4188424d823d7bef2bc3945" ]
 }
