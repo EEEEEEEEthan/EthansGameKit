@@ -12,6 +12,7 @@ namespace EthansGameKit.Internal
 			gameObject.hideFlags = HideFlags.NotEditable;
 			gameObject.AddComponent<MainThreadInvoker>();
 			gameObject.AddComponent<MainThreadRefreshCenter>();
+			gameObject.AddComponent<TimerUpdater>();
 		}
 	}
 }
