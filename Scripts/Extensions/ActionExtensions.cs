@@ -18,6 +18,7 @@ namespace EthansGameKit
 			}
 		}
 
+		// ReSharper disable Unity.PerformanceAnalysis
 		public static void TryInvoke<T>(this Action<T> action, T arg)
 		{
 			try

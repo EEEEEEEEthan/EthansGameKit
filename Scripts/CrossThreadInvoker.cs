@@ -16,7 +16,7 @@ namespace EthansGameKit
 				length = count;
 				if (buffer1.Length < length)
 					Array.Resize(ref buffer1, length);
-				buffer0.CopyTo(buffer1);
+				Array.Copy(buffer0, buffer1, length);
 				buffer0.Clear();
 				count = 0;
 			}

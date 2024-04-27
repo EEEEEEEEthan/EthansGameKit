@@ -99,10 +99,10 @@ namespace EthansGameKit.RectGrid
 			return new(x, y);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Vector3Int GetPosition(int index)
+		public Vector2Int GetPosition(int index)
 		{
 			GetPosition(index, out var x, out var y);
-			return new(x, y, 0);
+			return new(x, y);
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(int index)
