@@ -13,14 +13,36 @@ namespace EthansGameKit.Pathfinding
 		float maxCost;
 		float maxHeuristic;
 		int changeFlag;
-		public bool Expired => changeFlag != space.ChangeFlag;
+
 		protected Pathfinder(PathfindingSpace<T> space)
 		{
 			this.space = space;
-			heap = Heap<T, float>.Generate();
+			heap = new();
 			tBuffer = new T[space.maxLinkCountPerNode];
 			byteBuffer = new byte[space.maxLinkCountPerNode];
 		}
+
+		public bool Expired => changeFlag != space.ChangeFlag;
+		protected abstract void Clear();
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract bool TryGetTotalCostUnverified(T node, out float cost);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract void SetTotalCostUnverified(T node, float cost);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract bool TryGetParentNodeUnverified(T node, out T parent);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract void SetParentNodeUnverified(T node, T parent);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract float GetHeuristicUnverified(T node);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		protected abstract float GetStepCostUnverified(T from, T to, byte costType);
+
 		protected void Reset(IEnumerable<T> sources, float maxCost, float maxHeuristic)
 		{
 			changeFlag = space.ChangeFlag;
@@ -34,7 +56,7 @@ namespace EthansGameKit.Pathfinding
 				heap.AddOrUpdate(startNode, GetHeuristicUnverified(startNode));
 			}
 		}
-		protected abstract void Clear();
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		protected bool MoveNext(out T currentNode)
 		{
@@ -64,18 +86,7 @@ namespace EthansGameKit.Pathfinding
 			}
 			return true;
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract bool TryGetTotalCostUnverified(T node, out float cost);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract void SetTotalCostUnverified(T node, float cost);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract bool TryGetParentNodeUnverified(T node, out T parent);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract void SetParentNodeUnverified(T node, T parent);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract float GetHeuristicUnverified(T node);
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		protected abstract float GetStepCostUnverified(T from, T to, byte costType);
+
 		/// <summary>
 		///     获取从起点(含)到终点(含)的路径，起点先出栈
 		/// </summary>

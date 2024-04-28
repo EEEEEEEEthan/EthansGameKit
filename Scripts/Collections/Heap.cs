@@ -1,43 +1,89 @@
 using System;
-using System.Buffers;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
+// ReSharper disable TooWideLocalVariableScope
 namespace EthansGameKit.Collections
 {
-	internal class Heap<TKey, TValue> where TValue : IComparable<TValue>
+	public interface IReadOnlyHeap<TKey, TValue> : IReadOnlyCollection<KeyValuePair<TKey, TValue>>
+		where TValue : IComparable<TValue>
 	{
-		TKey[] keys;
-		TValue[] values;
+		TKey Peek(out TValue value, int index = 0);
+		TKey Peek(int index = 0);
+		bool TryPeek(out TKey key, int index = 0);
+		bool TryPeek(out TKey key, out TValue value, int index = 0);
+	}
 
-		public Heap(int capacity)
-		{
-			keys = new TKey[capacity];
-			values = new TValue[capacity];
-		}
+	public interface IHeap<T, TValue> : IReadOnlyHeap<T, TValue> where TValue : IComparable<TValue>
+	{
+		void Add(T element, TValue sortingValue);
+		T Pop(int index = 0);
+		T Pop(out TValue value, int index = 0);
+		bool TryPop(out T key, out TValue value, int index = 0);
+		void TrimExcess();
+	}
 
-		public Heap() : this(1)
-		{
-		}
+	[Serializable]
+	public sealed class Heap<TKey, TValue> : IHeap<TKey, TValue>, IDisposable where TValue : IComparable<TValue>
+	{
+		// ReSharper disable once StaticMemberInGenericType
+		static int[] finder = Array.Empty<int>();
+		[SerializeField] TKey[] keys = new TKey[1];
+		[SerializeField] TValue[] values = new TValue[1];
+		EqualityComparer<TKey> defaultComparer = EqualityComparer<TKey>.Default;
 
 		public int Count { get; private set; }
 
-		public void Add(TKey key, TValue value)
+		public void Dispose()
 		{
-			if (keys.Length == Count)
-			{
-				Array.Resize(ref keys, Count << 1);
-				Array.Resize(ref values, Count << 1);
-			}
-			keys[Count] = key;
-			values[Count] = value;
-			++Count;
-			AdjustUp(Count - 1);
+			var o = this;
 		}
 
-		public void Clear()
+		/// <summary>
+		///     堆增加一个元素
+		/// </summary>
+		/// <param name="element"></param>
+		/// <param name="sortingValue"></param>
+		public void Add(TKey element, TValue sortingValue)
 		{
-			Count = 0;
-			keys.Clear();
-			values.Clear();
+			if (Count >= keys.Length)
+			{
+				var newLength = Count << 1;
+				Array.Resize(ref keys, newLength);
+				Array.Resize(ref values, newLength);
+			}
+			keys[Count] = element;
+			values[Count] = sortingValue;
+			AdjustUp(Count++);
+		}
+
+		public TKey Pop(out TValue value, int index = 0)
+		{
+			value = values[index];
+			return Pop(index);
+		}
+
+		public TKey Pop(int index = 0)
+		{
+			var result = keys[index];
+			keys[index] = keys[--Count];
+			values[index] = values[Count];
+			AdjustDown(Count, index);
+			AdjustUp(index);
+			return result;
+		}
+
+		public bool TryPop(out TKey key, out TValue value, int index = 0)
+		{
+			if (index >= Count)
+			{
+				key = default;
+				value = default;
+				return false;
+			}
+			key = Pop(out value, index);
+			return true;
 		}
 
 		public void TrimExcess()
@@ -46,151 +92,240 @@ namespace EthansGameKit.Collections
 			Array.Resize(ref values, Count);
 		}
 
-		public bool Remove(TKey key) => RemoveAt(Find(key));
-
-		public bool Remove(TKey key, TValue value) => RemoveAt(Find(key, value));
-
-		public void Update(TKey key, TValue oldValue, TValue newValue)
+		public TKey Peek(out TValue value, int index = 0)
 		{
-			Update(Find(key, oldValue), newValue);
+			value = values[index];
+			return keys[index];
 		}
 
-		public void Update(TKey key, TValue newValue)
+		public TKey Peek(int index = 0) => keys[index];
+
+		public bool TryPeek(out TKey key, int index = 0)
 		{
-			Update(Find(key), newValue);
+			if (Count > index)
+			{
+				key = Peek(index);
+				return true;
+			}
+			key = default;
+			return false;
 		}
 
-		public int Find(TKey key)
+		public bool TryPeek(out TKey key, out TValue value, int index = 0)
 		{
-			for (var i = 0; i < Count; ++i)
-				if (keys[i].Equals(key))
+			if (Count > index)
+			{
+				key = Peek(out value, index);
+				return true;
+			}
+			key = default;
+			value = default;
+			return false;
+		}
+
+		public bool Update(TKey element, TValue sortingValue)
+		{
+			for (var i = 0; i < Count; i++)
+				if (keys[i].Equals(element))
+				{
+					Update(i, element, sortingValue);
+					return true;
+				}
+			return false;
+		}
+
+		public void AddOrUpdate(TKey element, TValue sortingValue, IEqualityComparer<TKey> equalityComparer)
+		{
+			var index = Find(element, equalityComparer);
+			if (index >= 0)
+				Update(index, element, sortingValue);
+			else
+				Add(element, sortingValue);
+		}
+
+		public void AddOrUpdate(TKey element, TValue oldValue, TValue newValue,
+			IEqualityComparer<TKey> equalityComparer)
+		{
+			var index = Find(element, oldValue, equalityComparer);
+			if (index >= 0)
+				Update(index, element, newValue);
+			else
+				Add(element, newValue);
+		}
+
+		public void AddOrUpdate(TKey element, TValue sortingValue)
+		{
+			AddOrUpdate(element, sortingValue, defaultComparer);
+		}
+
+		public void AddOrUpdate(TKey element, TValue oldValue, TValue newValue)
+		{
+			AddOrUpdate(element, oldValue, newValue, defaultComparer);
+		}
+
+		public void Clear()
+		{
+			Array.Clear(keys, 0, keys.Length);
+			Array.Clear(values, 0, values.Length);
+			Count = 0;
+		}
+
+		public int Find(TKey element, TValue sortingValue, IEqualityComparer<TKey> equalityComparer)
+		{
+			var count = Count;
+			if (count <= 0) return -1;
+			if (finder.Length <= count)
+				finder = new int[count];
+			finder[0] = 0;
+			var start = 0;
+			var end = 1;
+			while (start < end)
+			{
+				var currentIndex = finder[start];
+				var currentValue = values[currentIndex];
+				var cmp = sortingValue.CompareTo(currentValue);
+				switch (cmp)
+				{
+					case 0 when equalityComparer.Equals(keys[currentIndex], element):
+						return currentIndex;
+					case <= 0:
+						++start;
+						continue;
+				}
+				var leftIndex = (currentIndex << 1) | 1;
+				if (leftIndex < count)
+					finder[end++] = leftIndex;
+				var rightIndex = leftIndex + 1;
+				if (rightIndex < count)
+					finder[end++] = rightIndex;
+				++start;
+			}
+			return -1;
+		}
+
+		public int Find(TKey element, IEqualityComparer<TKey> equalityComparer)
+		{
+			var count = Count;
+			for (var i = 0; i < count; i++)
+				if (equalityComparer.Equals(keys[i], element))
 					return i;
 			return -1;
 		}
 
-		public int Find(TKey key, out TValue value)
+		public int Find(TKey element, TValue sortingValue) => Find(element, sortingValue, defaultComparer);
+
+		public int Find(TKey element) => Find(element, defaultComparer);
+
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			var index = Find(key);
-			value = index >= 0 ? values[index] : default;
-			return index;
+			for (var i = 0; i < Count; i++)
+				yield return new KeyValuePair<TKey, TValue>(keys[i], values[i]);
 		}
 
-		public void Pop()
+		IEnumerator<KeyValuePair<TKey, TValue>> IEnumerable<KeyValuePair<TKey, TValue>>.GetEnumerator()
 		{
-			RemoveAt(0);
+			for (var i = 0; i < Count; i++)
+				yield return new(keys[i], values[i]);
 		}
 
-		public TKey Peek() => keys[0];
+		int GetHashCode(TKey obj) => obj.GetHashCode();
 
-		public TKey Peek(out TValue value)
+		void Update(int index, TKey key, TValue value)
 		{
-			value = values[0];
-			return keys[0];
+			keys[index] = key;
+			values[index] = value;
+			AdjustDown(Count, index);
+			AdjustUp(index);
 		}
 
-		public bool TryPeek(out TKey key)
+		void AdjustDown(int length, int index)
 		{
-			if (Count == 0)
+			TKey tempKey;
+			TValue tempValue;
+			int leftIndex, rightIndex;
+			while (true)
 			{
-				key = default;
-				return false;
-			}
-			key = keys[0];
-			return true;
-		}
-
-		public int Find(TKey key, TValue value)
-		{
-			// 用栈的方式查找，性能更好
-			var buffer = ArrayPool<int>.Shared.Rent(Count / 2 + 1);
-			buffer[0] = 0;
-			var cnt = 1;
-			while (cnt > 0)
-			{
-				var currentIndex = buffer[--cnt];
-				if (currentIndex >= Count) continue;
-				var currentValue = values[currentIndex];
-				var cmp = currentValue.CompareTo(value);
-				switch (cmp)
+				leftIndex = (index << 1) | 1;
+				if (leftIndex >= length)
+					return;
+				rightIndex = leftIndex + 1;
+				var cmpLeftToMe = values[leftIndex].CompareTo(values[index]);
+				if (rightIndex >= length)
 				{
-					case 0 when keys[currentIndex].Equals(key):
-						// 键值分别相等，直接返回
-						ArrayPool<int>.Shared.Return(buffer);
-						return currentIndex;
-					case < 0:
-						// 值比节点更小，那么节点的子树全部舍弃
-						continue;
-					default:
-						// 在子树中查询
-						buffer[cnt++] = (currentIndex << 1) + 1;
-						buffer[cnt++] = (currentIndex << 1) + 2;
-						break;
+					if (cmpLeftToMe >= 0) return;
+					tempKey = keys[leftIndex];
+					keys[leftIndex] = keys[index];
+					keys[index] = tempKey;
+					tempValue = values[leftIndex];
+					values[leftIndex] = values[index];
+					values[index] = tempValue;
+					return;
+				}
+				if (cmpLeftToMe < 0)
+				{
+					if (values[rightIndex].CompareTo(values[leftIndex]) < 0)
+					{
+						tempKey = keys[rightIndex];
+						keys[rightIndex] = keys[index];
+						keys[index] = tempKey;
+						tempValue = values[rightIndex];
+						values[rightIndex] = values[index];
+						values[index] = tempValue;
+						index = rightIndex;
+					}
+					else
+					{
+						tempKey = keys[leftIndex];
+						keys[leftIndex] = keys[index];
+						keys[index] = tempKey;
+						tempValue = values[leftIndex];
+						values[leftIndex] = values[index];
+						values[index] = tempValue;
+						index = leftIndex;
+					}
+				}
+				else
+				{
+					if (values[rightIndex].CompareTo(values[index]) < 0)
+					{
+						tempKey = keys[rightIndex];
+						keys[rightIndex] = keys[index];
+						keys[index] = tempKey;
+						tempValue = values[rightIndex];
+						values[rightIndex] = values[index];
+						values[index] = tempValue;
+						index = rightIndex;
+					}
+					else
+					{
+						return;
+					}
 				}
 			}
-			ArrayPool<int>.Shared.Return(buffer);
-			return -1;
 		}
 
-		public bool TryPeek(out TKey key, out TValue value)
+		void AdjustUp(int index)
 		{
-			if (Count == 0)
+			int parentIndex;
+			TKey tempKey;
+			TValue tempValue;
+			while (index > 0)
 			{
-				key = default;
-				value = default;
-				return false;
-			}
-			key = keys[0];
-			value = values[0];
-			return true;
-		}
-
-		bool RemoveAt(int index)
-		{
-			if (index < 0 || index >= Count) return false;
-			Swap(index, --Count);
-			keys[Count] = default;
-			values[Count] = default;
-			AdjustDown(index);
-			AdjustUp(index);
-			return true;
-		}
-
-		void Update(int index, TValue newValue)
-		{
-			values[index] = newValue;
-			AdjustDown(index);
-			AdjustUp(index);
-		}
-
-		void Swap(int i, int j)
-		{
-			(keys[i], keys[j]) = (keys[j], keys[i]);
-			(values[i], values[j]) = (values[j], values[i]);
-		}
-
-		void AdjustUp(int i)
-		{
-			while (i > 0)
-			{
-				var parent = (i - 1) >> 1;
-				if (values[i].CompareTo(values[parent]) < 0) break;
-				Swap(i, parent);
-				i = parent;
-			}
-		}
-
-		void AdjustDown(int i)
-		{
-			while (i < Count)
-			{
-				var left = (i << 1) + 1;
-				if (left >= Count) break;
-				var right = left + 1;
-				var max = left;
-				if (right < Count && values[right].CompareTo(values[left]) > 0) max = right;
-				if (values[i].CompareTo(values[max]) >= 0) break;
-				Swap(i, max);
-				i = max;
+				parentIndex = (index - 1) >> 1;
+				if (values[index].CompareTo(values[parentIndex]) < 0)
+				{
+					tempKey = keys[parentIndex];
+					tempValue = values[parentIndex];
+					keys[parentIndex] = keys[index];
+					values[parentIndex] = values[index];
+					keys[index] = tempKey;
+					values[index] = tempValue;
+					index = parentIndex;
+				}
+				else
+				{
+					break;
+				}
 			}
 		}
 	}

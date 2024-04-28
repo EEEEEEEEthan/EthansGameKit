@@ -52,7 +52,7 @@ namespace EthansGameKit.Internal
 			if (buffer.Remove(id)) return true;
 			if (id2callback.Remove(id))
 			{
-				id2time.Remove(id);
+				id2time.Pop(id2time.Find(id));
 				return true;
 			}
 			return false;
@@ -67,7 +67,7 @@ namespace EthansGameKit.Internal
 			}
 			if (id2callback.Remove(id))
 			{
-				id2time.Remove(id);
+				id2time.Pop(id2time.Find(id));
 				id = 0;
 				return true;
 			}
