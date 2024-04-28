@@ -1,123 +1,188 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using System.Runtime.CompilerServices;
+using EthansGameKit.Pathfinding.Rect;
 using UnityEngine;
-using UnityEngine.Assertions;
 
 namespace EthansGameKit.RectGrid
 {
 	public readonly struct GridIndexCalculator
 	{
-		struct AllPositionWithinEnumerator : IEnumerator<Vector2Int>, IEnumerable<Vector2Int>
+		public readonly int WidthPower;
+		public readonly int HeightPower;
+		public readonly int Width;
+		public readonly int XMin;
+		public readonly int YMin;
+		public readonly int XMax;
+		public readonly int YMax;
+		public readonly int Count;
+		readonly int widthMask;
+
+		public GridIndexCalculator(RectInt rect)
 		{
-			readonly GridIndexCalculator calculator;
-			int currentIndex;
-			public AllPositionWithinEnumerator(GridIndexCalculator calculator)
-			{
-				this.calculator = calculator;
-				currentIndex = -1;
-			}
-			Vector2Int IEnumerator<Vector2Int>.Current => calculator.GetPositionUnverified(currentIndex);
-			object IEnumerator.Current => calculator.GetPositionUnverified(currentIndex);
-			bool IEnumerator.MoveNext()
-			{
-				++currentIndex;
-				return currentIndex < calculator.Count;
-			}
-			void IEnumerator.Reset()
-			{
-				currentIndex = -1;
-			}
-			void IDisposable.Dispose()
-			{
-			}
-			IEnumerator<Vector2Int> IEnumerable<Vector2Int>.GetEnumerator()
-			{
-				return this;
-			}
-			IEnumerator IEnumerable.GetEnumerator()
-			{
-				return this;
-			}
+			WidthPower = Mathf.CeilToInt(Mathf.Log(rect.width, 2));
+			HeightPower = Mathf.CeilToInt(Mathf.Log(rect.height, 2));
+			Width = 1 << WidthPower;
+			var height = 1 << HeightPower;
+			XMin = rect.xMin;
+			YMin = rect.yMin;
+			XMax = rect.xMax;
+			YMax = rect.yMax;
+			widthMask = Width - 1;
+			Count = Width * height;
 		}
 
-		public readonly int WidthPower;
-		public readonly int Width;
-		public readonly int Count;
-		public GridIndexCalculator(int widthPower)
+		public GridIndexCalculator(int widthPower) : this(new RectInt(0, 0, 1 << widthPower, 1 << widthPower))
 		{
-			WidthPower = widthPower;
-			Width = 1 << widthPower;
-			Count = Width << widthPower;
-			Assert.AreEqual(Width * Width, Count);
 		}
-		public IEnumerable<Vector2Int> AllPositionWithin
-		{
-			[MethodImpl(MethodImplOptions.AggressiveInlining)]
-			get => new AllPositionWithinEnumerator(this);
-		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndexUnverified(int x, int y)
-		{
-			return x | (y << WidthPower);
-		}
+		public bool Contains(int index) => index >= 0 && index < Count;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Contains(int x, int y) => x >= XMin && x < XMax && y >= YMin && y < YMax;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Contains(Vector2Int position) => Contains(position.x, position.y);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetIndexUnverified(int x, int y) => ((y - YMin) << WidthPower) | (x - XMin);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetIndexUnverified(Vector2Int position) => GetIndexUnverified(position.x, position.y);
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetIndex(int x, int y)
 		{
-			if (x < 0 || x >= Width || y < 0 || y >= Width)
-				throw new ArgumentOutOfRangeException($"x={x},y={y},width={Width}");
+			if (!Contains(x, y)) throw new ArgumentOutOfRangeException($"({x}, {y}) is not in the grid.");
 			return GetIndexUnverified(x, y);
 		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndexUnverified(Vector2Int position)
-		{
-			return GetIndexUnverified(position.x, position.y);
-		}
+		public int GetIndex(Vector2Int position) => GetIndex(position.x, position.y);
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndex(Vector2Int position)
+		public bool TryGetIndex(int x, int y, out int index)
 		{
-			return GetIndex(position.x, position.y);
+			if (Contains(x, y))
+			{
+				index = GetIndexUnverified(x, y);
+				return true;
+			}
+			index = default;
+			return false;
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetIndex(Vector2Int position, out int index) => TryGetIndex(position.x, position.y, out index);
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetXUnverified(int index) => (index & widthMask) + XMin;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetX(int index)
+		{
+			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
+			return GetXUnverified(index);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetX(int index, out int x)
+		{
+			if (Contains(index))
+			{
+				x = GetXUnverified(index);
+				return true;
+			}
+			x = default;
+			return false;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetYUnverified(int index) => (index >> WidthPower) + YMin;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public int GetY(int index)
+		{
+			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
+			return GetYUnverified(index);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool TryGetY(int index, out int y)
+		{
+			if (Contains(index))
+			{
+				y = GetYUnverified(index);
+				return true;
+			}
+			y = default;
+			return false;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void GetPositionUnverified(int index, out int x, out int y)
 		{
-			y = index >> WidthPower;
-			x = index & (Width - 1);
+			x = GetXUnverified(index);
+			y = GetYUnverified(index);
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public Vector2Int GetPositionUnverified(int index) => new(GetXUnverified(index), GetYUnverified(index));
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public void GetPosition(int index, out int x, out int y)
 		{
-			if (index < 0 || index >= Count)
-				throw new ArgumentOutOfRangeException();
+			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
 			GetPositionUnverified(index, out x, out y);
 		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Vector2Int GetPositionUnverified(int index)
-		{
-			GetPositionUnverified(index, out var x, out var y);
-			return new(x, y);
-		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public Vector2Int GetPosition(int index)
 		{
 			GetPosition(index, out var x, out var y);
 			return new(x, y);
 		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(int index)
+		public bool TryGetPosition(int index, out int x, out int y)
 		{
-			return index >= 0 && index < Count;
+			if (Contains(index))
+			{
+				GetPositionUnverified(index, out x, out y);
+				return true;
+			}
+			x = default;
+			y = default;
+			return false;
 		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(int x, int y)
+		public bool TryGetPosition(int index, out Vector2Int position)
 		{
-			return x >= 0 && x < Width && y >= 0 && y < Width;
+			if (Contains(index))
+			{
+				position = GetPositionUnverified(index);
+				return true;
+			}
+			position = default;
+			return false;
 		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(Vector2Int position)
+		public int GetNeighborIndexUnverified(int index, GridDirections direction)
 		{
-			return Contains(position.x, position.y);
+			return direction switch
+			{
+				GridDirections.Forward => index + Width,
+				GridDirections.ForwardRight => index + Width + 1,
+				GridDirections.Right => index + 1,
+				GridDirections.BackwardRight => index - Width + 1,
+				GridDirections.Backward => index - Width,
+				GridDirections.BackwardLeft => index - Width - 1,
+				GridDirections.Left => index - 1,
+				GridDirections.ForwardLeft => index + Width - 1,
+				_ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
+			};
 		}
 	}
 }
