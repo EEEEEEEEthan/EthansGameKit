@@ -6,7 +6,7 @@ namespace EthansGameKit
 	{
 		public static void InvokeOnMainThread(Action action)
 		{
-			Internal.MainThreadInvoker.Invoker.Add(action);
+			Internal.MainThreadInvoker.Invoker.Invoke(action);
 		}
 	}
 }

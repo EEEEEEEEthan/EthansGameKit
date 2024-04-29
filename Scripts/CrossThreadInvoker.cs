@@ -24,7 +24,7 @@ namespace EthansGameKit
 				buffer1[i].TryInvoke();
 			buffer1.Clear();
 		}
-		public void Add(Action action)
+		public void Invoke(Action action)
 		{
 			lock (asyncLock)
 			{

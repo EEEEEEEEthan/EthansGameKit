@@ -10,7 +10,7 @@ namespace EthansGameKit.RectGrid
 		public MapData(int widthPower)
 		{
 			GridCalculator = new(widthPower);
-			data = new T[GridCalculator.Count];
+			data = new T[GridCalculator.count];
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryGetValue(int index, out T value)

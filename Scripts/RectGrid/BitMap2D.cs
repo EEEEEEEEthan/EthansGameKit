@@ -21,7 +21,7 @@ namespace EthansGameKit.RectGrid
 		public BitMap2D(int widthPower)
 		{
 			Calculator = new(widthPower);
-			chunks = new long[Calculator.Count >> 6];
+			chunks = new long[Calculator.count >> 6];
 		}
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool GetValue(int index)

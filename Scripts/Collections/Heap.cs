@@ -134,6 +134,17 @@ namespace EthansGameKit.Collections
 			return false;
 		}
 
+		public bool Update(TKey element, TValue oldValue, TValue newValue)
+		{
+			var index = Find(element, oldValue);
+			if (index > 0)
+			{
+				Update(index, element, newValue);
+				return true;
+			}
+			return false;
+		}
+
 		public void AddOrUpdate(TKey element, TValue sortingValue, IEqualityComparer<TKey> equalityComparer)
 		{
 			var index = Find(element, equalityComparer);

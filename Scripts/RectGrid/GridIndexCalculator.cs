@@ -1,51 +1,115 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Runtime.CompilerServices;
-using EthansGameKit.Pathfinding.Rect;
 using UnityEngine;
 
 namespace EthansGameKit.RectGrid
 {
-	public readonly struct GridIndexCalculator
+	// ReSharper disable once StructCanBeMadeReadOnly
+	[SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
+	public struct GridIndexCalculator
 	{
-		public readonly int WidthPower;
-		public readonly int HeightPower;
-		public readonly int Width;
-		public readonly int XMin;
-		public readonly int YMin;
-		public readonly int XMax;
-		public readonly int YMax;
-		public readonly int Count;
+		struct Enumerator : IEnumerable<Vector2Int>, IEnumerator<Vector2Int>
+		{
+			readonly GridIndexCalculator calculator;
+			int currentIndex;
+
+			public Enumerator(GridIndexCalculator calculator)
+			{
+				this.calculator = calculator;
+				currentIndex = -1;
+			}
+
+			Vector2Int IEnumerator<Vector2Int>.Current
+			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				get => calculator.GetPositionUnverified(currentIndex);
+			}
+
+			object IEnumerator.Current
+			{
+				[MethodImpl(MethodImplOptions.AggressiveInlining)]
+				get => calculator.GetPositionUnverified(currentIndex);
+			}
+
+			IEnumerator<Vector2Int> IEnumerable<Vector2Int>.GetEnumerator() => this;
+
+			IEnumerator IEnumerable.GetEnumerator() => this;
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			bool IEnumerator.MoveNext()
+			{
+				++currentIndex;
+				return currentIndex < calculator.count;
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			void IEnumerator.Reset()
+			{
+				currentIndex = -1;
+			}
+
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			void IDisposable.Dispose()
+			{
+			}
+		}
+
+		public readonly int widthPower;
+		public readonly int heightPower;
+		/// <summary>
+		///     总宽度(2的整数次方)
+		/// </summary>
+		public readonly int width;
+		/// <summary>
+		///     总高度(2的整数次方)
+		/// </summary>
+		public readonly int height;
+		public readonly int xMin;
+		public readonly int yMin;
+		public readonly int xMax;
+		public readonly int yMax;
+		/// <summary>
+		///     总数量<see cref="width" /> x <see cref="height" />
+		/// </summary>
+		public readonly int count;
 		readonly int widthMask;
+		public readonly RectInt rect;
 
 		public GridIndexCalculator(RectInt rect)
 		{
-			WidthPower = Mathf.CeilToInt(Mathf.Log(rect.width, 2));
-			HeightPower = Mathf.CeilToInt(Mathf.Log(rect.height, 2));
-			Width = 1 << WidthPower;
-			var height = 1 << HeightPower;
-			XMin = rect.xMin;
-			YMin = rect.yMin;
-			XMax = rect.xMax;
-			YMax = rect.yMax;
-			widthMask = Width - 1;
-			Count = Width * height;
+			widthPower = Mathf.CeilToInt(Mathf.Log(rect.width, 2));
+			heightPower = Mathf.CeilToInt(Mathf.Log(rect.height, 2));
+			width = 1 << widthPower;
+			height = 1 << heightPower;
+			xMin = rect.xMin;
+			yMin = rect.yMin;
+			xMax = rect.xMax;
+			yMax = rect.yMax;
+			widthMask = width - 1;
+			count = width * height;
+			this.rect = rect;
 		}
 
 		public GridIndexCalculator(int widthPower) : this(new RectInt(0, 0, 1 << widthPower, 1 << widthPower))
 		{
 		}
 
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(int index) => index >= 0 && index < Count;
+		public IEnumerable<Vector2Int> AllPositionWithin => new Enumerator(this);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(int x, int y) => x >= XMin && x < XMax && y >= YMin && y < YMax;
+		public bool Contains(int index) => index >= 0 && index < count;
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public bool Contains(int x, int y) => x >= xMin && x < xMax && y >= yMin && y < yMax;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool Contains(Vector2Int position) => Contains(position.x, position.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndexUnverified(int x, int y) => ((y - YMin) << WidthPower) | (x - XMin);
+		public int GetIndexUnverified(int x, int y) => ((y - yMin) << widthPower) | (x - xMin);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetIndexUnverified(Vector2Int position) => GetIndexUnverified(position.x, position.y);
@@ -76,7 +140,7 @@ namespace EthansGameKit.RectGrid
 		public bool TryGetIndex(Vector2Int position, out int index) => TryGetIndex(position.x, position.y, out index);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetXUnverified(int index) => (index & widthMask) + XMin;
+		public int GetXUnverified(int index) => (index & widthMask) + xMin;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetX(int index)
@@ -98,7 +162,7 @@ namespace EthansGameKit.RectGrid
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetYUnverified(int index) => (index >> WidthPower) + YMin;
+		public int GetYUnverified(int index) => (index >> widthPower) + yMin;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public int GetY(int index)
@@ -166,23 +230,6 @@ namespace EthansGameKit.RectGrid
 			}
 			position = default;
 			return false;
-		}
-
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetNeighborIndexUnverified(int index, GridDirections direction)
-		{
-			return direction switch
-			{
-				GridDirections.Forward => index + Width,
-				GridDirections.ForwardRight => index + Width + 1,
-				GridDirections.Right => index + 1,
-				GridDirections.BackwardRight => index - Width + 1,
-				GridDirections.Backward => index - Width,
-				GridDirections.BackwardLeft => index - Width - 1,
-				GridDirections.Left => index - 1,
-				GridDirections.ForwardLeft => index + Width - 1,
-				_ => throw new ArgumentOutOfRangeException(nameof(direction), direction, null)
-			};
 		}
 	}
 }
