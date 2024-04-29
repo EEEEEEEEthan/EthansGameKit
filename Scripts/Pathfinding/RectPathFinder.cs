@@ -10,7 +10,7 @@ namespace EthansGameKit.Pathfinding
 	public class RectPathFinder
 	{
 		const int noParent = -1;
-		const float unCached = -1;
+		const float uncached = -1;
 		/// <summary>
 		///     (启发值+消耗)超过这个值认为不可达
 		/// </summary>
@@ -46,8 +46,8 @@ namespace EthansGameKit.Pathfinding
 		public void Reinitialize(IEnumerable<Vector2Int> sources, IPathfindingArguments<Vector2Int> arguments)
 		{
 			this.arguments = arguments;
-			cachedStepCost.MemSet(unCached);
-			cachedHeuristic.MemSet(unCached);
+			cachedStepCost.MemSet(uncached);
+			cachedHeuristic.MemSet(uncached);
 			totalCostMap.MemSet(maxWeight);
 			parentMap.MemSet(noParent);
 			open.Clear();
@@ -158,7 +158,7 @@ namespace EthansGameKit.Pathfinding
 		{
 			var index = (fromNode << directionBits) | direction;
 			var cachedCost = cachedStepCost[index];
-			if (cachedCost == unCached)
+			if (cachedCost == uncached)
 			{
 				var fromPosition = calculator.GetPosition(fromNode);
 				var toPosition = fromPosition + ((OctDirectionCode)direction).ToVector2Int();
@@ -175,7 +175,7 @@ namespace EthansGameKit.Pathfinding
 		float GetHeuristicUnverified(int node)
 		{
 			var cachedHeuristic = this.cachedHeuristic[node];
-			if (cachedHeuristic == unCached)
+			if (cachedHeuristic == uncached)
 			{
 				cachedHeuristic = this.cachedHeuristic[node] = arguments.CalculateHeuristic(calculator.GetPosition(node));
 				cachedHeuristic.Clamp(0, maxWeight);
