@@ -75,8 +75,8 @@ namespace EthansGameKit.RectGrid
 		///     总数量<see cref="width" /> x <see cref="height" />
 		/// </summary>
 		public readonly int count;
-		readonly int widthMask;
 		public readonly RectInt rect;
+		readonly int widthMask;
 
 		public GridIndexCalculator(RectInt rect)
 		{
@@ -100,32 +100,32 @@ namespace EthansGameKit.RectGrid
 		public IEnumerable<Vector2Int> AllPositionWithin => new Enumerator(this);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(int index) => index >= 0 && index < count;
+		public readonly bool Contains(int index) => index >= 0 && index < count;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(int x, int y) => x >= xMin && x < xMax && y >= yMin && y < yMax;
+		public readonly bool Contains(int x, int y) => x >= xMin && x < xMax && y >= yMin && y < yMax;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool Contains(Vector2Int position) => Contains(position.x, position.y);
+		public readonly bool Contains(Vector2Int position) => Contains(position.x, position.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndexUnverified(int x, int y) => ((y - yMin) << widthPower) | (x - xMin);
+		public readonly int GetIndexUnverified(int x, int y) => ((y - yMin) << widthPower) | (x - xMin);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndexUnverified(Vector2Int position) => GetIndexUnverified(position.x, position.y);
+		public readonly int GetIndexUnverified(Vector2Int position) => GetIndexUnverified(position.x, position.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndex(int x, int y)
+		public readonly int GetIndex(int x, int y)
 		{
 			if (!Contains(x, y)) throw new ArgumentOutOfRangeException($"({x}, {y}) is not in the grid.");
 			return GetIndexUnverified(x, y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetIndex(Vector2Int position) => GetIndex(position.x, position.y);
+		public readonly int GetIndex(Vector2Int position) => GetIndex(position.x, position.y);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetIndex(int x, int y, out int index)
+		public readonly bool TryGetIndex(int x, int y, out int index)
 		{
 			if (Contains(x, y))
 			{
@@ -137,20 +137,21 @@ namespace EthansGameKit.RectGrid
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetIndex(Vector2Int position, out int index) => TryGetIndex(position.x, position.y, out index);
+		public readonly bool TryGetIndex(Vector2Int position, out int index) =>
+			TryGetIndex(position.x, position.y, out index);
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetXUnverified(int index) => (index & widthMask) + xMin;
+		public readonly int GetXUnverified(int index) => (index & widthMask) + xMin;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetX(int index)
+		public readonly int GetX(int index)
 		{
 			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
 			return GetXUnverified(index);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetX(int index, out int x)
+		public readonly bool TryGetX(int index, out int x)
 		{
 			if (Contains(index))
 			{
@@ -162,17 +163,17 @@ namespace EthansGameKit.RectGrid
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetYUnverified(int index) => (index >> widthPower) + yMin;
+		public readonly int GetYUnverified(int index) => (index >> widthPower) + yMin;
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public int GetY(int index)
+		public readonly int GetY(int index)
 		{
 			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
 			return GetYUnverified(index);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetY(int index, out int y)
+		public readonly bool TryGetY(int index, out int y)
 		{
 			if (Contains(index))
 			{
@@ -184,31 +185,32 @@ namespace EthansGameKit.RectGrid
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void GetPositionUnverified(int index, out int x, out int y)
+		public readonly void GetPositionUnverified(int index, out int x, out int y)
 		{
 			x = GetXUnverified(index);
 			y = GetYUnverified(index);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Vector2Int GetPositionUnverified(int index) => new(GetXUnverified(index), GetYUnverified(index));
+		public readonly Vector2Int GetPositionUnverified(int index) =>
+			new(GetXUnverified(index), GetYUnverified(index));
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public void GetPosition(int index, out int x, out int y)
+		public readonly void GetPosition(int index, out int x, out int y)
 		{
 			if (!Contains(index)) throw new ArgumentOutOfRangeException($"({index}) is not in the grid.");
 			GetPositionUnverified(index, out x, out y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public Vector2Int GetPosition(int index)
+		public readonly Vector2Int GetPosition(int index)
 		{
 			GetPosition(index, out var x, out var y);
 			return new(x, y);
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetPosition(int index, out int x, out int y)
+		public readonly bool TryGetPosition(int index, out int x, out int y)
 		{
 			if (Contains(index))
 			{
@@ -221,7 +223,7 @@ namespace EthansGameKit.RectGrid
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		public bool TryGetPosition(int index, out Vector2Int position)
+		public readonly bool TryGetPosition(int index, out Vector2Int position)
 		{
 			if (Contains(index))
 			{

@@ -39,9 +39,18 @@ namespace EthansGameKit.Pathfinding
 
 		public void SetLink(Vector2Int position, QuadDirectionCode direction, byte costType)
 		{
-			if (direction is < 0 or > QuadDirectionCode.West) throw new System.ArgumentOutOfRangeException($"direction {direction} is out of range");
+			if (direction is < 0 or > QuadDirectionCode.West)
+				throw new System.ArgumentOutOfRangeException($"direction {direction} is out of range");
+			if (!calculator.Contains(position))
+				throw new System.ArgumentOutOfRangeException($"position {position} is out of range");
 			var neighbor = position + direction.ToVector2Int();
-			if (!calculator.Contains(neighbor)) throw new System.ArgumentOutOfRangeException($"neighbor {neighbor} is out of range");
+			if (!calculator.Contains(neighbor))
+				if (costType != 0)
+				{
+					Debug.LogError(
+						$"SetLink({position}, {direction}, {costType}) failed because neighbor {neighbor} is out of range");
+					costType = 0;
+				}
 			var index = calculator.GetIndex(position);
 			costTypes[(index << 2) | (int)direction] = costType;
 		}

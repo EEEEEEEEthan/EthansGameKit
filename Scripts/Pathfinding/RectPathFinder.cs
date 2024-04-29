@@ -36,6 +36,7 @@ namespace EthansGameKit.Pathfinding
 			this.allowDiagonal = allowDiagonal;
 			directionBits = allowDiagonal ? 3 : 2;
 			cachedStepCost = new float[calculator.count << directionBits];
+			cachedHeuristic = new float[calculator.count];
 			totalCostMap = new float[calculator.count];
 			parentMap = new int[calculator.count];
 			open = new();
@@ -68,6 +69,7 @@ namespace EthansGameKit.Pathfinding
 				totalCostMap[sourceIndex] = 0;
 				cachedHeuristic[sourceIndex] = arguments.CalculateHeuristic(source);
 				parentMap[sourceIndex] = sourceIndex;
+				open.Add(sourceIndex, cachedHeuristic[sourceIndex]);
 				++count;
 			}
 			if (count <= 0) throw new ArgumentException("no valid sources");
@@ -85,16 +87,12 @@ namespace EthansGameKit.Pathfinding
 			var currentTotalCost = totalCostMap[step];
 			for (var i = 0; i < count; ++i)
 			{
-				var neighbor = neighborBuffer[i];
 				var costType = neighborCostTypeBuffer[i];
-				ConsiderNextStep(step, neighbor, currentTotalCost, costType);
+				ConsiderNextStep(step, (OctDirectionCode)i, currentTotalCost, costType);
 			}
 			if (allowDiagonal)
 				for (var direction = OctDirectionCode.NorthEast; direction < OctDirectionCode.NorthWest; ++direction)
-				{
-					var neighbor = step + space.neighborOffsets[(int)direction];
-					ConsiderNextStep(step, neighbor, currentTotalCost, 0);
-				}
+					ConsiderNextStep(step, direction, currentTotalCost, 0);
 			return true;
 		}
 
@@ -116,7 +114,8 @@ namespace EthansGameKit.Pathfinding
 		/// <param name="path">包含起点和终点的路径。终点先入栈。若起点与终点相同，栈长度为1。若无路径，栈长度为0</param>
 		public void GetPath(int targetIndex, Stack<int> path)
 		{
-			if (!calculator.Contains(targetIndex)) throw new ArgumentOutOfRangeException($"targetIndex {targetIndex} is out of range");
+			if (!calculator.Contains(targetIndex))
+				throw new ArgumentOutOfRangeException($"targetIndex {targetIndex} is out of range");
 			path.Clear();
 			if (parentMap[targetIndex] == noParent)
 				return;
@@ -130,7 +129,7 @@ namespace EthansGameKit.Pathfinding
 			}
 			path.Clear();
 		}
-		
+
 		/// <summary>
 		///     获得一条从sources到target的路径
 		/// </summary>
@@ -149,10 +148,10 @@ namespace EthansGameKit.Pathfinding
 		/// <param name="path">包含起点和终点的路径。终点先入栈。若起点与终点相同，栈长度为1。若无路径，栈长度为0</param>
 		public void GetPath(Vector2Int target, Stack<Vector2Int> path)
 		{
+			if (!calculator.Contains(target)) return;
 			var targetIndex = calculator.GetIndex(target);
 			path.Clear();
-			if (parentMap[targetIndex] == noParent)
-				return;
+			if (parentMap[targetIndex] == noParent) return;
 			var index = targetIndex;
 			while (true)
 			{
@@ -170,16 +169,17 @@ namespace EthansGameKit.Pathfinding
 		/// <param name="costType"></param>
 		/// <returns>最大消耗值<see cref="maxWeight" /></returns>
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		float GetStepCostUnverified(int fromNode, int direction, byte costType)
+		float GetStepCostUnverified(int fromNode, OctDirectionCode direction, byte costType)
 		{
-			var index = (fromNode << directionBits) | direction;
+			var index = (fromNode << directionBits) | (int)direction;
 			var cachedCost = cachedStepCost[index];
 			if (cachedCost == uncached)
 			{
 				var fromPosition = calculator.GetPosition(fromNode);
-				var toPosition = fromPosition + ((OctDirectionCode)direction).ToVector2Int();
+				var toPosition = fromPosition + direction.ToVector2Int();
 				if (calculator.Contains(toPosition))
-					cachedCost = cachedStepCost[index] = arguments.CalculateStepCost(fromPosition, toPosition, costType);
+					cachedCost = cachedStepCost[index] =
+						arguments.CalculateStepCost(fromPosition, toPosition, costType);
 				else
 					cachedCost = cachedStepCost[index] = maxWeight;
 				cachedCost.Clamp(0, maxWeight);
@@ -193,16 +193,19 @@ namespace EthansGameKit.Pathfinding
 			var cachedHeuristic = this.cachedHeuristic[node];
 			if (cachedHeuristic == uncached)
 			{
-				cachedHeuristic = this.cachedHeuristic[node] = arguments.CalculateHeuristic(calculator.GetPosition(node));
+				cachedHeuristic = this.cachedHeuristic[node] =
+					arguments.CalculateHeuristic(calculator.GetPosition(node));
 				cachedHeuristic.Clamp(0, maxWeight);
 			}
 			return cachedHeuristic;
 		}
 
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		void ConsiderNextStep(int currentIndex, int neighborIndex, float currentTotalCost, byte costType)
+		void ConsiderNextStep(int currentIndex, OctDirectionCode direction, float currentTotalCost, byte costType)
 		{
-			var stepCost = GetStepCostUnverified(currentIndex, neighborIndex, costType);
+			var neighborIndex = space.neighborOffsets[(int)direction] + currentIndex;
+			var stepCost = GetStepCostUnverified(currentIndex, direction, costType);
+			if (stepCost >= maxWeight) return;
 			var oldNeighborTotalCost = totalCostMap[neighborIndex];
 			var newNeighborTotalCost = currentTotalCost + stepCost;
 			if (newNeighborTotalCost < oldNeighborTotalCost)
