@@ -10,20 +10,18 @@ using UnityEngine;
 namespace EthansGameKit.Editor.Scripts
 {
 	[CreateAssetMenu(fileName = "ResourceMapper", menuName = "EthansGameKit/ResourceMapper")]
-	class ResourceMapper : ScriptableObject
+	internal class ResourceMapper : ScriptableObject
 	{
 		static string GetShorttenName(Type type, List<string> usings)
 		{
 			var fullName = type.FullName;
 			Assert.IsNotNull(fullName);
 			foreach (var u in usings)
-			{
 				if (fullName.StartsWith(u))
 				{
 					fullName = fullName[(u.Length + 1)..];
 					return fullName;
 				}
-			}
 			return fullName;
 		}
 
@@ -51,10 +49,7 @@ namespace EthansGameKit.Editor.Scripts
 					EditorGUILayout.HelpBox("Region not found", MessageType.Error);
 					return;
 				}
-				if (GUILayout.Button("Generate Code"))
-				{
-					target.GenerateCode();
-				}
+				if (GUILayout.Button("Generate Code")) target.GenerateCode();
 			}
 		}
 
@@ -62,6 +57,7 @@ namespace EthansGameKit.Editor.Scripts
 		[SerializeField] MonoScript script;
 		[SerializeField] string region;
 		[SerializeField, UnityEngine.Range(0, 10)] int indent;
+
 		void GenerateCode()
 		{
 			var originalText = script.text;
@@ -87,6 +83,7 @@ namespace EthansGameKit.Editor.Scripts
 			File.WriteAllText(path, builder.ToString());
 			AssetDatabase.Refresh();
 		}
+
 		string GetBody(List<string> usings)
 		{
 			var builder = new StringBuilder();
@@ -104,7 +101,7 @@ namespace EthansGameKit.Editor.Scripts
 				var index = path.IndexOf(resourceFolder, StringComparison.Ordinal);
 				if (index < 0) continue;
 				var resourcePath = path[(index + resourceFolder.Length)..];
-				var dir = Path.GetDirectoryName(resourcePath);
+				var dir = Path.GetDirectoryName(resourcePath).Replace("\\", "/");
 				var resourceName = Path.GetFileNameWithoutExtension(resourcePath);
 				var extensionName = Path.GetExtension(resourcePath);
 				extensionName = char.ToUpper(extensionName[1]) + extensionName[2..];
