@@ -43,6 +43,11 @@ namespace EthansGameKit.Pathfinding
 
 		public Vector2Int Current => calculator.GetPosition(open.Peek());
 
+		public void Reinitialize(Vector2Int source, IPathfindingArguments<Vector2Int> arguments)
+		{
+			Reinitialize(new[] { source }, arguments);
+		}
+
 		public void Reinitialize(IEnumerable<Vector2Int> sources, IPathfindingArguments<Vector2Int> arguments)
 		{
 			this.arguments = arguments;
@@ -124,6 +129,17 @@ namespace EthansGameKit.Pathfinding
 				index = parentMap[index];
 			}
 			path.Clear();
+		}
+		
+		/// <summary>
+		///     获得一条从sources到target的路径
+		/// </summary>
+		/// <param name="target"></param>
+		/// <param name="path">包含起点和终点的路径。终点先入栈。若起点与终点相同，栈长度为1。若无路径，栈长度为0</param>
+		public bool TryGetPath(Vector2Int target, Stack<Vector2Int> path)
+		{
+			GetPath(target, path);
+			return path.Count > 0;
 		}
 
 		/// <summary>
