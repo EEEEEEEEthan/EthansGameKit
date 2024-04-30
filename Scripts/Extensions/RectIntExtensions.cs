@@ -34,25 +34,25 @@ namespace EthansGameKit
 					current = rect.min;
 					return true;
 				}
-				// 顺时针
+				// 顺时针)
 				if (current.x == rect.xMin && current.y < rect.yMax - 1)
 				{
-					++current.y;
+					current = new(current.x, current.y + 1);
 					return true;
 				}
 				if (current.y == rect.yMax - 1 && current.x < rect.xMax - 1)
 				{
-					++current.x;
+					current = new(current.x + 1, current.y);
 					return true;
 				}
 				if (current.x == rect.xMax - 1 && current.y > rect.yMin)
 				{
-					--current.y;
+					current = new(current.x, current.y - 1);
 					return true;
 				}
-				if (current.y == rect.yMin && current.x > rect.xMin)
+				if (current.y == rect.yMin && current.x > rect.xMin + 1)
 				{
-					--current.x;
+					current = new(current.x - 1, current.y);
 					return true;
 				}
 				return false;
