@@ -8,7 +8,7 @@ namespace EthansGameKit
 		public static T RandomPick<T>(this IReadOnlyList<T> @this)
 		{
 			if (@this.Count == 0) throw new InvalidOperationException("Empty list");
-			return @this[UnityEngine.Random.Range(0, @this.Count)];
+			return @this[RandomUtility.random.Next(0, @this.Count)];
 		}
 
 		public static bool TryRandomPick<T>(this IReadOnlyList<T> @this, out T result)
@@ -18,7 +18,7 @@ namespace EthansGameKit
 				result = default;
 				return false;
 			}
-			result = @this[UnityEngine.Random.Range(0, @this.Count)];
+			result = @this[RandomUtility.random.Next(0, @this.Count)];
 			return true;
 		}
 	}

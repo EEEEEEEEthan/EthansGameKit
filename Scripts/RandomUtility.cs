@@ -1,4 +1,6 @@
+using System;
 using UnityEngine;
+using Random = System.Random;
 
 namespace EthansGameKit
 {
@@ -6,6 +8,7 @@ namespace EthansGameKit
 	{
 		const uint lcg_a = 0x_fa20_c1e5;
 		const uint lcg_c = 0x_0cf2_5807;
+		public static readonly Random random = new(DateTime.Now.Millisecond);
 
 		/// <summary>
 		///     线性同余 linear congruential generator
@@ -57,7 +60,10 @@ namespace EthansGameKit
 		/// <param name="c">随便写另一个让人摸不着头脑的整数</param>
 		/// <param name="modulus">模，得到0(含)-<paramref name="modulus" />(不含)的伪随机数</param>
 		/// <returns>生成一个伪随机数</returns>
-		static uint LCG(uint seed, uint a, uint c, uint modulus) => modulus <= 0 ? 0 : (a * seed + c) % modulus;
+		static uint LCG(uint seed, uint a, uint c, uint modulus)
+		{
+			return modulus <= 0 ? 0 : (a * seed + c) % modulus;
+		}
 
 		/// <summary>
 		///     线性同余 linear congruential generator
@@ -65,6 +71,9 @@ namespace EthansGameKit
 		/// <param name="seed">种子</param>
 		/// <param name="modulus">模，得到0(含)-<paramref name="modulus" />(不含)的伪随机数</param>
 		/// <returns>生成一个伪随机数</returns>
-		static uint LCG(uint seed, uint modulus) => LCG(seed, lcg_a, lcg_c, modulus);
+		static uint LCG(uint seed, uint modulus)
+		{
+			return LCG(seed, lcg_a, lcg_c, modulus);
+		}
 	}
 }
