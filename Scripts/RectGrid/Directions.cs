@@ -30,6 +30,11 @@ namespace EthansGameKit.RectGrid
 		static readonly Vector2Int downLeft = new(-1, -1);
 		static readonly Vector2Int upLeft = new(-1, 1);
 
+		public static bool IsDiagonal(this OctDirectionCode direction)
+		{
+			return direction is > OctDirectionCode.West and <= OctDirectionCode.NorthEast;
+		}
+
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public static void Next(this ref QuadDirectionCode direction)
 		{

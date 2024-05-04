@@ -1,8 +1,6 @@
-using UnityEngine;
-
 namespace EthansGameKit.Pathfinding
 {
-	public interface IPathfindingArguments<T>
+	public interface IPathfindingArguments<in T>
 	{
 		/// <summary>
 		/// </summary>

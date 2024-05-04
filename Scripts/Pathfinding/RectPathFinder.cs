@@ -14,7 +14,7 @@ namespace EthansGameKit.Pathfinding
 		/// <summary>
 		///     (启发值+消耗)超过这个值认为不可达
 		/// </summary>
-		const float maxWeight = 1000000;
+		const float maxWeight = float.MaxValue;
 		readonly RectPathFindingSpace space;
 		readonly float[] cachedStepCost;
 		readonly float[] cachedHeuristic;
@@ -173,15 +173,47 @@ namespace EthansGameKit.Pathfinding
 		{
 			var index = (fromNode << directionBits) | (int)direction;
 			var cachedCost = cachedStepCost[index];
+			// ReSharper disable once CompareOfFloatsByEqualityOperator
 			if (cachedCost == uncached)
 			{
 				var fromPosition = calculator.GetPosition(fromNode);
 				var toPosition = fromPosition + direction.ToVector2Int();
+
 				if (calculator.Contains(toPosition))
-					cachedCost = cachedStepCost[index] =
-						arguments.CalculateStepCost(fromPosition, toPosition, costType);
+				{
+					if (direction.IsDiagonal())
+					{
+						double planA, planB;
+						var previous = direction.GetPrevious();
+						var next = direction.GetNext();
+						var midIndex = calculator.GetIndex(fromPosition + previous.ToVector2Int());
+						const double sqrt2 = 1.41421356;
+						{
+							var firstCost = GetStepCostUnverified(fromNode, previous, costType);
+							var secondCost = GetStepCostUnverified(midIndex, next, costType);
+							planA = Mathf.Max(firstCost, secondCost);
+						}
+						{
+							var firstCost = GetStepCostUnverified(fromNode, next, costType);
+							var secondCost = GetStepCostUnverified(midIndex, previous, costType);
+							planB = Mathf.Max(firstCost, secondCost);
+						}
+						var cost = Math.Max(planA, planB) * sqrt2;
+						if (cost >= maxWeight)
+							cachedCost = maxWeight;
+						else
+							cachedCost = (float)cost;
+					}
+					else
+					{
+						cachedCost = arguments.CalculateStepCost(fromPosition, toPosition, costType);
+					}
+				}
 				else
-					cachedCost = cachedStepCost[index] = maxWeight;
+				{
+					cachedCost = maxWeight;
+				}
+				cachedStepCost[index] = cachedCost;
 				cachedCost.Clamp(0, maxWeight);
 			}
 			return cachedCost;
@@ -211,8 +243,8 @@ namespace EthansGameKit.Pathfinding
 			if (newNeighborTotalCost < oldNeighborTotalCost)
 			{
 				var heuristic = GetHeuristicUnverified(neighborIndex);
+				if (heuristic >= maxWeight || heuristic + (double)newNeighborTotalCost >= maxWeight) return;
 				var newHeapValue = newNeighborTotalCost + heuristic;
-				if (newHeapValue >= maxWeight) return;
 				var oldHeapValue = oldNeighborTotalCost + heuristic;
 				open.AddOrUpdate(neighborIndex, oldHeapValue, newHeapValue);
 				totalCostMap[neighborIndex] = newNeighborTotalCost;
