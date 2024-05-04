@@ -16,7 +16,7 @@ namespace EthansGameKit
 		public static IEnumerable<Vector2Int> IterCellsAtManhattanDistance(this Vector2Int @this, int radius)
 		{
 			var rect = new RectInt(@this.x - radius, @this.y - radius, radius * 2 + 1, radius * 2 + 1);
-			return rect.EdgePositions();
+			return rect.GetEdgePositions();
 		}
 
 		public static IEnumerable<Vector2Int> IterCellsInManhattanDistance(this Vector2Int @this, int radius)
@@ -30,7 +30,7 @@ namespace EthansGameKit
 			{
 				var width = (radius << 1) + 1;
 				var rect = new RectInt(center.x - radius, center.y - radius, width, width);
-				var edgeEnumerator = rect.EdgePositions().GetEnumerator();
+				var edgeEnumerator = rect.GetEdgePositions().GetEnumerator();
 				return edgeEnumerator;
 			}
 

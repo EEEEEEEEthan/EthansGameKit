@@ -6,7 +6,7 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
-		public static IEnumerable<Vector2Int> EdgePositions(this RectInt @this) => new RectEdgeEnumerator(@this);
+		public static IEnumerable<Vector2Int> GetEdgePositions(this RectInt @this) => new RectEdgeEnumerator(@this);
 
 		struct RectEdgeEnumerator : IEnumerator<Vector2Int>, IEnumerable<Vector2Int>
 		{

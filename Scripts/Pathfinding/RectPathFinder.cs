@@ -130,6 +130,17 @@ namespace EthansGameKit.Pathfinding
 			path.Clear();
 		}
 
+		public Stack<Vector2Int> GetPath(Vector2Int target)
+		{
+			if (!calculator.Contains(target))
+				throw new ArgumentOutOfRangeException($"targetIndex {target} is out of range");
+			var targetIndex = calculator.GetIndexUnverified(target);
+			if (parentMap[targetIndex] == noParent) return null;
+			var path = new Stack<Vector2Int>();
+			GetPath(target, path);
+			return path;
+		}
+
 		/// <summary>
 		///     获得一条从sources到target的路径
 		/// </summary>
