@@ -1,25 +1,26 @@
 using System;
+using EthansGameKit.Internal;
 
 namespace EthansGameKit
 {
 	public static class Timer
 	{
 		public static uint InvokeAfter(double seconds, Action callback) =>
-			Internal.TimerUpdater.InvokeAfter(seconds, callback);
+			MainThreadTimer.updater.InvokeAfter(seconds, callback);
 
 		public static void InvokeAfter(ref uint id, double seconds, Action callback) =>
-			Internal.TimerUpdater.InvokeAfter(ref id, seconds, callback);
+			MainThreadTimer.updater.InvokeAfter(ref id, seconds, callback);
 
 		public static IAwaitable Await(double seconds) =>
-			Internal.TimerUpdater.Await(seconds);
+			MainThreadTimer.updater.Await(seconds);
 
 		public static IAwaitable Await(ref uint id, double seconds) =>
-			Internal.TimerUpdater.Await(ref id, seconds);
+			MainThreadTimer.updater.Await(ref id, seconds);
 
 		public static IAwaitable Await(double seconds, out uint id) =>
-			Internal.TimerUpdater.Await(seconds, out id);
+			MainThreadTimer.updater.Await(seconds, out id);
 
 		public static bool CancelInvoke(uint id) =>
-			Internal.TimerUpdater.CancelInvoke(id);
+			MainThreadTimer.updater.CancelInvoke(id);
 	}
 }

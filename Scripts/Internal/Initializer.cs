@@ -2,7 +2,7 @@ using UnityEngine;
 
 namespace EthansGameKit.Internal
 {
-	static class Initializer
+	internal static class Initializer
 	{
 		[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
 		static void Initialize()
@@ -12,7 +12,7 @@ namespace EthansGameKit.Internal
 			gameObject.hideFlags = HideFlags.NotEditable;
 			gameObject.AddComponent<MainThreadInvoker>();
 			gameObject.AddComponent<MainThreadRefreshCenter>();
-			gameObject.AddComponent<TimerUpdater>();
+			gameObject.AddComponent<MainThreadTimer>();
 		}
 	}
 }

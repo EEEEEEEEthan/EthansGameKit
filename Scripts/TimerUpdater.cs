@@ -3,51 +3,51 @@ using System.Collections.Generic;
 using EthansGameKit.Collections;
 using UnityEngine;
 
-namespace EthansGameKit.Internal
+namespace EthansGameKit
 {
-	public class TimerUpdater : MonoBehaviour
+	public class TimerUpdater
 	{
-		static readonly Heap<uint, double> id2time = new();
-		static readonly Dictionary<uint, Action> id2callback = new();
-		static readonly Dictionary<uint, Action> buffer = new();
-		static uint currentId;
+		readonly Heap<uint, long> id2time = new();
+		readonly Dictionary<uint, Action> id2callback = new();
+		readonly Dictionary<uint, (long, Action)> buffer = new();
+		uint currentId;
 
-		public static uint InvokeAfter(double seconds, Action callback)
+		public uint InvokeAfter(double seconds, Action callback)
 		{
 			if (callback is null) throw new ArgumentNullException(nameof(callback));
 			var id = ++currentId;
-			buffer[id] = callback;
+			buffer[id] = ((DateTime.Now + TimeSpan.FromSeconds(seconds)).Ticks, callback);
 			return id;
 		}
 
-		public static void InvokeAfter(ref uint id, double seconds, Action callback)
+		public void InvokeAfter(ref uint id, double seconds, Action callback)
 		{
 			CancelInvoke(id);
 			id = InvokeAfter(seconds, callback);
 		}
 
-		public static IAwaitable Await(double seconds)
+		public IAwaitable Await(double seconds)
 		{
 			var awaitable = IAwaitable.Generate(out var handle);
 			InvokeAfter(seconds, handle.Set);
 			return awaitable;
 		}
 
-		public static IAwaitable Await(ref uint id, double seconds)
+		public IAwaitable Await(ref uint id, double seconds)
 		{
 			var awaitable = IAwaitable.Generate(out var handle);
 			InvokeAfter(ref id, seconds, handle.Set);
 			return awaitable;
 		}
 
-		public static IAwaitable Await(double seconds, out uint id)
+		public IAwaitable Await(double seconds, out uint id)
 		{
 			var awaitable = IAwaitable.Generate(out var handle);
 			id = InvokeAfter(seconds, handle.Set);
 			return awaitable;
 		}
 
-		public static bool CancelInvoke(uint id)
+		public bool CancelInvoke(uint id)
 		{
 			if (buffer.Remove(id)) return true;
 			if (id2callback.Remove(id))
@@ -58,7 +58,7 @@ namespace EthansGameKit.Internal
 			return false;
 		}
 
-		public static bool CancelInvoke(ref uint id)
+		public bool CancelInvoke(ref uint id)
 		{
 			if (buffer.Remove(id))
 			{
@@ -74,18 +74,19 @@ namespace EthansGameKit.Internal
 			return false;
 		}
 
-		void Update()
+		public void Update()
 		{
 			foreach (var pair in buffer)
 			{
-				id2time.Add(pair.Key, Time.timeAsDouble + 1);
-				id2callback[pair.Key] = pair.Value;
+				var (time, callback) = pair.Value;
+				id2time.Add(pair.Key, time);
+				id2callback[pair.Key] = callback;
 			}
 			buffer.Clear();
 			while (id2time.Count > 0)
 			{
 				var id = id2time.Peek(out var time);
-				if (time < Time.timeAsDouble)
+				if (time < DateTime.Now.Ticks)
 				{
 					id2time.Pop();
 					var callback = id2callback[id];
