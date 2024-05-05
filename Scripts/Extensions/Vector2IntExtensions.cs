@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,22 +9,24 @@ namespace EthansGameKit
 	public static partial class Extensions
 	{
 		/// <summary>
-		/// 
 		/// </summary>
 		/// <param name="this"></param>
 		/// <param name="radius"></param>
 		/// <returns></returns>
+		[Obsolete("这个东西有问题，曼哈顿距离是一个菱形而不是矩形")]
 		public static IEnumerable<Vector2Int> IterCellsAtManhattanDistance(this Vector2Int @this, int radius)
 		{
 			var rect = new RectInt(@this.x - radius, @this.y - radius, radius * 2 + 1, radius * 2 + 1);
 			return rect.GetEdgePositions();
 		}
 
+		[Obsolete("这个东西有问题，曼哈顿距离是一个菱形而不是矩形")]
 		public static IEnumerable<Vector2Int> IterCellsInManhattanDistance(this Vector2Int @this, int radius)
 		{
 			return new ManhattanEnumerator(@this, radius);
 		}
 
+		[Obsolete("这个东西有问题，曼哈顿距离是一个菱形而不是矩形")]
 		struct ManhattanEnumerator : IEnumerator<Vector2Int>, IEnumerable<Vector2Int>
 		{
 			static IEnumerator<Vector2Int> GetEdgeEnumerator(Vector2Int center, int radius)
@@ -68,9 +71,15 @@ namespace EthansGameKit
 			{
 			}
 
-			public IEnumerator<Vector2Int> GetEnumerator() => this;
+			public IEnumerator<Vector2Int> GetEnumerator()
+			{
+				return this;
+			}
 
-			IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
+			IEnumerator IEnumerable.GetEnumerator()
+			{
+				return GetEnumerator();
+			}
 		}
 	}
 }
