@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -7,10 +6,15 @@ namespace EthansGameKit
 {
 	public static partial class Extensions
 	{
+		public static IEnumerable<Transform> DfsChildren(this Transform root)
+		{
+			return new DfsChildrenEnumerator(root);
+		}
+
 		struct DfsChildrenEnumerator : IEnumerator<Transform>, IEnumerable<Transform>
 		{
-			readonly Stack<Transform> stack;
-			Transform root;
+			readonly Transform root;
+			Stack<Transform> stack;
 
 			public DfsChildrenEnumerator(Transform root)
 			{
@@ -24,31 +28,35 @@ namespace EthansGameKit
 
 			public bool MoveNext()
 			{
-				if (!stack.TryPop(out var element))
+				if (stack is null)
 				{
-					return false;
+					stack = new();
+					stack.Push(root);
+					return true;
 				}
-				stack.
+				if (!stack.TryPop(out var element)) return false;
+				var count = element.childCount;
+				for (var i = count - 1; i >= 0; i--) stack.Push(element.GetChild(i));
+				return true;
 			}
 
 			public void Reset()
 			{
-				throw new NotImplementedException();
+				stack = null;
 			}
 
 			public void Dispose()
 			{
-				throw new NotImplementedException();
 			}
 
 			public IEnumerator<Transform> GetEnumerator()
 			{
-				throw new NotImplementedException();
+				return this;
 			}
 
 			IEnumerator IEnumerable.GetEnumerator()
 			{
-				return GetEnumerator();
+				return this;
 			}
 		}
 	}
