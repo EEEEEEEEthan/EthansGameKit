@@ -75,23 +75,23 @@ namespace EthansGameKit
 
 		static Awaiter<T> Generate() => new();
 
-		Action continuation;
+		event Action continuation;
 		T result;
 		public bool IsCompleted => State == StateCode.Completed;
 		public StateCode State { get; private set; }
 
 		public void OnCompleted(Action continuation)
 		{
-			Assert.AreEqual(State, StateCode.Inactive);
+			Assert.AreNotEqual(State, StateCode.Completed, "already completed");
 			State = StateCode.Awaiting;
-			this.continuation = continuation;
+			this.continuation += continuation;
 		}
 
 		public void Set()
 		{
 			Assert.AreNotEqual(State, StateCode.Completed, "already completed");
 			State = StateCode.Completed;
-			continuation?.Invoke();
+			continuation?.TryInvoke();
 			continuation = null;
 		}
 
@@ -100,7 +100,7 @@ namespace EthansGameKit
 			Assert.AreNotEqual(State, StateCode.Completed, "already completed");
 			State = StateCode.Completed;
 			this.result = result;
-			continuation?.Invoke();
+			continuation?.TryInvoke();
 			continuation = null;
 		}
 
