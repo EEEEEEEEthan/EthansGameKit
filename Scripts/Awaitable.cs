@@ -82,7 +82,11 @@ namespace EthansGameKit
 
 		public void OnCompleted(Action continuation)
 		{
-			Assert.AreNotEqual(State, StateCode.Completed, "already completed");
+			if(State == StateCode.Completed)
+			{
+				continuation?.TryInvoke();
+				return;
+			}
 			State = StateCode.Awaiting;
 			this.continuation += continuation;
 		}
