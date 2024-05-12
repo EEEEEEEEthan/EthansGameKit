@@ -46,5 +46,15 @@ namespace EthansGameKit
 
 		public static ListToDict<T> WrapAsDict<T>(this IList<T> @this, Func<int, bool> filter) =>
 			new(@this, IFilter<int>.FromFunc(filter));
+
+		public static void Shuffle<T>(this IList<T>@this)
+		{
+			var count = @this.Count;
+			for (var i = 0; i < count; i++)
+			{
+				var j = RandomUtility.random.Next(i, count);
+				(@this[i], @this[j]) = (@this[j], @this[i]);
+			}
+		}
 	}
 }
