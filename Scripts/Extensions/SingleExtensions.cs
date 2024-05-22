@@ -28,5 +28,9 @@ namespace EthansGameKit
 		{
 			return Math.Clamp(@this, min, max);
 		}
+        public static float Remap(this float @this, float fromMin, float fromMax, float toMin, float toMax)
+		{
+			return (toMax - toMin) * (@this - fromMin) / (fromMax - fromMin) + toMin;
+		}
 	}
 }
