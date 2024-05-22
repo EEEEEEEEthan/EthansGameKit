@@ -45,6 +45,8 @@ namespace EthansGameKit
 			{
 				case < 10:
 					return GetChar(@this, traditional).ToString();
+				case 10:
+					return lst[10].ToString();
 				case < 20:
 					return $"{lst[10]}{GetChar(@this % 10, traditional)}";
 				case < 100 when @this % 10 == 0:
