@@ -3,7 +3,22 @@ using UnityEngine;
 
 namespace EthansGameKit.RectGrid
 {
-	public class MapData<T>
+	public interface IReadOnlyMapData<T>
+	{
+		public bool TryGetValue(int index, out T value);
+		public bool TryGetValue(int x, int y, out T value);
+		public bool TryGetValue(Vector2Int position, out T value);
+		public T GetValue(int x, int y);
+		public T GetValueUnverified(int x, int y);
+		public T GetValue(Vector2Int position);
+		public T GetValueUnverified(Vector2Int position);
+		public T GetValue(int index);
+		public T this[int index] { get; }
+		public T this[int x, int y] { get; }
+		public T this[Vector2Int position] { get; }
+	}
+
+	public class MapData<T> : IReadOnlyMapData<T>
 	{
 		public readonly GridIndexCalculator GridCalculator;
 		readonly T[] data;
