@@ -9,17 +9,14 @@ namespace EthansGameKit
 		{
 			@this.Clear(0, @this.Length);
 		}
-
 		public static void Clear(this Array @this, int index, int length)
 		{
 			Array.Clear(@this, index, length);
 		}
-
 		public static void MemSet(this Array @this, object value)
 		{
 			@this.MemSet(0, @this.Length, value);
 		}
-
 		public static void MemSet(this Array @this, int index, int length, object value)
 		{
 			if (Equals(value, default))
@@ -37,17 +34,14 @@ namespace EthansGameKit
 				index += copyLength;
 			}
 		}
-
 		public static void MemSet<T>(this T[] @this, T value, int index, int length)
 		{
 			@this.MemSet(index, length, value);
 		}
-
 		public static void CopyTo(this Array @this, Array destination)
 		{
 			Array.Copy(@this, 0, destination, 0, @this.Length);
 		}
-
 		public static void MemSet<T>(this T[] @this, int index, int length, T value)
 		{
 			if (Equals(value, default(T)))
@@ -68,12 +62,19 @@ namespace EthansGameKit
 				copiedLength += copyLength;
 			}
 		}
-
 		public static void MemSet<T>(this T[] @this, T value)
 		{
 			@this.MemSet(0, @this.Length, value);
 		}
-
-		public static bool IsNullOrEmpty<T>(this T[] @this) => @this == null || @this.Length == 0;
+		public static bool IsNullOrEmpty<T>(this T[] @this)
+		{
+			return @this == null || @this.Length == 0;
+		}
+		public static T[] Copy<T>(this T[] @this)
+		{
+			var array = new T[@this.Length];
+			Array.Copy(@this, array, @this.Length);
+			return array;
+		}
 	}
 }

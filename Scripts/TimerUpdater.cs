@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using EthansGameKit.Collections;
-using UnityEngine;
 
 namespace EthansGameKit
 {
@@ -11,7 +10,6 @@ namespace EthansGameKit
 		readonly Dictionary<uint, Action> id2callback = new();
 		readonly Dictionary<uint, (long, Action)> buffer = new();
 		uint currentId;
-
 		public uint InvokeAfter(double seconds, Action callback)
 		{
 			if (callback is null) throw new ArgumentNullException(nameof(callback));
@@ -19,34 +17,29 @@ namespace EthansGameKit
 			buffer[id] = ((DateTime.Now + TimeSpan.FromSeconds(seconds)).Ticks, callback);
 			return id;
 		}
-
 		public void InvokeAfter(ref uint id, double seconds, Action callback)
 		{
 			CancelInvoke(id);
 			id = InvokeAfter(seconds, callback);
 		}
-
 		public IAwaitable Await(double seconds)
 		{
 			var awaitable = IAwaitable.Generate(out var handle);
 			InvokeAfter(seconds, handle.Set);
 			return awaitable;
 		}
-
 		public IAwaitable Await(ref uint id, double seconds)
 		{
 			var awaitable = IAwaitable.Generate(out var handle);
 			InvokeAfter(ref id, seconds, handle.Set);
 			return awaitable;
 		}
-
 		public IAwaitable Await(double seconds, out uint id)
 		{
 			var awaitable = IAwaitable.Generate(out var handle);
 			id = InvokeAfter(seconds, handle.Set);
 			return awaitable;
 		}
-
 		public bool CancelInvoke(uint id)
 		{
 			if (buffer.Remove(id)) return true;
@@ -57,7 +50,6 @@ namespace EthansGameKit
 			}
 			return false;
 		}
-
 		public bool CancelInvoke(ref uint id)
 		{
 			if (buffer.Remove(id))
@@ -73,7 +65,6 @@ namespace EthansGameKit
 			}
 			return false;
 		}
-
 		public void Update()
 		{
 			foreach (var pair in buffer)
