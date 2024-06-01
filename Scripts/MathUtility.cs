@@ -37,5 +37,31 @@ namespace EthansGameKit
 					p1 * (-6 * t2 + 6 * t1) +
 					v1 * (3 * t2 - 2 * t1);
 		}
+		/// <summary>
+		///     判断是否互质
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <returns></returns>
+		public static bool Coprime(int a, int b)
+		{
+			return GreatestCommonDivisor(a, b) == 1;
+		}
+		/// <summary>
+		///     最大公约数
+		/// </summary>
+		/// <param name="a"></param>
+		/// <param name="b"></param>
+		/// <returns></returns>
+		public static int GreatestCommonDivisor(int a, int b)
+		{
+			while (b != 0)
+			{
+				var t = b;
+				b = a % b;
+				a = t;
+			}
+			return a;
+		}
 	}
 }

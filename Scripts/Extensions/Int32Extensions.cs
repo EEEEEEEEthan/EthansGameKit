@@ -7,30 +7,30 @@ namespace EthansGameKit
 	{
 		static readonly char[] chineseNumbers =
 			{ '零', '一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '百', '千', '万' };
-
 		static readonly char[] traditionalChineseNumbers =
 			{ '零', '壹', '貳', '叁', '肆', '伍', '陸', '柒', '捌', '玖', '拾', '佰', '仟', '萬' };
-
 		public static float Sqrt(this int @this)
 		{
 			return (float)Math.Sqrt(@this);
 		}
-
 		public static int Clamped(this int @this, int min, int max)
 		{
 			return @this < min ? min : @this > max ? max : @this;
 		}
-
 		public static void Clamp(ref this int @this, int min, int max)
 		{
 			@this = @this < min ? min : @this > max ? max : @this;
 		}
-
+		/// <summary>
+		///     获取十进制在position位上的数字
+		/// </summary>
+		/// <param name="n"></param>
+		/// <param name="position"></param>
+		/// <returns></returns>
 		public static int GetDigit(this int n, int position)
 		{
 			return n / (int)Math.Pow(10, position) % 10;
 		}
-
 		public static string ToChinese(this int @this, bool traditional = false)
 		{
 			static char GetChar(int n, bool traditional)
@@ -38,9 +38,7 @@ namespace EthansGameKit
 				if (n is < 0 or > 9) throw new ArgumentOutOfRangeException($"unexpected number {n}");
 				return traditional ? traditionalChineseNumbers[n] : chineseNumbers[n];
 			}
-			
 			var lst = traditional ? traditionalChineseNumbers : chineseNumbers;
-
 			switch (@this)
 			{
 				case < 10:

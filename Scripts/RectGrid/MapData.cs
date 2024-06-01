@@ -5,6 +5,7 @@ namespace EthansGameKit.RectGrid
 {
 	public interface IReadOnlyMapData<T>
 	{
+		public GridIndexCalculator GridCalculator { get; }
 		public bool TryGetValue(int index, out T value);
 		public bool TryGetValue(int x, int y, out T value);
 		public bool TryGetValue(Vector2Int position, out T value);
@@ -20,13 +21,13 @@ namespace EthansGameKit.RectGrid
 
 	public class MapData<T> : IReadOnlyMapData<T>
 	{
-		public readonly GridIndexCalculator GridCalculator;
 		readonly T[] data;
 		public MapData(int widthPower)
 		{
 			GridCalculator = new(widthPower);
 			data = new T[GridCalculator.count];
 		}
+		public GridIndexCalculator GridCalculator { get; }
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryGetValue(int index, out T value)
 		{
