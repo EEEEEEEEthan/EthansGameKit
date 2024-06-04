@@ -1,3 +1,4 @@
+using System;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
@@ -6,6 +7,7 @@ namespace EthansGameKit.RectGrid
 	public interface IReadOnlyMapData<T>
 	{
 		public GridIndexCalculator GridCalculator { get; }
+		public IReadOnlyMapData<T> Copy { get; }
 		public bool TryGetValue(int index, out T value);
 		public bool TryGetValue(int x, int y, out T value);
 		public bool TryGetValue(Vector2Int position, out T value);
@@ -28,6 +30,16 @@ namespace EthansGameKit.RectGrid
 			data = new T[GridCalculator.count];
 		}
 		public GridIndexCalculator GridCalculator { get; }
+		public MapData<T> Copy
+		{
+			get
+			{
+				var copy = new MapData<T>(GridCalculator.widthPower);
+				Array.Copy(data, copy.data, data.Length);
+				return copy;
+			}
+		}
+		IReadOnlyMapData<T> IReadOnlyMapData<T>.Copy => Copy;
 		[MethodImpl(MethodImplOptions.AggressiveInlining)]
 		public bool TryGetValue(int index, out T value)
 		{

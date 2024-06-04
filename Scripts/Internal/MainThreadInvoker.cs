@@ -7,7 +7,7 @@ namespace EthansGameKit.Internal
 		internal static readonly CrossThreadInvoker Invoker = new();
 		void Update()
 		{
-			Invoker.InovkeAll();
+			Invoker.InvokeAll();
 		}
 	}
 }

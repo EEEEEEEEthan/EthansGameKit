@@ -8,7 +8,7 @@ namespace EthansGameKit
 		int count;
 		Action[] buffer0 = new Action[1];
 		Action[] buffer1 = new Action[1];
-		public void InovkeAll()
+		public void InvokeAll()
 		{
 			int length;
 			lock (asyncLock)
