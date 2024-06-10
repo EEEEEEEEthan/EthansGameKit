@@ -4,6 +4,14 @@ namespace EthansGameKit
 {
 	public readonly struct SunlightCalculator
 	{
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <param name="obliquity">黄赤夹角(角度)</param>
+		/// <param name="latitude">维度(角度)</param>
+		/// <param name="revolutionProgress">公转进度(0-1)</param>
+		/// <param name="rotationProgress">自转进度(0-1)</param>
+		/// <returns></returns>
 		public static Vector3 GetSunlightDirection(float obliquity, float latitude, float revolutionProgress, float rotationProgress)
 		{
 			obliquity.Clamp(-89.99f, 89.99f);
