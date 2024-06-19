@@ -3,28 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
-using NUnit.Framework;
 using UnityEditor;
 using UnityEngine;
 
 namespace EthansGameKit.Editor.Scripts
 {
 	[CreateAssetMenu(fileName = "ResourceMapper", menuName = "EthansGameKit/ResourceMapper")]
-	internal class ResourceMapper : ScriptableObject
+	public class ResourceMapper : ScriptableObject
 	{
-		static string GetShorttenName(Type type, List<string> usings)
-		{
-			var fullName = type.FullName;
-			Assert.IsNotNull(fullName);
-			foreach (var u in usings)
-				if (fullName.StartsWith(u))
-				{
-					fullName = fullName[(u.Length + 1)..];
-					return fullName;
-				}
-			return fullName;
-		}
-
 		[CustomEditor(typeof(ResourceMapper))]
 		class Editor : UnityEditor.Editor
 		{
@@ -58,7 +44,7 @@ namespace EthansGameKit.Editor.Scripts
 		[SerializeField] string region;
 		[SerializeField, UnityEngine.Range(0, 10)] int indent;
 
-		void GenerateCode()
+		public void GenerateCode()
 		{
 			var originalText = script.text;
 			var patten = new Regex(@"using\s+([\w\.]+);");
